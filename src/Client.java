@@ -1,4 +1,3 @@
-import javax.imageio.IIOException;
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -25,12 +24,30 @@ public class Client implements Runnable {
             Scanner input = new Scanner(System.in);
             System.out.println("Words here: ");
             sendMessage(input.nextLine());
+            String line;
+            try {
+                if ((line = in.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
     }
 
     public void sendMessage(String message){
         out.println(message);
+    }
+
+    /**
+     * Place holder method to handle a message.
+     * will want this in another class to break down the incoming string and
+     * do stuff with it
+     * @param message the message that was sent from the server
+     */
+    public void handleMessage(String message){
+        System.out.println(message);
     }
 
     public void start(){
