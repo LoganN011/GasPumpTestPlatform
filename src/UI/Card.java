@@ -21,8 +21,8 @@ public class Card extends Application {
     @Override
     public void start(Stage primaryStage) {
         //todo replace this with an instance of API
-        Client self = new Client(1234);
-        self.start();
+        API_NAME self = new API_NAME("localHost",1234);
+
 
         Button test = new Button();
         test.setMinSize(100, 100);
@@ -33,7 +33,7 @@ public class Card extends Application {
 
             //todo relay message through communication API containing number
             //  may look like this:
-            //self.sendMessage(cardNumber);
+            self.sendMessage(cardNumber);
         });
 
         HBox root = new HBox();
