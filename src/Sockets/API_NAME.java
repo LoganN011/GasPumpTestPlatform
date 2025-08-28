@@ -13,6 +13,8 @@ public class API_NAME {
     public API_NAME(int port)  {
         try{
             serverSocket = new ServerSocket(port);
+            //todo while true loop on this thread prevents constructor caller from
+            //  proceeding (like in Controller line 24
             while(true){
                 socket = serverSocket.accept();
                  r = new API_PLACEHOLDERNAME(socket);
@@ -26,7 +28,7 @@ public class API_NAME {
 
     public API_NAME(String host, int port)   {
         try{
-            Socket socket = new  Socket(host,port);
+            Socket socket = new Socket(host,port);
             r = new API_PLACEHOLDERNAME(socket);
             Thread t = new Thread();
             t.start();

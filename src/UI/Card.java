@@ -29,7 +29,6 @@ public class Card extends Application {
         test.setOnMouseClicked(x ->{
             String cardNumber = "";
             while (cardNumber.length() < 20) cardNumber += (int)(Math.random() * 10);
-            System.out.println(cardNumber);
 
             //todo relay message through communication API containing number
             //  may look like this:
