@@ -1,8 +1,6 @@
 package Sockets;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-
+//TODO move this somewhere else so that we can delete this class but i am not sure where
 public class API {
 
     /**

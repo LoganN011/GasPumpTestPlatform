@@ -1,6 +1,6 @@
 package Devices;
 
-import Sockets.Server;
+import Sockets.commPort;
 
 public class Harness {
     public static void main(String[] args) {
@@ -12,7 +12,7 @@ public class Harness {
         //commPort screenComm = new commPort("screen");
         //screenComm.sendMessage();
         try {
-            Server server = new Server("card");
+            commPort server = new commPort("card");
             System.out.println(server.get());
         } catch (Exception e) {
             e.printStackTrace();

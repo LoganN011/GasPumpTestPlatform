@@ -3,6 +3,8 @@ package Sockets;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.BindException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,22 +23,59 @@ public class commPort {
      * @param deviceName name of device you are connecting to/from
      * @throws IOException throws if the connections breaks
      */
-    public commPort(String deviceName) throws IOException {
-        socket = new Socket("localhost", API.portLookup(deviceName));
-        in = new ObjectInputStream(socket.getInputStream());
-        out = new ObjectOutputStream(socket.getOutputStream());
-        queue = new LinkedBlockingQueue<>();
+//    public commPort(String deviceName) throws IOException {
+//        socket = new Socket("localhost", API.portLookup(deviceName));
+//        in = new ObjectInputStream(socket.getInputStream());
+//        out = new ObjectOutputStream(socket.getOutputStream());
+//        queue = new LinkedBlockingQueue<>();
+//
+//        new Thread(() -> {
+//            Message msg;
+//            try{
+//                while((msg =(Message) in.readObject()) != null ){
+//                    queue.put(msg);
+//                }
+//            }catch(Exception e){
+//                e.printStackTrace();
+//            }
+//        }).start();
+//    }
 
-        new Thread(() -> {
-            Message msg;
-            try{
-                while((msg =(Message) in.readObject()) != null ){
-                    queue.put(msg);
+    public commPort(String deviceName) throws IOException {
+        try{
+            ServerSocket serverSocket = new ServerSocket(API.portLookup(deviceName));
+            socket = serverSocket.accept();
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new  ObjectInputStream(socket.getInputStream());
+            queue = new LinkedBlockingQueue<>();
+
+            new Thread(() -> {
+                Message msg;
+                try{
+                    while((msg =(Message) in.readObject()) != null ){
+                        queue.put(msg);
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
                 }
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }).start();
+            }).start();
+        } catch (BindException e){
+            socket = new Socket("localhost", API.portLookup(deviceName));
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+            queue = new LinkedBlockingQueue<>();
+
+            new Thread(() -> {
+                Message msg;
+                try{
+                    while((msg =(Message) in.readObject()) != null ){
+                        queue.put(msg);
+                    }
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     /**
