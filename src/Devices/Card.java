@@ -21,9 +21,9 @@ public class Card extends Application {
     @Override
     public void start(Stage primaryStage) {
         //todo replace with real handing of connection failing
-        commPort self = null;
+        controlPort self = null;
         try{
-            self = new commPort("card");
+            self = new controlPort("card");
         } catch (IOException e){
             e.printStackTrace();
             System.exit(1);
@@ -33,7 +33,7 @@ public class Card extends Application {
 
         Button test = new Button();
         test.setMinSize(100, 100);
-        commPort finalSelf = self; //TODO: fix this cause idk wants it want this way only sometimes
+        controlPort finalSelf = self; //TODO: fix this cause idk wants it want this way only sometimes
         test.setOnMouseClicked(x ->{
             String cardNumber = "";
             while (cardNumber.length() < 20) cardNumber += (int)(Math.random() * 10);
@@ -55,7 +55,7 @@ public class Card extends Application {
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Gas Nozzle");
+        primaryStage.setTitle("Card Reader");
         primaryStage.show();
     }
 }
