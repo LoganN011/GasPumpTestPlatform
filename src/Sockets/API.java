@@ -4,42 +4,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class API {
-    private Socket socket;
-    private ServerSocket serverSocket;
-    private API_PLACEHOLDERNAME r;
-
-
-    public API(int port) {
-        try {
-            serverSocket = new ServerSocket(port);
-            //todo while true loop on this thread prevents constructor caller from
-            //  proceeding (like in Controller line 24
-            while (true) {
-                socket = serverSocket.accept();
-                r = new API_PLACEHOLDERNAME(socket);
-                Thread t = new Thread(r);
-                t.start();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public API(String host, int port) {
-        try {
-            Socket socket = new Socket(host, port);
-            r = new API_PLACEHOLDERNAME(socket);
-            Thread t = new Thread();
-            t.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void sendMessage(String message) {
-        r.sendMessage(message);
-    }
 
     /**
      * A method to determine the port number given a device name, for example
@@ -65,6 +29,7 @@ public class API {
             case "card_sever" -> 7142;
             //715x for controlPort
             case "hose" -> 7150;
+            case "card" -> 7151;
             //716x for monitorPort
             case "flow_meter" -> 7160;
             //717x for statusPort

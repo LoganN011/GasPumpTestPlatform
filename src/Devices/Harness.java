@@ -1,5 +1,7 @@
 package Devices;
 
+import Sockets.Server;
+
 public class Harness {
     public static void main(String[] args) {
         //Format for messages to screen:
@@ -9,5 +11,12 @@ public class Harness {
 
         //commPort screenComm = new commPort("screen");
         //screenComm.sendMessage();
+        try {
+            Server server = new Server("card");
+            System.out.println(server.get());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

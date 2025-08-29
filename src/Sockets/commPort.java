@@ -1,29 +1,30 @@
 package Sockets;
 
-import java.io.*;
-import java.net.ServerSocket;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Server  {
-    ServerSocket serverSocket;
-    Socket socket;
-    ObjectOutputStream out;
-    ObjectInputStream in;
-    BlockingQueue<Message> queue;
+public class commPort {
+    //send and get messages
+    private Socket socket;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private BlockingQueue<Message> queue;
 
     /**
-     * Constructor to make a server. It can both send and take messages.
-     * Acts like a commPort but is a server socket and not a normal one
-     * @param deviceName The name of the device that you want to connect to
-     * @throws IOException Throws if the socket connection is rejected
+     * Make a new commPort (can send and get)
+     * @param deviceName name of device you are connecting to/from
+     * @throws IOException throws if the connections breaks
      */
-    public Server(String deviceName) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(API.portLookup(deviceName));
-        socket = serverSocket.accept();
+    public commPort(String deviceName) throws IOException {
+        socket = new Socket("localhost", API.portLookup(deviceName));
+        in = new ObjectInputStream(socket.getInputStream());
         out = new ObjectOutputStream(socket.getOutputStream());
-        in = new  ObjectInputStream(socket.getInputStream());
         queue = new LinkedBlockingQueue<>();
 
         new Thread(() -> {
@@ -49,7 +50,7 @@ public class Server  {
         } catch(InterruptedException e){
             e.printStackTrace();
         }
-         return null;
+        return null;
     }
 
     /**
