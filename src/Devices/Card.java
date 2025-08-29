@@ -1,12 +1,9 @@
-package UI;
+package Devices;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import Sockets.*;
@@ -21,7 +18,7 @@ public class Card extends Application {
     @Override
     public void start(Stage primaryStage) {
         //todo replace this with an instance of API
-        API_NAME self = new API_NAME("localHost",1234);
+        API self = new API("localHost",1234);
 
 
         Button test = new Button();
