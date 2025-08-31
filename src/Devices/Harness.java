@@ -14,13 +14,18 @@ public class Harness {
         String testScreenThree = "b:1:m,b:2:m,t:23:s3:f3:c3:A Third Message";
 
         try {
-            commPort display = new commPort("screen");
-            display.send(new Message(testScreenOne));
-            System.out.println("The device responded with" + display.get());
-            display.send(new Message(testScreenTwo));
-            System.out.println("The device responded with" + display.get());
-            display.send(new Message(testScreenThree));
-            System.out.println("The device responded with" + display.get());
+            //Card simulation
+//            commPort card = new commPort("card");
+//            System.out.println("Received Card Number: " + card.get());
+
+            //Display simulation
+//            commPort display = new commPort("screen");
+//            display.send(new Message(testScreenOne));
+//            System.out.println("The display responded with" + display.get());
+//            display.send(new Message(testScreenTwo));
+//            System.out.println("The display responded with" + display.get());
+//            display.send(new Message(testScreenThree));
+//            System.out.println("The display responded with" + display.get());
         } catch (Exception e) {
             e.printStackTrace();
         }
