@@ -26,6 +26,13 @@ public class Harness {
 //            System.out.println("The display responded with" + display.get());
 //            display.send(new Message(testScreenThree));
 //            System.out.println("The display responded with" + display.get());
+
+            //Gas Server simulation
+            commPort gasServer = new commPort("gas_server");
+            gasServer.send(new Message("request_info"));
+            System.out.println(gasServer.get());
+            gasServer.send(new Message("complete_sale:87,3,1.245"));
+            System.out.println("The final price of the sale was :$" + gasServer.get());
         } catch (Exception e) {
             e.printStackTrace();
         }

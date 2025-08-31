@@ -7,10 +7,15 @@ public class Gas {
     double availableQuantity;
 
     public Gas(String name, int number, double price, double availableQuantity){
-        this.price = (int)(price * 100) / 100.0;
+        this.price = price;
         this.number = number;
         this.name = name;
         this.availableQuantity = availableQuantity;
+    }
+
+    public double sellGas(double gallons){
+        availableQuantity -= gallons;
+        return availableQuantity;
     }
 
     public double getPrice() {
@@ -25,7 +30,22 @@ public class Gas {
         return getAvailableQuantity();
     }
 
-    public String toString() {
-        return name + " " + number + " $" + price;
+    public int getType() {
+        return number;
     }
+
+    public String toString() {
+        return name + " " + number + " $" + displayPrice(price);
+    }
+
+    public static String displayPrice(double price) {
+        price = (int)(Math.ceil(price * 100)) / 100.0;
+        String[] curPrice = (price + "").split("\\.");
+        return switch (curPrice.length){
+            case 1 -> (price + ".00");
+            case 2 -> (curPrice[1].length() < 2) ? price + "0" : "" + price;
+            default -> "problem in price display";
+        };
+    }
+
 }
