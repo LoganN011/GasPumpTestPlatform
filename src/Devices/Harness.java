@@ -2,16 +2,20 @@ package Devices;
 
 import Sockets.Message;
 import Sockets.commPort;
+import HelpyWelpy.MessageReader;
 
 public class Harness {
     public static void main(String[] args) {
         //Format for messages to screen:
         //  Buttons:    b:n:t               where n is the button number, and t is x for exclusive and m for multiple
         //  Text:       t:n[n]:sx:fy:cz:m   where n[n] is the text number, x is the size to use, y is the font to use, z is the color to use, and m is the message
+        //  NOTE: Text number, size, etc. are from 0-2
 
-        String testScreenOne = "b:0:x,t:0:s1:f1:c1:Hello World";
-        String testScreenTwo = "b:1:x,t:01:s2:f2:c2:Heres A Message";
-        String testScreenThree = "b:1:m,b:2:m,t:23:s3:f3:c3:A Third Message";
+        String testScreenOne = "b:0:x,t:00:s0:f1:c1:Hello World";
+        String testScreenTwo = "b:1:x,t:01:s1:f2:c2:Here's A Message";
+        String testScreenThree = "b:1:m,b:2:m,t:23:s2:f3:c3:A Third Message";
+
+        MessageReader temp = new MessageReader(testScreenOne);
 
         try {
             //Card simulation
