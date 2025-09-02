@@ -6,11 +6,12 @@ import Sockets.commPort;
 import java.util.Arrays;
 
 import static java.lang.System.exit;
-import static java.lang.System.in;
 
 public class GasServer {
     private Gas[] fuels;
     private double totalSales;
+    private int salesCount;
+    private boolean pumpActive;
 
     public static void main(String[] args) {
         //For the sake of testing, the fuels are predetermined
@@ -33,6 +34,22 @@ public class GasServer {
 
     private GasServer(Gas[] fuels) {
         this.fuels = fuels.clone();
+        this.totalSales = 0;
+        this.salesCount = 0;
+        this.pumpActive = true;
+    }
+
+    private String setPumpState(boolean newState) {
+        this.pumpActive = newState;
+        return "This pump is " + ((pumpActive) ? "ON" : "OFF");
+    }
+
+    private String getPumpState() {
+        return "This pump is " + ((pumpActive) ? "ON" : "OFF");
+    }
+
+    private String salesInfo() {
+        return "This pump has completed " + salesCount + " transactions for total sales of: $" + Gas.displayPrice(totalSales);
     }
 
     private String handleMessage(Message message) {
@@ -40,7 +57,10 @@ public class GasServer {
         String[] requests = message.toString().split(":");
         String messageType = requests[0];
         return switch (messageType) {
-            case "request_info" -> displayGasses();
+            case "pump_info" -> getPumpState() + "\n\t" + salesInfo();
+            case "disable_pump" -> setPumpState(false);
+            case "enable_pump" -> setPumpState(true);
+            case "fuel_info" -> displayGasses();
             case "complete_sale" -> completeSale(requests[1]);
             default -> "not sure what you sent?";
         };
@@ -60,6 +80,7 @@ public class GasServer {
             }
         }
 
+        salesCount++;
         return Gas.displayPrice(finalPrice) + "";
     }
 
