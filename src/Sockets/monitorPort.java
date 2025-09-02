@@ -1,5 +1,7 @@
 package Sockets;
 
+import Message.Message;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,36 +17,38 @@ public class monitorPort {
 
     /**
      * Make a new monitorPort (can send and read)
+     *
      * @param deviceName name of device you are connecting to/from
      * @throws IOException throws if the connections breaks
      */
     public monitorPort(String deviceName) throws IOException {
-        socket = new Socket("localhost", API.portLookup(deviceName));
+        socket = new Socket("localhost", Port.portLookup(deviceName));
         in = new ObjectInputStream(socket.getInputStream());
         out = new ObjectOutputStream(socket.getOutputStream());
         new Thread(() -> {
             Message msg;
-            try{
-                while((msg =(Message) in.readObject()) != null ){
+            try {
+                while ((msg = (Message) in.readObject()) != null) {
                     lastMessage = msg;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
     /**
-     * TODO:Right a better description for this
      * Get the status of the current object
+     *
      * @return the message
      */
-    public Message read(){
+    public Message read() {
         return lastMessage;
     }
 
     /**
      * Send a message to the connected device
+     *
      * @param message the message being sent
      * @throws IOException if there is a socket error this will be thrown
      */

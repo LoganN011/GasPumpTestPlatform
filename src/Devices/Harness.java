@@ -1,8 +1,7 @@
 package Devices;
 
-import Sockets.Message;
+import Message.Message;
 import Sockets.commPort;
-import HelpyWelpy.MessageReader;
 
 public class Harness {
     public static void main(String[] args) {

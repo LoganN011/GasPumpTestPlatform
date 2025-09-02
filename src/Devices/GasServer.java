@@ -1,6 +1,6 @@
 package Devices;
 
-import Sockets.Message;
+import Message.Message;
 import Sockets.commPort;
 
 import java.util.Arrays;
@@ -15,10 +15,10 @@ public class GasServer {
 
     public static void main(String[] args) {
         //For the sake of testing, the fuels are predetermined
-        Gas[] fuels = new Gas[]{new Gas("Regular",87,2.124,100), new Gas("Premium",89,2.90,100)};
+        Gas[] fuels = new Gas[]{new Gas("Regular", 87, 2.124, 100), new Gas("Premium", 89, 2.90, 100)};
         GasServer server = new GasServer(fuels);
 
-        try{
+        try {
             commPort self = new commPort("gas_server");
             while (true) {
                 String response = server.handleMessage(self.get());
@@ -74,8 +74,8 @@ public class GasServer {
         double finalPrice = gallonsSold * pricePromised;
         totalSales += finalPrice;
 
-        for(int i = 0; i < fuels.length && gasType != fuels[i].getType(); i++) {
-            if(gasType == fuels[i].getType()) {
+        for (int i = 0; i < fuels.length && gasType != fuels[i].getType(); i++) {
+            if (gasType == fuels[i].getType()) {
                 fuels[i].sellGas(gallonsSold);
             }
         }

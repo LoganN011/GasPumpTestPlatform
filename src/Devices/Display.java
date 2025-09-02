@@ -1,6 +1,6 @@
 package Devices;
 
-import Sockets.Message;
+import Message.Message;
 import Sockets.commPort;
 import javafx.application.Application;
 import javafx.scene.Scene;
