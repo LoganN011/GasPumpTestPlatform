@@ -36,11 +36,11 @@ import java.util.*;
  */
 public class Display extends Application {
 
-    // ---- Layout data
+    // Layout data
     private static final Set<String> PAIRS = Set.of("00","01","23","45","67","89");
     private static final double WIDTH = 960, HEIGHT = 540;
 
-    // ---- UI state
+    // UI state
     private final GridPane grid = new GridPane();
     // Container panes for left/right buttons per index 0..9
     private final Map<Integer, StackPane> btnCells = new HashMap<>();
@@ -67,11 +67,11 @@ public class Display extends Application {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.setResizable(false);
-        stage.setTitle("Screen");
+        stage.setTitle("Gas Pump Display");
         stage.show();
 
         startIO();
-        log("waiting for backend…");
+        log("please start harness (waiting for backend)…");
     }
 
     @Override
@@ -299,7 +299,6 @@ public class Display extends Application {
         }
     }
 
-
     /**
      * MessageReader gives styled nodes, but it doesn’t tell Display:
      *  which button index goes in which grid cell (0/1 → row 1, 2/3 → row 2, etc.),
@@ -308,7 +307,7 @@ public class Display extends Application {
      *      rendering two labels vs one,
      *      your rule “single-column rows disable the left button”.
      */
-    // ---------- Minimal token parsing for metadata we need ----------
+    // Minimal token parsing for metadata we need
     private static final class BtnSpec { final int idx; final boolean multi; BtnSpec(int i, boolean m){idx=i;multi=m;} }
     private static final class TextSpec {
         final String pair; final boolean split; final String left; final String right; final String text;
