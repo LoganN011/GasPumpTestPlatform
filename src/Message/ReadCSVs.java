@@ -2,6 +2,7 @@ package Message;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -76,8 +77,12 @@ public class ReadCSVs {
     public Font getFont(int fontNumSelect, int fontSizeSelect) {
         String fontName = fontNameArrayList.get(fontNumSelect);
         int fontSize = fontSizeArrayList.get(fontSizeSelect);
+        FontWeight fw = FontWeight.NORMAL;
 
-        return Font.font(fontName, fontSize);
+        // Bold "Begin Fueling | Cancel"
+        if (fontNumSelect == 2) fw = FontWeight.BOLD;
+
+        return Font.font(fontName, fw, fontSize);
     }
 
     /**

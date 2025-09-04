@@ -1,5 +1,24 @@
 Read me 
 
+### Font Information
+To use any font, font size, or color, use it's corresponding order in the associated CSV from ranges 0 to 2.
+
+_Header_: Font 0, Size 0, Color 0<br>
+_Body Text_: Font 1, Size 1, Color 1<br>
+_Something_: Font 2, Size 2, Color 2<br>
+
+#### Fonts
+1. Impact
+2. Verdana
+3. Constantia
+#### Font Sizes
+1. 30
+2. 19
+3. 22
+#### Font Colors
+1. Green, #84E296
+2. Blue, #083D77 
+3. Indian red, #EB5160
 
 ### Message Formatting:
 
