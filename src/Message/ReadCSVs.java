@@ -20,6 +20,9 @@ public class ReadCSVs {
         readColorsCSV();
     }
 
+    /**
+     * Reads CSV of font names
+     */
     private void readFontNameCSV() {
         String line;
 
@@ -33,6 +36,9 @@ public class ReadCSVs {
         }
     }
 
+    /**
+     * Reads CSV of font sizes
+     */
     private void readFontSizesCSV() {
         String line;
 
@@ -46,6 +52,9 @@ public class ReadCSVs {
         }
     }
 
+    /**
+     * Reads CSV of colors (hex values)
+     */
     private void readColorsCSV() {
         String line;
 
@@ -61,6 +70,9 @@ public class ReadCSVs {
         }
     }
 
+    /**
+     * Returns font based on font name and size
+     */
     public Font getFont(int fontNumSelect, int fontSizeSelect) {
         String fontName = fontNameArrayList.get(fontNumSelect);
         int fontSize = fontSizeArrayList.get(fontSizeSelect);
@@ -68,6 +80,9 @@ public class ReadCSVs {
         return Font.font(fontName, fontSize);
     }
 
+    /**
+     * Gets color at specific index
+     */
     public Color getColor(int colorNum) {
         return colorArrayList.get(colorNum);
     }
