@@ -1,4 +1,4 @@
-package Devices.GUI;
+package Devices.DisplayObjects;
 
 import javafx.scene.text.Text;
 

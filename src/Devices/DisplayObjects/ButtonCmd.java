@@ -1,4 +1,4 @@
-package Devices.GUI;
+package Devices.DisplayObjects;
 
 public class ButtonCmd {
     public final int idx;
