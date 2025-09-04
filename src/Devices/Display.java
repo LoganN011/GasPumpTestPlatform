@@ -1,28 +1,24 @@
 package Devices;
 
+import Devices.DisplayObjects.ButtonCmd;
+import Devices.DisplayObjects.TextCmd;
 import Message.Message;
 import Sockets.commPort;
-import HelpyWelpy.MessageReader; // TODO: Rename HelpyWelpy
+import Message.MessageReader;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Screen UI (sockets only).
@@ -32,27 +28,9 @@ import java.util.regex.Pattern;
  * Outbound (UI → backend):
  *   click:<idx>
  */
-public class Display extends Application {
-
-    // ---- Buttons using regex; text using MessageReader (for style and decode)
-    private static final Pattern BUTTON_RE  = Pattern.compile("^b:(\\d)(?::(x|m))?$");
-    private static final Pattern TEXT_TOKEN = Pattern.compile("^t:(\\d{2}):s(\\d+):f(\\d+):c(\\d+):(.+)$");
+public class Display {
     private static final Set<String> PAIRS  = Set.of("00","01","23","45","67","89");
 
-    private static class ButtonCmd {
-        final int idx; final boolean multi;
-        ButtonCmd(int idx, boolean multi) { this.idx = idx; this.multi = multi; }
-    }
-    private static class TextCmd {
-        final String pair; final int s, f, c;
-        final boolean split; final String left, right, text;
-        final Text styledFromMR; // copy font/fill from MR text node
-        TextCmd(String pair, int s, int f, int c, boolean split, String left, String right, String text, Text styledFromMR) {
-            this.pair = pair; this.s = s; this.f = f; this.c = c;
-            this.split = split; this.left = left; this.right = right; this.text = text;
-            this.styledFromMR = styledFromMR;
-        }
-    }
     private static class ParsedLine {
         final List<ButtonCmd> buttons = new ArrayList<>();
         final List<TextCmd> texts = new ArrayList<>();
@@ -71,8 +49,10 @@ public class Display extends Application {
     private volatile boolean running = true;
     private volatile commPort port;
 
-    @Override
-    public void start(Stage stage) {
+    /**
+     * Returns entire display
+     */
+    public VBox createPumpDisplay() {
         buildGrid();
         resetAll();
 
@@ -80,22 +60,14 @@ public class Display extends Application {
         root.getChildren().addAll(grid, footerBar());
         VBox.setVgrow(grid, Priority.ALWAYS);
 
-        Scene scene = new Scene(root, WIDTH, HEIGHT);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.setTitle("Screen");
-        stage.show();
-
         startIO();
+
+        return root;
     }
 
-    @Override
-    public void stop() {
-        running = false;
-        // TODO: try { if (port != null) port.close(); } catch (Exception ignored) {}
-    }
-
-    // this builds grid
+    /**
+     * Creates initial grid of buttons and displays
+     */
     private void buildGrid() {
         grid.setGridLinesVisible(false);
         grid.setStyle("-fx-background-color: white;");
@@ -302,42 +274,10 @@ public class Display extends Application {
         ParsedLine out = new ParsedLine();
         if (line == null || line.isEmpty()) return out;
 
-        String[] parts = line.split("\\s*,\\s*");
-        for (String token : parts) {
-            if (token.startsWith("b:")) {
-                Matcher m = BUTTON_RE.matcher(token);
-                if (m.matches()) {
-                    int idx = Integer.parseInt(m.group(1));
-                    boolean multi = "m".equalsIgnoreCase(Objects.toString(m.group(2), ""));
-                    out.buttons.add(new ButtonCmd(idx, multi));
-                }
-            } else if (token.startsWith("t:")) {
-                Matcher m = TEXT_TOKEN.matcher(token);
-                if (!m.matches()) continue;
+        MessageReader mr = new MessageReader(line);
+        out.buttons.addAll(mr.getButtons());
+        out.texts.addAll(mr.getTexts());
 
-                String pair = m.group(1);        // "00","01","23",...
-                int s = parseIntSafely(m.group(2), 2);
-                int f = parseIntSafely(m.group(3), 2);
-                int c = parseIntSafely(m.group(4), 1);
-                String payload = m.group(5);
-
-                Text styled = null;
-                try {
-                    MessageReader mr = new MessageReader(token); // loads CSV styles
-                    styled = mr.getText();
-                } catch (Throwable ignored) {}
-
-                boolean split = payload.contains("|");
-                if (split) {
-                    int i = payload.indexOf('|');
-                    String left = payload.substring(0, i);
-                    String right = payload.substring(i + 1);
-                    out.texts.add(new TextCmd(pair, s, f, c, true, left, right, null, styled));
-                } else {
-                    out.texts.add(new TextCmd(pair, s, f, c, false, null, null, payload, styled));
-                }
-            }
-        }
         return out;
     }
 
@@ -351,23 +291,29 @@ public class Display extends Application {
             try {
                 port = new commPort("screen");
                 log("connected");
+
                 while (running) {
                     Message m = port.get();
                     if (m == null) continue;
                     String line = m.toString().trim();
                     if (!line.isEmpty()) handleInbound(line);
                 }
+
             } catch (IOException connectErr) {
                 log("connect failed: " + connectErr.getMessage());
             } catch (Exception ex) {
+                ex.printStackTrace();
                 log("io error: " + ex.getMessage());
             }
+
         }, "screen-io");
         io.setDaemon(true);
         io.start();
     }
 
-    private void log(String s) { footer.setText(s); }
+    private void log(String s) {
+        Platform.runLater(() -> footer.setText(s));
+    }
 
     private HBox footerBar() {
         footer.setTextFill(Color.web("#374151")); // slate-700
@@ -376,6 +322,4 @@ public class Display extends Application {
         box.setStyle("-fx-background-color: #F3F4F6; -fx-border-color: #E5E7EB; -fx-border-width: 1 0 0 0;");
         return box;
     }
-
-    public static void main(String[] args) { launch(args); }
 }
