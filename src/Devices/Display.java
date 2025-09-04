@@ -8,6 +8,7 @@ import Message.MessageReader;
 
 import javafx.application.Platform;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
@@ -70,7 +71,7 @@ public class Display {
      */
     private void buildGrid() {
         grid.setGridLinesVisible(false);
-        grid.setStyle("-fx-background-color: white;");
+        grid.setStyle("-fx-background-color: f9f9f9;"); // was 'white'
         grid.setPrefSize(WIDTH, HEIGHT - 32);
 
         ColumnConstraints c0 = new ColumnConstraints();
@@ -172,6 +173,7 @@ public class Display {
 
         if (cmd.split) {
             HBox h = new HBox(16);
+            h.setPadding(new Insets(20, 10, 20, 10));
             h.setAlignment(Pos.CENTER);
 
             Label left = labelFrom(cmd.left, cmd);
@@ -319,7 +321,8 @@ public class Display {
         footer.setTextFill(Color.web("#374151")); // slate-700
         footer.setStyle("-fx-padding: 8; -fx-font-size: 12px;");
         HBox box = new HBox(footer);
-        box.setStyle("-fx-background-color: #F3F4F6; -fx-border-color: #E5E7EB; -fx-border-width: 1 0 0 0;");
+        box.setStyle("-fx-background-color: #575D90; -fx-border-color: #E5E7EB; -fx-border-width: 1 0 0 0;");
+        // was #F3F4F6
         return box;
     }
 }

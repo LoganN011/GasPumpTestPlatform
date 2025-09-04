@@ -2,7 +2,6 @@ package Message;
 
 import Devices.DisplayObjects.ButtonCmd;
 import Devices.DisplayObjects.TextCmd;
-import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -14,7 +13,6 @@ public class MessageReader {
     ArrayList<TextCmd> textCollection = new ArrayList<>();
     Text finalText;
     ReadCSVs csv;
-
     String msgText;
 
     public MessageReader(String input) {

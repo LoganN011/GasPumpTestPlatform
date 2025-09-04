@@ -15,15 +15,15 @@ public class Harness extends Application {
      * Example usage for selecting fuel
      */
     private void testFuelSelection(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s2:f0:c2:SELECT YOUR GAS TYPE"));
+        device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
         Thread.sleep(40);
-        device.send(new Message("b:2:m,b:3:m,t:23:s2:f1:c1:REGULAR 87"));
+        device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
         Thread.sleep(40);
-        device.send(new Message("b:4:m,b:5:m,t:45:s2:f1:c1:PLUS 89"));
+        device.send(new Message("b:4:m,b:5:m,t:45:s1:f1:c1:PLUS 89"));
         Thread.sleep(40);
-        device.send(new Message("b:6:m,b:7:m,t:67:s2:f1:c1:PREMIUM 91"));
+        device.send(new Message("b:6:m,b:7:m,t:67:s1:f1:c1:PREMIUM 91"));
         Thread.sleep(40);
-        device.send(new Message("b:8:x,b:9:x,t:89:s2:f1:c1:BEGIN FUELING|CANCEL"));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL"));
     }
 
     /**
