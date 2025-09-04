@@ -1,14 +1,13 @@
 package Devices;
 
+import Message.Message;
+import Sockets.controlPort;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-import Sockets.*;
-
-import javax.imageio.IIOException;
 import java.io.IOException;
 
 public class Card extends Application {
@@ -22,27 +21,26 @@ public class Card extends Application {
     public void start(Stage primaryStage) {
         //todo replace with real handing of connection failing
         controlPort self = null;
-        try{
+        try {
             self = new controlPort("card");
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
 
-
         Button test = new Button();
         test.setMinSize(100, 100);
         controlPort finalSelf = self; //TODO: fix this cause idk wants it want this way only sometimes
-        test.setOnMouseClicked(x ->{
+        test.setOnMouseClicked(x -> {
             String cardNumber = "";
-            while (cardNumber.length() < 20) cardNumber += (int)(Math.random() * 10);
+            while (cardNumber.length() < 20) cardNumber += (int) (Math.random() * 10);
 
-            //todo relay message through communication API containing number
+            //todo relay message through communication Port containing number
             //  may look like this:
-            try{
+            try {
                 finalSelf.send(new Message(cardNumber));
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
                 //TODO: put real error handling

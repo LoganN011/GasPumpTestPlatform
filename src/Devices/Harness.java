@@ -1,8 +1,7 @@
 package Devices;
 
-import Sockets.Message;
+import Message.Message;
 import Sockets.commPort;
-import HelpyWelpy.MessageReader;
 
 public class Harness {
     public static void main(String[] args) {
@@ -14,8 +13,6 @@ public class Harness {
         String testScreenOne = "b:0:x,t:00:s0:f1:c1:Hello World";
         String testScreenTwo = "b:1:x,t:01:s1:f2:c2:Here's A Message";
         String testScreenThree = "b:1:m,b:2:m,t:23:s2:f3:c3:A Third Message";
-
-        MessageReader temp = new MessageReader(testScreenOne);
 
         try {
             //Card simulation
@@ -33,10 +30,14 @@ public class Harness {
 
             //Gas Server simulation
             commPort gasServer = new commPort("gas_server");
-            gasServer.send(new Message("request_info"));
+            gasServer.send(new Message("pump_info"));
             System.out.println(gasServer.get());
+            gasServer.send(new Message("fuel_info"));
+            System.out.println("Gas prices: " + gasServer.get());
             gasServer.send(new Message("complete_sale:87,3,1.245"));
-            System.out.println("The final price of the sale was :$" + gasServer.get());
+            System.out.println("The final price of the sale was: $" + gasServer.get());
+            gasServer.send(new Message("pump_info"));
+            System.out.println(gasServer.get());
         } catch (Exception e) {
             e.printStackTrace();
         }
