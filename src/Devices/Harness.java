@@ -49,9 +49,9 @@ public class Harness extends Application {
     }
 
     public void start(Stage stage) {
-        Display display = new Display();
+        DisplayHandler displayHandler = new DisplayHandler();
 
-        Scene scene = new Scene(display.createPumpDisplay(), WIDTH, HEIGHT);
+        Scene scene = new Scene(displayHandler.getPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setTitle("Screen");
@@ -70,7 +70,7 @@ public class Harness extends Application {
                 while (true) {
                     Message m = screen.get();
 
-                    if (m != null) System.out.println("clicked on: " + m);
+                    if (m != null) displayHandler.handleInput(screen.get());
                     Thread.sleep(10);
                 }
 

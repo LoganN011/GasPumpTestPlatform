@@ -283,10 +283,6 @@ public class Display {
         return out;
     }
 
-    private int parseIntSafely(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
-    }
-
     // socket stuff
     private void startIO() {
         Thread io = new Thread(() -> {
@@ -325,4 +321,56 @@ public class Display {
         // was #F3F4F6
         return box;
     }
+
+    // Return the center text for the row that contains this button index (0..9).
+// Example: idx 2 or 3  -> pair "23" (e.g., "REGULAR 87")
+    public String getGasField(int buttonIdx) {
+        String pair = pairForButton(buttonIdx);
+        if (pair == null) return null;
+        return getCenterTextByPair(pair);
+    }
+
+// ----- helpers -----
+
+    private String pairForButton(int idx) {
+        switch (idx) {
+            case 0: case 1: return "01";
+            case 2: case 3: return "23";
+            case 4: case 5: return "45";
+            case 6: case 7: return "67";
+            case 8: case 9: return "89";
+            default: return null;
+        }
+    }
+
+    private String getCenterTextByPair(String pair) {
+        Pane center = centers.get(pair);
+        if (center == null || center.getChildren().isEmpty()) return null;
+
+        javafx.scene.Node node = center.getChildren().get(0);
+
+        // Single centered label (most gas rows use this)
+        if (node instanceof Label) {
+            return ((Label) node).getText();
+        }
+
+        // Split left|right layout: join both sides with " | "
+        if (node instanceof HBox) {
+            StringBuilder sb = new StringBuilder();
+            for (javafx.scene.Node child : ((HBox) node).getChildren()) {
+                if (child instanceof Label) {
+                    String t = ((Label) child).getText();
+                    if (t != null && !t.isEmpty()) {
+                        if (sb.length() > 0) sb.append(" | ");
+                        sb.append(t);
+                    }
+                }
+            }
+            return sb.toString();
+        }
+
+        // Fallback
+        return node.toString();
+    }
+
 }
