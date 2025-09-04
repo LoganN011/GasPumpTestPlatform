@@ -2,7 +2,7 @@ package Devices;
 
 import Sockets.Message;
 import Sockets.commPort;
-import HelpyWelpy.MessageReader;
+import UIHelper.MessageReader;
 
 public class Harness {
     public static void main(String[] args) {

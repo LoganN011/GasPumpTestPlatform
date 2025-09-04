@@ -1,4 +1,4 @@
-package HelpyWelpy;
+package UIHelper;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;

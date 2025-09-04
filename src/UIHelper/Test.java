@@ -1,4 +1,4 @@
-package HelpyWelpy;
+package UIHelper;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

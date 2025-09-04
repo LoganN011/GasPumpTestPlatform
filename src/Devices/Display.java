@@ -2,7 +2,7 @@ package Devices;
 
 import Sockets.Message;
 import Sockets.commPort;
-import HelpyWelpy.MessageReader; // TODO: Rename HelpyWelpy
+import UIHelper.MessageReader; // TODO: Rename HelpyWelpy
 
 import javafx.application.Application;
 import javafx.application.Platform;
