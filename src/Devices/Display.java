@@ -11,61 +11,46 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Screen UI (sockets only).
+ * Changed Display.java so that it uses UIHelper.MessageReader to parse text and
+ * lookup their fonts, colors, etc.
  * Inbound (backend → UI):
- *   b:<idx>:(x|m)
+ *   b:<idx>:(x|m)           // buttons to enable + type (exclusive x / multi m)
  *   t:(00|01|23|45|67|89):s#:f#:c#:<text or left|right>
  * Outbound (UI → backend):
- *   click:<idx>
+ *   click:<idx> (this is returning the index of the button pressed in a printing
+ *                statement. In order for it to "do" anything other than display
+ *                the grid, we need to change this)
  */
 public class Display extends Application {
 
-    // ---- Buttons using regex; text using MessageReader (for style and decode)
-    private static final Pattern BUTTON_RE  = Pattern.compile("^b:(\\d)(?::(x|m))?$");
-    private static final Pattern TEXT_TOKEN = Pattern.compile("^t:(\\d{2}):s(\\d+):f(\\d+):c(\\d+):(.+)$");
-    private static final Set<String> PAIRS  = Set.of("00","01","23","45","67","89");
-
-    private static class ButtonCmd {
-        final int idx; final boolean multi;
-        ButtonCmd(int idx, boolean multi) { this.idx = idx; this.multi = multi; }
-    }
-    private static class TextCmd {
-        final String pair; final int s, f, c;
-        final boolean split; final String left, right, text;
-        final Text styledFromMR; // copy font/fill from MR text node
-        TextCmd(String pair, int s, int f, int c, boolean split, String left, String right, String text, Text styledFromMR) {
-            this.pair = pair; this.s = s; this.f = f; this.c = c;
-            this.split = split; this.left = left; this.right = right; this.text = text;
-            this.styledFromMR = styledFromMR;
-        }
-    }
-    private static class ParsedLine {
-        final List<ButtonCmd> buttons = new ArrayList<>();
-        final List<TextCmd> texts = new ArrayList<>();
-    }
+    // ---- Layout data
+    private static final Set<String> PAIRS = Set.of("00","01","23","45","67","89");
+    private static final double WIDTH = 960, HEIGHT = 540;
 
     // ---- UI state
     private final GridPane grid = new GridPane();
-    private final Map<Integer, Region> btns = new HashMap<>(); // from 0 to 9
-    private final Map<String, Pane> centers = new HashMap<>(); // "00","01","23","45","67","89"
-    private final Set<Integer> multiActive = new HashSet<>();  // are 'm'
-    private final Label footer = new Label();                  // a status line (will remove later)
-
-    private static final double WIDTH = 960, HEIGHT = 540;
+    // Container panes for left/right buttons per index 0..9
+    private final Map<Integer, StackPane> btnCells = new HashMap<>();
+    // Live buttons currently mounted at each index (so we can restyle/highlight)
+    private final Map<Integer, Button> liveButtons = new HashMap<>();
+    // Center cells keyed by pair "01","23"... ("00" aliases to "01")
+    private final Map<String, Pane> centers = new HashMap<>();
+    // Which button indices are multi-choice ('m')
+    private final Set<Integer> multiActive = new HashSet<>();
+    private final Label footer = new Label();
 
     // IO
     private volatile boolean running = true;
@@ -74,7 +59,6 @@ public class Display extends Application {
     @Override
     public void start(Stage stage) {
         buildGrid();
-        resetAll();
 
         VBox root = new VBox();
         root.getChildren().addAll(grid, footerBar());
@@ -87,15 +71,13 @@ public class Display extends Application {
         stage.show();
 
         startIO();
+        log("waiting for backend…");
     }
 
     @Override
-    public void stop() {
-        running = false;
-        // TODO: try { if (port != null) port.close(); } catch (Exception ignored) {}
-    }
+    public void stop() { running = false; }
 
-    // this builds grid
+    // Grid
     private void buildGrid() {
         grid.setGridLinesVisible(false);
         grid.setStyle("-fx-background-color: white;");
@@ -121,49 +103,35 @@ public class Display extends Application {
             int rightIdx = leftIdx + 1; // 1,3,5,7,9
             String pair = pairs[row];
 
-            Region leftBtn = makeButtonCell(leftIdx);
-            Region rightBtn = makeButtonCell(rightIdx);
+            StackPane leftCell = makeButtonCell(leftIdx);
+            StackPane rightCell = makeButtonCell(rightIdx);
             Pane center = makeCenterCell(pair);
 
-            btns.put(leftIdx, leftBtn);
-            btns.put(rightIdx, rightBtn);
+            btnCells.put(leftIdx, leftCell);
+            btnCells.put(rightIdx, rightCell);
             centers.put(pair, center);
 
-            grid.add(leftBtn, 0, row);
+            grid.add(leftCell, 0, row);
             grid.add(center, 1, row);
-            grid.add(rightBtn, 2, row);
+            grid.add(rightCell, 2, row);
 
-            GridPane.setHalignment(leftBtn, HPos.CENTER);
-            GridPane.setValignment(leftBtn, VPos.CENTER);
+            GridPane.setHalignment(leftCell, HPos.CENTER);
+            GridPane.setValignment(leftCell, VPos.CENTER);
             GridPane.setHalignment(center, HPos.CENTER);
             GridPane.setValignment(center, VPos.CENTER);
-            GridPane.setHalignment(rightBtn, HPos.CENTER);
-            GridPane.setValignment(rightBtn, VPos.CENTER);
+            GridPane.setHalignment(rightCell, HPos.CENTER);
+            GridPane.setValignment(rightCell, VPos.CENTER);
         }
-        // Alias "00" to top row center ("01") for early test payloads
+        // alias "00" to top row center
         centers.put("00", centers.get("01"));
     }
 
-    private Region makeButtonCell(int idx) {
+    private StackPane makeButtonCell(int idx) {
         StackPane p = new StackPane();
         p.setPrefSize(96, 72);
         p.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        p.setCursor(Cursor.HAND);
         p.setStyle(inactiveButtonStyle());
-        p.setDisable(true); // inactive by default
-        p.setOnMouseClicked((MouseEvent e) -> {
-            if (p.isDisable()) return;
-            try {
-                if (port != null) port.send(new Message("click:" + idx));
-                footer.setText("click:" + idx);
-            } catch (IOException ex) {
-                log("send failed: " + ex.getMessage());
-            }
-            if (multiActive.contains(idx)) {
-                clearMultiSelections();
-                setButtonVisual(p, true, true);
-            }
-        });
+        p.setDisable(true); // disabled until a 'b:idx' arrives
         return p;
     }
 
@@ -174,74 +142,82 @@ public class Display extends Application {
         return center;
     }
 
-    // Rendering
-    private void resetAll() {
-        centers.values().forEach(p -> p.getChildren().clear());
-        btns.values().forEach(b -> {
-            b.setDisable(true);
-            setButtonVisual(b, false, false);
-        });
-        multiActive.clear();
-        log("waiting for backend…");
-    }
+    // Handle the inbound messages
+    private void handleInbound(String line) {
+        Platform.runLater(() -> {
+            // Use MessageReader for styled nodes
+            MessageReader mr = new MessageReader(line);
+            Text mrText = mr.getText();                    // styled font/color for this line's t:...
+            Map<Integer, Button> mrButtons = mapById(mr);  // map "id string" -> Button
 
-    private void applyButton(ButtonCmd cmd) {
-        Region b = btns.get(cmd.idx);
-        if (b == null) return;
-        b.setDisable(false);
-        setButtonVisual(b, true, false);
-        if (cmd.multi) multiActive.add(cmd.idx);
-    }
+            // Parse minimal metadata we still need (button types + text pair/split)
+            Meta meta = parseMeta(line);
 
-    private void applyText(TextCmd cmd) {
-        Pane center = centers.get(cmd.pair);
-        if (center == null) return;
-        center.getChildren().clear();
-
-        if (cmd.split) {
-            HBox h = new HBox(16);
-            h.setAlignment(Pos.CENTER);
-
-            Label left = labelFrom(cmd.left, cmd);
-            Label right = labelFrom(cmd.right, cmd);
-
-            HBox.setHgrow(left, Priority.ALWAYS);
-            HBox.setHgrow(right, Priority.ALWAYS);
-            left.setMaxWidth(Double.MAX_VALUE);
-            right.setMaxWidth(Double.MAX_VALUE);
-            left.setAlignment(Pos.CENTER_LEFT);
-            right.setAlignment(Pos.CENTER_RIGHT);
-
-            h.getChildren().addAll(left, right);
-            center.getChildren().add(h);
-        } else {
-            Label mid = labelFrom(cmd.text, cmd);
-            mid.setAlignment(Pos.CENTER);
-            center.getChildren().add(mid);
-
-            // this disables the left button for that row, so that only right button can choose stuff
-            int leftIdx = leftIdxForPair(cmd.pair);
-            Region leftBtn = btns.get(leftIdx);
-            if (leftBtn != null) {
-                leftBtn.setDisable(true);
-                setButtonVisual(leftBtn, false, false);
-                multiActive.remove(leftIdx);
+            // 1) put the MR Buttons by index and style them to match the current theme
+            for (BtnSpec b : meta.buttons) {
+                Button btn = mrButtons.get(b.idx);
+                placeAndStyleButton(b.idx, btn, b.multi);
             }
-        }
+
+            // 2) copy font/color/size from MR's Text into Labels laid out by us
+            if (meta.text != null && PAIRS.contains(meta.text.pair)) {
+                applyText(meta.text, mrText);
+            }
+        });
     }
 
-    private Label labelFrom(String content, TextCmd cmd) {
-        Label lab = new Label(content == null ? "" : content);
-        lab.setWrapText(true);
+    // TODO: Fix  text box not appearing
 
-        if (cmd.styledFromMR != null) {
-            Font f = cmd.styledFromMR.getFont();
-            javafx.scene.paint.Paint paint = cmd.styledFromMR.getFill();
-            if (f != null) lab.setFont(f);
-            if (paint != null) lab.setTextFill(paint);
+    // Map the MessageReader buttons by their numeric id (the button's text is the id string)
+    private Map<Integer, javafx.scene.control.Button> mapById(UIHelper.MessageReader mr) {
+        Map<Integer, javafx.scene.control.Button> out = new HashMap<>();
+        for (javafx.scene.control.Button b : mr.getButtons()) {
+            try {
+                int id = Integer.parseInt(b.getText());
+                out.put(id, b);
+            } catch (NumberFormatException ignored) { /* skip non-numeric labels */ }
         }
-        return lab;
+        return out;
     }
+
+    // button placement and styling
+    private void placeAndStyleButton(int idx, javafx.scene.control.Button btn, boolean multi) {
+        StackPane cell = btnCells.get(idx);
+        if (cell == null) return;
+
+        // use a separate final variable for the lambda
+        final Button target = (btn != null) ? btn : new Button("");
+        target.setText(""); // <— make the button visually empty
+
+        // handle multi-choice highlight and send the "button clicked" statement
+        // TODO: handle the exclusive choice colors and highlight
+        final int idForSend = idx;
+        target.setOnAction(e -> {
+            try {
+                if (port != null) port.send(new Message("click:" + idForSend));
+                footer.setText("click:" + idForSend);
+            } catch (IOException ex) {
+                log("send failed: " + ex.getMessage());
+            }
+            if (multiActive.contains(idForSend)) {
+                clearMultiSelections();
+                setButtonVisual(target, true, true);
+            }
+        });
+
+        target.setCursor(Cursor.HAND);
+        target.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        // Mount/replace in cell
+        cell.getChildren().setAll(target);
+        cell.setDisable(false);
+        liveButtons.put(idx, target);
+
+        // Track multi-choice and apply base visuals
+        if (multi) multiActive.add(idx); else multiActive.remove(idx);
+        setButtonVisual(target, true, false);
+    }
+
 
     private void setButtonVisual(Region b, boolean active, boolean selected) {
         if (!active) {
@@ -259,12 +235,58 @@ public class Display extends Application {
     }
     private void clearMultiSelections() {
         for (int idx : multiActive) {
-            Region b = btns.get(idx);
+            Button b = liveButtons.get(idx);
             if (b != null) setButtonVisual(b, true, false);
         }
     }
 
-    // ---- left and right index helpers
+    // renders the text and copies the style from MR text parsed
+    private void applyText(TextSpec t, Text mrText) {
+        Pane center = centers.get(t.pair);
+        if (center == null) return;
+        center.getChildren().clear();
+
+        Font f = (mrText != null) ? mrText.getFont() : null;
+        Paint paint = (mrText != null) ? mrText.getFill() : null;
+
+        if (t.split) {
+            HBox h = new HBox(16);
+            h.setAlignment(Pos.CENTER);
+            StackPane.setAlignment(h, Pos.CENTER);
+
+            Label left  = new Label(t.left == null ? "" : t.left);
+            Label right = new Label(t.right == null ? "" : t.right);
+            if (f != null)    { left.setFont(f);  right.setFont(f); }
+            if (paint != null){ left.setTextFill(paint); right.setTextFill(paint); }
+
+            HBox.setHgrow(left, Priority.ALWAYS);
+            HBox.setHgrow(right, Priority.ALWAYS);
+            left.setMaxWidth(Double.MAX_VALUE);
+            right.setMaxWidth(Double.MAX_VALUE);
+            left.setAlignment(Pos.CENTER_LEFT);
+            right.setAlignment(Pos.CENTER_RIGHT);
+
+            h.getChildren().addAll(left, right);
+            center.getChildren().add(h);
+        } else {
+            Label mid = new Label(t.text == null ? "" : t.text);
+            if (f != null)    mid.setFont(f);
+            if (paint != null)mid.setTextFill(paint);
+            StackPane.setAlignment(mid, Pos.CENTER);
+            center.getChildren().add(mid);
+
+            // rule: single-column row → disable LEFT button for that row
+            int leftIdx = leftIdxForPair(t.pair);
+            StackPane leftCell = btnCells.get(leftIdx);
+            if (leftCell != null) {
+                leftCell.setDisable(true);
+                Region leftBtn = liveButtons.get(leftIdx);
+                if (leftBtn != null) setButtonVisual(leftBtn, false, false);
+                multiActive.remove(leftIdx);
+            }
+        }
+    }
+
     private int leftIdxForPair(String pair) {
         switch (pair) {
             case "00":
@@ -273,76 +295,54 @@ public class Display extends Application {
             case "45": return 4;
             case "67": return 6;
             case "89": return 8;
-            default: return -1;
-        }
-    }
-    private int rightIdxForPair(String pair) {
-        switch (pair) {
-            case "00":
-            case "01": return 1;
-            case "23": return 3;
-            case "45": return 5;
-            case "67": return 7;
-            case "89": return 9;
-            default: return -1;
+            default:   return -1;
         }
     }
 
-    // Inbound handling
-    private void handleInbound(String line) {
-        ParsedLine parsed = parseLineUsingMR(line);
-        Platform.runLater(() -> {
-            for (ButtonCmd b : parsed.buttons) applyButton(b);
-            for (TextCmd t : parsed.texts) if (PAIRS.contains(t.pair)) applyText(t);
-        });
-    }
 
-    // Use MessageReader for text style + regex for buttons/types.
-    private ParsedLine parseLineUsingMR(String line) {
-        ParsedLine out = new ParsedLine();
-        if (line == null || line.isEmpty()) return out;
+    /**
+     * MessageReader gives styled nodes, but it doesn’t tell Display:
+     *  which button index goes in which grid cell (0/1 → row 1, 2/3 → row 2, etc.),
+     *  whether a button is multi-choice (so we can do highlight behavior),
+     *  whether a row’s text is split (left|right) or single, which controls:
+     *      rendering two labels vs one,
+     *      your rule “single-column rows disable the left button”.
+     */
+    // ---------- Minimal token parsing for metadata we need ----------
+    private static final class BtnSpec { final int idx; final boolean multi; BtnSpec(int i, boolean m){idx=i;multi=m;} }
+    private static final class TextSpec {
+        final String pair; final boolean split; final String left; final String right; final String text;
+        TextSpec(String p, boolean s, String l, String r, String t){pair=p;split=s;left=l;right=r;text=t;}
+    }
+    private static final class Meta { final List<BtnSpec> buttons = new ArrayList<>(); TextSpec text; }
+
+    private Meta parseMeta(String line) {
+        Meta meta = new Meta();
+        if (line == null || line.isEmpty()) return meta;
 
         String[] parts = line.split("\\s*,\\s*");
         for (String token : parts) {
             if (token.startsWith("b:")) {
-                Matcher m = BUTTON_RE.matcher(token);
-                if (m.matches()) {
-                    int idx = Integer.parseInt(m.group(1));
-                    boolean multi = "m".equalsIgnoreCase(Objects.toString(m.group(2), ""));
-                    out.buttons.add(new ButtonCmd(idx, multi));
-                }
+                // b:<idx>[:x|m]
+                String[] p = token.split(":", 3);
+                int idx = Integer.parseInt(p[1]);
+                boolean multi = (p.length >= 3 && "m".equalsIgnoreCase(p[2]));
+                meta.buttons.add(new BtnSpec(idx, multi));
             } else if (token.startsWith("t:")) {
-                Matcher m = TEXT_TOKEN.matcher(token);
-                if (!m.matches()) continue;
-
-                String pair = m.group(1);        // "00","01","23",...
-                int s = parseIntSafely(m.group(2), 2);
-                int f = parseIntSafely(m.group(3), 2);
-                int c = parseIntSafely(m.group(4), 1);
-                String payload = m.group(5);
-
-                Text styled = null;
-                try {
-                    MessageReader mr = new MessageReader(token); // loads CSV styles
-                    styled = mr.getText();
-                } catch (Throwable ignored) {}
-
-                boolean split = payload.contains("|");
-                if (split) {
+                // t:<pair>:s#:f#:c#:<payload>
+                String[] p = token.split(":", 6);
+                if (p.length < 6) continue;
+                String pair = p[1];
+                String payload = p[5];
+                if (payload.contains("|")) {
                     int i = payload.indexOf('|');
-                    String left = payload.substring(0, i);
-                    String right = payload.substring(i + 1);
-                    out.texts.add(new TextCmd(pair, s, f, c, true, left, right, null, styled));
+                    meta.text = new TextSpec(pair, true, payload.substring(0,i), payload.substring(i+1), null);
                 } else {
-                    out.texts.add(new TextCmd(pair, s, f, c, false, null, null, payload, styled));
+                    meta.text = new TextSpec(pair, false, null, null, payload);
                 }
             }
         }
-        return out;
-    }
-
-    private int parseIntSafely(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        return meta;
     }
 
     // socket stuff
@@ -368,9 +368,8 @@ public class Display extends Application {
     }
 
     private void log(String s) { footer.setText(s); }
-
     private HBox footerBar() {
-        footer.setTextFill(Color.web("#374151")); // slate-700
+        footer.setTextFill(Color.web("#374151"));
         footer.setStyle("-fx-padding: 8; -fx-font-size: 12px;");
         HBox box = new HBox(footer);
         box.setStyle("-fx-background-color: #F3F4F6; -fx-border-color: #E5E7EB; -fx-border-width: 1 0 0 0;");
