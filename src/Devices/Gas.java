@@ -37,4 +37,8 @@ public class Gas {
         };
     }
 
+    public static String displayPrice(String price) {
+        return displayPrice(Double.parseDouble(price));
+    }
+
 }

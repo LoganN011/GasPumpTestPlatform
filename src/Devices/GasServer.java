@@ -7,7 +7,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -21,7 +24,8 @@ public class GasServer extends Application {
     private ArrayList<Gas> fuels;
     private double totalSales;
     private int salesCount;
-    private boolean pumpActive;
+
+    TextArea log;
 
     public static void main(String[] args) {
         launch(args);
@@ -29,19 +33,16 @@ public class GasServer extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //For the sake of testing, the fuels are predetermined
-//        fuels = new Gas[]{new Gas("Regular", 2.124, 100), new Gas("Premium", 2.90, 100)};
-        commPort tempServer = null;
-        try {
-            tempServer = new commPort("gas_server");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        commPort server = tempServer;//todo figure out why we need this
+        commPort server = new commPort("gas_server");
+
+        log = new TextArea();
+        log.setEditable(false);
+        log.setText("Messages regarding sales will appear below:\n");
 
         VBox fuelInputs = new VBox();
         fuelInputs.getChildren().addAll(generateFuelInputs(3));
 
+        HBox buttons = new HBox();
         Button sendInputs = new Button("Set Prices");
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
@@ -51,21 +52,34 @@ public class GasServer extends Application {
                 e.printStackTrace();
             }
         });
-
         Button addFuel = new Button("Add New Fuel");
         addFuel.setOnMouseClicked(x -> {
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
         });
+        buttons.getChildren().addAll(sendInputs, addFuel);
 
-        VBox root = new VBox();
+        BorderPane root = new BorderPane();
         root.setMinSize(400, 400);
-        root.setAlignment(Pos.CENTER);
-        root.getChildren().addAll(fuelInputs, addFuel, sendInputs);
+        root.setTop(log);
+        root.setCenter(fuelInputs);
+        root.setBottom(buttons);
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Gas Server");
         primaryStage.show();
+
+        Thread io = new Thread(() -> {
+            while(true) {
+                handleMessage(server.get());
+            }
+        });
+        io.start();
+
+    }
+
+    private void updateLog(String message) {
+        log.setText(log.getText() + "\n" + message);
     }
 
     private Message generateCurrentPrices() {
@@ -98,13 +112,6 @@ public class GasServer extends Application {
         return fuels;
     }
 
-//    private GasServer(Gas[] fuels) {
-//        this.fuels = new Gas[3];
-//        this.totalSales = 0;
-//        this.salesCount = 0;
-//        this.pumpActive = true;
-//    }
-
     private ArrayList<HBox> generateFuelInputs(int numFuels) {
         ArrayList<HBox> results = new ArrayList<>();
         for (int i = 0; i < numFuels; i++) {
@@ -120,41 +127,28 @@ public class GasServer extends Application {
         return results;
     }
 
-    private String setPumpState(boolean newState) {
-        this.pumpActive = newState;
-        return "This pump is " + ((pumpActive) ? "ON" : "OFF");
-    }
-
-    private String getPumpState() {
-        return "This pump is " + ((pumpActive) ? "ON" : "OFF");
-    }
-
     private String salesInfo() {
         return "This pump has completed " + salesCount + " transactions for total sales of: $" + Gas.displayPrice(totalSales);
     }
 
-//    private String handleMessage(Message message) {
-//        System.out.println("Incoming request: " + message.toString());
-//        String[] requests = message.toString().split(":");
-//        String messageType = requests[0];
-//        return switch (messageType) {
-//            case "pump_info" -> getPumpState() + "\n\t" + salesInfo();
-//            case "disable_pump" -> setPumpState(false);
-//            case "enable_pump" -> setPumpState(true);
-//            case "complete_sale" -> completeSale(requests[1]);
-//            default -> "not sure what you sent?";
-//        };
-//    }
+    private void handleMessage(Message message) {
+        System.out.println("Incoming request: " + message.toString());
+        String[] requests = message.toString().split(":");
+        String messageType = requests[0];
+        switch (messageType) {
+            case "sale" -> completeSale(requests[1]);
+        }
+    }
 
-    private String completeSale(String contents) {
+    private void completeSale(String contents) {
         String[] info = contents.split(",");
-        double gallonsSold = Double.parseDouble(info[1]);
-        double pricePromised = Double.parseDouble(info[2]);
+        double gallonsSold = Double.parseDouble(info[0]);
+        double pricePromised = Double.parseDouble(info[1]);
         double finalPrice = gallonsSold * pricePromised;
         totalSales += finalPrice;
-
         salesCount++;
-        return Gas.displayPrice(finalPrice) + "";
+        String priceString = Gas.displayPrice(finalPrice);
+        updateLog("Sale completed: " + gallonsSold + " gallons for $" + priceString);
     }
 
 

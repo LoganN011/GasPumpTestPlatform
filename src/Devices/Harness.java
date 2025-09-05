@@ -9,7 +9,20 @@ public class Harness {
     public static void main(String[] args) {
 //        testDisplay();
 //        testCard();
-        testGasServer();
+//        testGasServer();
+        testBankServer();
+    }
+
+    public static void testBankServer() {
+        try{
+            commPort bankServer = new commPort("bank");
+            bankServer.send(new Message("card:12345678910111213141"));
+            System.out.println("Bank server sent: " + bankServer.get());
+            bankServer.send(new Message("sale:42.39"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void testDisplay(){
@@ -31,6 +44,7 @@ public class Harness {
         //Gas Server simulation
         try{
             commPort gasServer = new commPort("gas_server");
+            gasServer.send(new Message("sale:14.2,2.80"));
             while(true) {
                 System.out.println("Gas server sent: " + gasServer.get());
             }
