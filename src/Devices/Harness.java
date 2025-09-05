@@ -11,8 +11,8 @@ public class Harness {
 //        testCard();
 //        testGasServer();
 //        testBankServer();
-//        testHose();
-        testPump();
+        testHose();
+//        testPump();
     }
 
     public static void testPump(){
