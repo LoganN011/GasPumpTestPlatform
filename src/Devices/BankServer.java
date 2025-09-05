@@ -63,7 +63,6 @@ public class BankServer extends Application {
     }
 
     private void handleMessage(Message message) {
-        System.out.println("here");
         String[] request = message.toString().split(":");
         String requestType = request[0];
         String requestInfo = request[1];
