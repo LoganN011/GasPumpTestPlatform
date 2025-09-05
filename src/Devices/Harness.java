@@ -31,14 +31,10 @@ public class Harness {
         //Gas Server simulation
         try{
             commPort gasServer = new commPort("gas_server");
-            gasServer.send(new Message("pump_info"));
-            System.out.println(gasServer.get());
-            gasServer.send(new Message("fuel_info"));
-            System.out.println("Gas prices: " + gasServer.get());
-            gasServer.send(new Message("complete_sale:87,3,1.245"));
-            System.out.println("The final price of the sale was: $" + gasServer.get());
-            gasServer.send(new Message("pump_info"));
-            System.out.println(gasServer.get());
+            while(true) {
+                System.out.println("Gas server sent: " + gasServer.get());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
