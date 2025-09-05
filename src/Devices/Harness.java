@@ -10,7 +10,8 @@ public class Harness {
 //        testDisplay();
 //        testCard();
 //        testGasServer();
-        testBankServer();
+//        testBankServer();
+        testHose();
     }
 
     public static void testBankServer() {
@@ -20,6 +21,17 @@ public class Harness {
             System.out.println("Bank server sent: " + bankServer.get());
             bankServer.send(new Message("sale:42.39"));
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testHose(){
+        try {
+            commPort hose = new commPort("hose");
+            while(true){
+                System.out.println(hose.get());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,22 +95,22 @@ public class Harness {
      * Example welcome screen
      */
     private static void testWelcome(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s3:f2:c2:WELCOME!"));
+        device.send(new Message("t:01:s0:f2:c2:WELCOME!"));
         Thread.sleep(40);
-        device.send(new Message("t:45:s3:f2:c2:PLEASE TAP YOUR CARD OR PHONE TO BEGIN"));
+        device.send(new Message("t:45:s0:f2:c2:PLEASE TAP YOUR CARD OR PHONE TO BEGIN"));
     }
 
     /**
      * Example usage for receipts
      */
     private static void testReceiptPrompt(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s3:f2:c2:WOULD YOU LIKE A RECEIPT?"));
+        device.send(new Message("t:01:s1:f2:c2:WOULD YOU LIKE A RECEIPT?"));
         Thread.sleep(40);
         device.send(new Message("b:6:x,b:7:x,t:67:s2:f2:c1:YES|NO"));
 
-        device.send(new Message("t:23:s3:f2:c2:RECEIPT WAS SENT TO"));
+        device.send(new Message("t:23:s1:f2:c2:RECEIPT WAS SENT TO"));
         Thread.sleep(40);
-        device.send(new Message("t:45:s3:f0:c1:user@example.com"));
+        device.send(new Message("t:45:s1:f0:c1:user@example.com"));
     }
 
 }
