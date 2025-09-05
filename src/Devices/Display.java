@@ -6,17 +6,20 @@ import Message.Message;
 import Sockets.commPort;
 import Message.MessageReader;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,7 +32,7 @@ import java.util.*;
  * Outbound (UI → backend):
  *   click:<idx>
  */
-public class Display {
+public class Display extends Application {
     private static final Set<String> PAIRS  = Set.of("00","01","23","45","67","89");
 
     private static class ParsedLine {
@@ -49,6 +52,16 @@ public class Display {
     // IO
     private volatile boolean running = true;
     private volatile commPort port;
+
+    public void start(Stage stage) {
+        DisplayHandler displayHandler = new DisplayHandler();
+
+        Scene scene = new Scene(displayHandler.getPumpDisplay(), WIDTH, HEIGHT);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.setTitle("Screen");
+        stage.show();
+    }
 
     /**
      * Returns entire display

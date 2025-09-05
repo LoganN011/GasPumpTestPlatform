@@ -15,7 +15,7 @@ public class GasServer {
 
     public static void main(String[] args) {
         //For the sake of testing, the fuels are predetermined
-        Gas[] fuels = new Gas[]{new Gas("Regular", 87, 2.124, 100), new Gas("Premium", 89, 2.90, 100)};
+        Gas[] fuels = new Gas[]{new Gas("Regular", 2.124, 100), new Gas("Premium", 2.90, 100)};
         GasServer server = new GasServer(fuels);
 
         try {
@@ -74,11 +74,7 @@ public class GasServer {
         double finalPrice = gallonsSold * pricePromised;
         totalSales += finalPrice;
 
-        for (int i = 0; i < fuels.length && gasType != fuels[i].getType(); i++) {
-            if (gasType == fuels[i].getType()) {
-                fuels[i].sellGas(gallonsSold);
-            }
-        }
+
 
         salesCount++;
         return Gas.displayPrice(finalPrice) + "";
