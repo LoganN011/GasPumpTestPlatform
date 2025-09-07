@@ -30,7 +30,6 @@ public class Pump extends Application {
     RotateTransition animation;
     Circle gauge;
     int counter=0;
-    double lastAngle=0;
     Label flowCounter;
     Rectangle pumpRec;
     Label pumpLabel;
@@ -121,7 +120,6 @@ public class Pump extends Application {
                     togglePump();
                 }
                 else if(msg.equals("off")&& pumpOn){
-                    System.out.println("OFF");
                     togglePump();
                 }
             }
