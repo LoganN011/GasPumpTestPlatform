@@ -5,12 +5,11 @@ import Sockets.monitorPort;
 import Sockets.statusPort;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -26,12 +25,16 @@ public class Pump extends Application {
 
     monitorPort flow;
     statusPort pump;
-    boolean on=false;
+    boolean flowOn =false;
+    boolean pumpOn =false;
     RotateTransition animation;
     Circle gauge;
     int counter=0;
     double lastAngle=0;
     Label flowCounter;
+    Rectangle pumpRec;
+    Label pumpLabel;
+    Rectangle line;
     public static void main(String[] args) {
         launch(args);
     }
@@ -45,17 +48,20 @@ public class Pump extends Application {
             e.printStackTrace();
         }
 
-        Rectangle pumpDevice = new Rectangle(200, 150);
-        pumpDevice.setFill(Color.GRAY);
+        StackPane pumpDevice = new StackPane();
+        pumpRec = new  Rectangle(200,150);
+        pumpRec.setFill(Color.GREY);
+        pumpLabel = new Label("Pump OFF");
+        pumpDevice.getChildren().addAll(pumpRec,pumpLabel);
 
         StackPane flowMeter = new StackPane();
         gauge = new Circle(50);
         gauge.setFill(Color.TRANSPARENT);
         gauge.setStroke(Color.BLACK);
-        Rectangle line = new Rectangle(10, 100);
+        line = new Rectangle(10, 100);
         flowMeter.getChildren().addAll(gauge,line);
         VBox flowAssembly = new VBox(10);
-         flowCounter = new  Label("0");
+        flowCounter = new  Label("0");
         flowAssembly.getChildren().addAll(flowCounter,flowMeter);
 
         animation = new RotateTransition(Duration.millis(250), line);
@@ -64,12 +70,11 @@ public class Pump extends Application {
 
 
 
-        line.rotateProperty().addListener((obs, oldVal, newVal)->{
-            if (lastAngle > 300 && newVal.doubleValue() < 60) {
+        line.rotateProperty().addListener((obs, oldVal, newVal) -> {
+            if (flowOn && oldVal.doubleValue() > 300 && newVal.doubleValue() < 60) {
                 counter++;
-                flowCounter.setText("" + counter);
+                Platform.runLater(() -> flowCounter.setText("" + counter));
             }
-            lastAngle = newVal.doubleValue();
         });
 
 
@@ -85,21 +90,19 @@ public class Pump extends Application {
         primaryStage.show();
 
         new Thread(() -> {
-            try {
-                Thread.sleep(100);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            while(true){
 
-                if(flow.read().equals("on")&&!on){
-                    togglePower();
+            while(true){
+                Message msg= flow.read();
+                if(msg == null) {
+                    continue;
                 }
-                else if(flow.read().equals("off")&&on){
+                if(msg.equals("on")&&!flowOn){
+                    toggleFlow();
+                }
+                else if(msg.equals("off")&& flowOn){
                     try {
                         flow.send(new Message(""+counter));
-                        togglePower();
-                        counter=0;
+                        toggleFlow();
 
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -108,17 +111,57 @@ public class Pump extends Application {
             }
         }).start();
 
+        new Thread(() -> {
+            while(true){
+                Message msg= pump.read();
+                if(msg == null) {
+                    continue;
+                }
+                if(msg.equals("on")&&!pumpOn){
+                    togglePump();
+                }
+                else if(msg.equals("off")&& pumpOn){
+                    System.out.println("OFF");
+                    togglePump();
+                }
+            }
+
+        }).start();
+
     }
 
-    private void togglePower() {
-        on = !on;
-        if (on) {
-            gauge.setFill(Color.YELLOW);
-            animation.play();
+    private void toggleFlow() {
+        flowOn = !flowOn;
+
+        if (flowOn) {
+            counter = 0;
+            Platform.runLater(() -> {
+                flowCounter.setText("0");
+                gauge.setFill(Color.YELLOW);
+                line.setRotate(0);
+                animation.playFromStart();
+            });
         } else {
-            gauge.setFill(Color.TRANSPARENT);
-            animation.stop();
-            flowCounter.setText("" + counter);
+            Platform.runLater(() -> {
+                gauge.setFill(Color.TRANSPARENT);
+                animation.stop();
+            });
+        }
+    }
+
+    private void togglePump() {
+        pumpOn = !pumpOn;
+        if (pumpOn) {
+            Platform.runLater(() -> {
+                pumpRec.setFill(Color.GREEN);
+                pumpLabel.setText("Pump ON");
+            });
+
+        } else {
+            Platform.runLater(() -> {
+                pumpRec.setFill(Color.GREY);
+                pumpLabel.setText("Pump OFF");
+            });
         }
     }
 }
