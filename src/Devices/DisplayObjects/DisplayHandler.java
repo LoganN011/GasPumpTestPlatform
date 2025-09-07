@@ -1,80 +1,126 @@
-package Devices;
+package Devices.DisplayObjects;
 
-import Devices.DisplayObjects.ButtonCmd;
-import Devices.DisplayObjects.TextCmd;
 import Message.Message;
-import Message.MessageReader;
+import Devices.Display;
 import Sockets.commPort;
-import javafx.application.Platform;
+import javafx.scene.layout.VBox;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Consumer;
-
-/**
- * Orchestrates IO and delegates parsed commands to Display.
- * Use handleInput(...) to feed "b:..." / "t:..." frames (from sockets or tests).
- */
 public class DisplayHandler {
-
+    private final VBox pumpDisplay;
     private final Display display;
-    private commPort port;
-    private volatile boolean running;
+    private String gasType = null;
+    private boolean isGasSelected = false;
+
+    // IO
+    private volatile boolean running = true;
+    private volatile commPort port;
 
     public DisplayHandler(Display display) {
         this.display = display;
-
-        // UI → backend: forward click events as "click:n"
-        Consumer<String> clickOut = line -> {
-            try {
-                if (port != null) port.send(new Message(line));
-            } catch (IOException e) {
-                display.logLater("send failed: " + e.getMessage());
-            }
-        };
-        this.display.setOnClick(clickOut);
+        this.pumpDisplay = display.createPumpDisplay();
     }
 
-    /** Parse a single protocol line and render it. Safe to call from any thread. */
-    public void handleInput(String line) {
-        if (line == null || line.isBlank()) return;
-
-        // Let MessageReader turn the line into shared DTOs
-        MessageReader mr = new MessageReader(line);
-        List<ButtonCmd> buttons = mr.getButtons();
-        List<TextCmd>   texts   = mr.getTexts();
-
-        Platform.runLater(() -> {
-            if (buttons != null && !buttons.isEmpty()) display.renderButtons(buttons);
-            if (texts   != null && !texts.isEmpty())   display.renderTexts(texts);
-        });
+    /**
+     * Display communicates with DisplayHandler through sending which
+     * button ID was clicked.
+     * @param buttonID int
+     */
+    public void onButtonClick(int buttonID) {
+        System.out.println("From DisplayHandler.java:" + buttonID);
+        handleInput(buttonID);
     }
 
-    /** Start background IO on "screen" port. Each inbound message calls handleInput. */
     public void startIO() {
-        running = true;
-        Thread t = new Thread(() -> {
+        Thread io = new Thread(() -> {
             try {
                 port = new commPort("screen");
-                display.logLater("connected");
+                System.out.println("Display connected");
+
                 while (running) {
                     Message m = port.get();
                     if (m == null) continue;
-                    String line = String.valueOf(m).trim();
-                    if (!line.isEmpty()) handleInput(line);
+                    String line = m.toString().trim();
+                    if (!line.isEmpty()) display.handleInbound(line);
                 }
-            } catch (IOException e) {
-                display.logLater("connect failed: " + e.getMessage());
-            } catch (Exception e) {
-                display.logLater("io error: " + e.getMessage());
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
+
         }, "screen-io");
-        t.setDaemon(true);
-        t.start();
+        io.setDaemon(true);
+        io.start();
     }
 
     public void stopIO() {
         running = false;
-        // if (port != null) try { port.close(); } catch (Exception ignore) {}
     }
+
+    /**
+     * Handles incoming inputs from commPort
+     * @param buttonID incoming commPort message
+     */
+    public void handleInput(int buttonID) {
+
+        switch (buttonID) {
+            case 9 -> cancel(); // "Cancel"
+            case 8 -> startPumping(); // "Begin Fueling"
+            case 7, 5, 3 -> selectGas(buttonID); // Gas Type
+
+//            case 6:
+//                break;
+//            case 4:
+//                break;
+//            case 2:
+//                break;
+//            case 1:
+//                break;
+//            case 0:
+//                break;
+
+        }
+    }
+
+    /**
+     * Removes current selected gas, resets pump display to initial state.
+     */
+    private void cancel() {
+        System.out.println("From DP: Canceled");
+        display.clearCurrentGasSelection();
+        isGasSelected = false;
+        gasType = null;
+        display.createDialogBox("Canceled", "cancel");
+    }
+
+    //TODO: Still needs logic
+    /**
+     * Begin pumping
+     */
+    private void startPumping() {
+        if (!isGasSelected) {
+            display.createDialogBox("Please select a fuel type first.", "cancel");
+            return;
+        }
+
+        display.createDialogBox("Pumping started!", "greencheck");
+        // check hose is latched or something
+
+        // something lol
+    }
+
+    /**
+     * Selects gas and plays selection animation
+     * @param buttonID int of button ID from pump display
+     */
+    private void selectGas(int buttonID) {
+        // If user selects new gas type, then clear current selected type
+        display.clearCurrentGasSelection();
+
+        display.markSelectedGas(buttonID);
+        gasType = display.getGasField(buttonID);
+        System.out.println("From Display.java:" + gasType);
+        isGasSelected = true;
+    }
+
+
 }
