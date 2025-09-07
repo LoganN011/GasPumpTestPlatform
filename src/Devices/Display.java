@@ -1,11 +1,11 @@
 package Devices;
 
 import Devices.DisplayObjects.ButtonCmd;
+import Devices.DisplayObjects.DisplayHandler;
 import Devices.DisplayObjects.TextCmd;
-import Message.Message;
-import Sockets.commPort;
 import Message.MessageReader;
 
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -13,15 +13,23 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
-import java.io.IOException;
+import javafx.util.Duration;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -46,20 +54,30 @@ public class Display extends Application {
     private final Map<String, Pane> centers = new HashMap<>(); // "00","01","23","45","67","89"
     private final Set<Integer> multiActive = new HashSet<>();  // are 'm'
     private final Label footer = new Label();                  // a status line (will remove later)
+    private DisplayHandler displayHandler;
+    private final StackPane overlayLayer = new StackPane();
+    private Label selectedGasLabel;
+
 
     private static final double WIDTH = 960, HEIGHT = 540;
 
-    // IO
-    private volatile boolean running = true;
-    private volatile commPort port;
-
+    /**
+     * Starts initial scene by creating DisplayHandler and passing this current
+     * instance of Display.
+     *
+     * @param stage the primary stage for this application, onto which
+     * the application scene can be set.
+     */
     public void start(Stage stage) {
-        DisplayHandler displayHandler = new DisplayHandler();
+        displayHandler = new DisplayHandler(this);
+        displayHandler.startIO();
 
-        Scene scene = new Scene(displayHandler.getPumpDisplay(), WIDTH, HEIGHT);
+        Scene scene = new Scene(this.createPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setTitle("Screen");
+
+        stage.setOnCloseRequest(e -> displayHandler.stopIO());
         stage.show();
     }
 
@@ -70,11 +88,14 @@ public class Display extends Application {
         buildGrid();
         resetAll();
 
-        VBox root = new VBox();
-        root.getChildren().addAll(grid, footerBar());
-        VBox.setVgrow(grid, Priority.ALWAYS);
+        // Create overlay to overlay dialog messages on top of grid
+        overlayLayer.getChildren().setAll(grid);
+        overlayLayer.setPickOnBounds(false);
+        overlayLayer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        startIO();
+        VBox root = new VBox();
+        root.getChildren().addAll(overlayLayer, footerBar());
+        VBox.setVgrow(overlayLayer, Priority.ALWAYS);
 
         return root;
     }
@@ -84,8 +105,13 @@ public class Display extends Application {
      */
     private void buildGrid() {
         grid.setGridLinesVisible(false);
-        grid.setStyle("-fx-background-color: f9f9f9;"); // was 'white'
+        grid.setStyle("-fx-background-color: #FFFDF8;"); //f9f9f9
         grid.setPrefSize(WIDTH, HEIGHT - 32);
+
+        // Clear otherwise grid builds incorrectly
+        grid.getChildren().clear();
+        grid.getColumnConstraints().clear();
+        grid.getRowConstraints().clear();
 
         ColumnConstraints c0 = new ColumnConstraints();
         ColumnConstraints c1 = new ColumnConstraints();
@@ -109,7 +135,7 @@ public class Display extends Application {
 
             Region leftBtn = makeButtonCell(leftIdx);
             Region rightBtn = makeButtonCell(rightIdx);
-            Pane center = makeCenterCell(pair);
+            Pane center = makeCenterCell();
 
             btns.put(leftIdx, leftBtn);
             btns.put(rightIdx, rightBtn);
@@ -137,14 +163,17 @@ public class Display extends Application {
         p.setCursor(Cursor.HAND);
         p.setStyle(inactiveButtonStyle());
         p.setDisable(true); // inactive by default
+
         p.setOnMouseClicked((MouseEvent e) -> {
             if (p.isDisable()) return;
+
             try {
-                if (port != null) port.send(new Message("click:" + idx));
-                footer.setText("click:" + idx);
-            } catch (IOException ex) {
-                log("send failed: " + ex.getMessage());
+                displayHandler.onButtonClick(idx);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
+
             if (multiActive.contains(idx)) {
                 clearMultiSelections();
                 setButtonVisual(p, true, true);
@@ -153,7 +182,7 @@ public class Display extends Application {
         return p;
     }
 
-    private Pane makeCenterCell(String pair) {
+    private Pane makeCenterCell() {
         StackPane center = new StackPane();
         center.setPrefSize(680, 88);
         center.setStyle("-fx-background-color: transparent;");
@@ -168,7 +197,6 @@ public class Display extends Application {
             setButtonVisual(b, false, false);
         });
         multiActive.clear();
-        log("waiting for backend…");
     }
 
     private void applyButton(ButtonCmd cmd) {
@@ -276,7 +304,7 @@ public class Display extends Application {
     }
 
     // Inbound handling
-    private void handleInbound(String line) {
+    public void handleInbound(String line) {
         ParsedLine parsed = parseLineUsingMR(line);
         Platform.runLater(() -> {
             for (ButtonCmd b : parsed.buttons) applyButton(b);
@@ -296,55 +324,31 @@ public class Display extends Application {
         return out;
     }
 
-    // socket stuff
-    private void startIO() {
-        Thread io = new Thread(() -> {
-            try {
-                port = new commPort("screen");
-                log("connected");
 
-                while (running) {
-                    Message m = port.get();
-                    if (m == null) continue;
-                    String line = m.toString().trim();
-                    if (!line.isEmpty()) handleInbound(line);
-                }
-
-            } catch (IOException connectErr) {
-                log("connect failed: " + connectErr.getMessage());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                log("io error: " + ex.getMessage());
-            }
-
-        }, "screen-io");
-        io.setDaemon(true);
-        io.start();
-    }
-
-    private void log(String s) {
-        Platform.runLater(() -> footer.setText(s));
-    }
-
+    /**
+     * Creates visual footer on bottom of pump display
+     * @return HBox of footer
+     */
     private HBox footerBar() {
-        footer.setTextFill(Color.web("#374151")); // slate-700
         footer.setStyle("-fx-padding: 8; -fx-font-size: 12px;");
         HBox box = new HBox(footer);
         box.setStyle("-fx-background-color: #575D90; -fx-border-color: #E5E7EB; -fx-border-width: 1 0 0 0;");
-        // was #F3F4F6
         return box;
     }
 
     // Return the center text for the row that contains this button index (0..9).
-// Example: idx 2 or 3  -> pair "23" (e.g., "REGULAR 87")
+    // Example: idx 2 or 3  -> pair "23" (e.g., "REGULAR 87")
     public String getGasField(int buttonIdx) {
         String pair = pairForButton(buttonIdx);
         if (pair == null) return null;
         return getCenterTextByPair(pair);
     }
 
-// ----- helpers -----
-
+    /**
+     * Helper: Find middle pair ID
+     * @param idx int of ButtonID
+     * @return String pair
+     */
     private String pairForButton(int idx) {
         switch (idx) {
             case 0: case 1: return "01";
@@ -356,6 +360,11 @@ public class Display extends Application {
         }
     }
 
+    /**
+     * Helper: Gets center text by pair ID
+     * @param pair String ID
+     * @return String content
+     */
     private String getCenterTextByPair(String pair) {
         Pane center = centers.get(pair);
         if (center == null || center.getChildren().isEmpty()) return null;
@@ -385,5 +394,251 @@ public class Display extends Application {
         // Fallback
         return node.toString();
     }
+
+    /**
+     * Creates text dialog box for Cancel button (so far)
+     * @param msg String text message
+     */
+    public void createDialogBox(String msg, String fileName) {
+        Platform.runLater(() -> {
+
+            // StackPane for larger message
+            StackPane overlaySP = new StackPane();
+            overlaySP.setMaxSize(300, 250);
+            overlaySP.setAlignment(Pos.CENTER);
+            overlaySP.setMouseTransparent(true);
+            overlaySP.setPickOnBounds(false);
+            overlaySP.setStyle("-fx-background-color: transparent;");
+
+            // Smaller StackPane to append text, image on
+            StackPane smallSP = new StackPane();
+            smallSP.setStyle(
+                    "-fx-background-color: rgba(30,30,30,0.92);" +
+                            "-fx-background-radius: 12;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, 0.2, 0, 2);"
+            );
+            smallSP.setPadding(new Insets(10, 14, 10, 14));
+            smallSP.setMaxWidth(300);
+            smallSP.setOpacity(0);          // for fade-in
+            smallSP.setTranslateY(12);      // for slide-in
+
+            VBox vbox = new VBox();
+            vbox.setAlignment(Pos.CENTER);
+
+            // Create text
+            Text text = new Text(msg);
+            text.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+            text.setFill(Color.WHITE);
+            text.setTextAlignment(TextAlignment.CENTER);
+            text.setWrappingWidth(263);
+
+            // Create image (if any)
+            if (fileName != null) {
+                FileInputStream inputstream;
+                try {
+                    inputstream = new FileInputStream("resources/images/" + fileName + ".png");
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Image image = new Image(inputstream);
+                ImageView imgView = new ImageView(image);
+                imgView.setPreserveRatio(true);
+                imgView.setFitWidth(120);
+                imgView.setTranslateY(10);
+
+                vbox.getChildren().addAll(text, imgView);
+
+            } else {
+                vbox.getChildren().add(text);
+            }
+
+            // Add together
+            smallSP.getChildren().add(vbox);
+            overlaySP.getChildren().add(smallSP);
+            StackPane.setAlignment(smallSP, Pos.CENTER);
+            overlayLayer.getChildren().add(overlaySP);
+
+            // Fade in, pause, fade out animations
+            FadeTransition fadeIn = setFadeTransition(200, smallSP, 0, 1);
+            TranslateTransition slideIn = setSlideTransition(220, smallSP, 12, 0);
+            PauseTransition stay = new PauseTransition(Duration.seconds(1.6));
+            FadeTransition fadeOut = setFadeTransition(280, smallSP, 1, 0);
+            TranslateTransition slideOut = setSlideTransition(280, smallSP, 0, 8);
+
+            // Define transition timeline
+            SequentialTransition seq = new SequentialTransition(
+                    fadeIn, slideIn, // coming in
+                    stay, // pause for a second
+                    fadeOut, slideOut // going out
+            );
+
+            seq.setOnFinished(ev -> overlayLayer.getChildren().remove(overlaySP));
+            seq.play();
+        });
+    }
+
+    /**
+     * Helper: Sets fade in/fade out animation.
+     *
+     * @param ms Duration in milliseconds
+     * @param sp StackPane
+     * @param from Animation "from" in seconds
+     * @param to Animation "to" in seconds
+     * @return FadeTransition
+     */
+    private FadeTransition setFadeTransition(int ms, StackPane sp, int from, int to) {
+        FadeTransition fade = new FadeTransition(Duration.millis(ms), sp);
+        fade.setFromValue(from);
+        fade.setToValue(to);
+
+        return fade;
+    }
+
+    /**
+     * Helper: Sets slide in/slide out transition.
+     *
+     * @param ms Duration in milliseconds
+     * @param sp StackPane
+     * @param fromY From y-value
+     * @param toY To y-value
+     * @return TranslateTransition
+     */
+    private TranslateTransition setSlideTransition(int ms, StackPane sp, int fromY, int toY) {
+        TranslateTransition slide = new TranslateTransition(Duration.millis(ms), sp);
+        slide.setFromY(fromY);
+        slide.setToY(toY);
+
+        return slide;
+    }
+
+    /**
+     * Visually select gas with pill icon, checkmark icon, and pop-in animation.
+     */
+    public void markSelectedGas(int buttonIdx) {
+        Platform.runLater(() -> {
+            String pair = pairForButton(buttonIdx);
+            if (pair == null) return;
+
+            Label label = findCenterLabel(pair);
+            if (label == null) return;
+
+            // Clear any previous selection
+            if (selectedGasLabel != null && selectedGasLabel != label) {
+                clearSelectedStyle(selectedGasLabel);
+            }
+
+            applyPillStyle(label);
+            playPop(label);
+            selectedGasLabel = label;
+        });
+    }
+
+    /**
+     * Clears current gas selection (e.g., pressing "Cancel")
+     */
+    public void clearCurrentGasSelection() {
+        Platform.runLater(() -> {
+            if (selectedGasLabel != null) {
+                clearSelectedStyle(selectedGasLabel);
+                selectedGasLabel = null;
+            }
+        });
+    }
+
+    /**
+     * Helper: find the single centered Label in the center cell for a pair (e.g., "23").
+     */
+    private Label findCenterLabel(String pair) {
+        Pane center = centers.get(pair);
+        if (center == null || center.getChildren().isEmpty()) return null;
+        Node node = center.getChildren().get(0);
+
+        if (node instanceof Label) {
+            return (Label) node;
+        }
+        return null;
+    }
+
+    /**
+     * Apply pill highlight + check chip to a label (no images required).
+     */
+    private void applyPillStyle(Label label) {
+        // Appends existing font style (if any)
+        String base;
+        if (label.getStyle() == null) {
+            base = "";
+        } else {
+            base = label.getStyle();
+        }
+
+        String pill =
+                "-fx-background-color: #ff6392;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-border-color: #DE63A9;" +
+                        "-fx-border-radius: 12;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-padding: 6 12;";
+        String style;
+        if (base.endsWith(";")) {
+            style = base + pill;
+        } else {
+            style = base + ";" + pill;
+        }
+        label.setStyle(style);
+
+
+        Label check = new Label("✓");
+        check.setStyle(
+                "-fx-background-color: #10B981;" +
+                        "-fx-background-radius: 999;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 11px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-padding: 2 6;"
+        );
+
+        label.setGraphic(check);
+        label.setContentDisplay(ContentDisplay.RIGHT);
+        label.setGraphicTextGap(8);
+    }
+
+    /**
+     * Remove current gas selection style.
+     */
+    private void clearSelectedStyle(Label label) {
+        String s = label.getStyle();
+        if (s != null) {
+            label.setStyle("");
+        }
+
+        label.setGraphic(null);
+        label.setContentDisplay(ContentDisplay.LEFT);
+        label.setGraphicTextGap(0);
+    }
+
+    /**
+     * Selected gas pop animation.
+     */
+    private void playPop(Node node) {
+        // Pop in, then settle down
+        ScaleTransition st1 = new ScaleTransition(Duration.millis(90), node);
+        st1.setFromX(1.0);
+        st1.setFromY(1.0);
+
+        st1.setToX(1.06);
+        st1.setToY(1.06);
+
+        ScaleTransition st2 = new ScaleTransition(Duration.millis(110), node);
+        st2.setFromX(1.06);
+        st2.setFromY(1.06);
+
+        st2.setToX(1.0);
+        st2.setToY(1.0);
+
+        new SequentialTransition(st1, st2).play();
+    }
+
+
 
 }
