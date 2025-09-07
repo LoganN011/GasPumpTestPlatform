@@ -14,6 +14,7 @@ public class ReadCSVs {
     ArrayList<String> fontNameArrayList = new ArrayList<>();
     ArrayList<Integer> fontSizeArrayList = new ArrayList<>();
     ArrayList<Color> colorArrayList = new ArrayList<>();
+    private final String filePath = "resources/fonts-colors/";
 
     public ReadCSVs() {
         readFontNameCSV();
@@ -27,7 +28,7 @@ public class ReadCSVs {
     private void readFontNameCSV() {
         String line;
 
-        try (BufferedReader br = new BufferedReader(new FileReader("resources/" + "fonts.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath + "fonts.csv"))) {
             while ((line = br.readLine()) != null) {
                 fontNameArrayList.add(line);
             }
@@ -43,7 +44,7 @@ public class ReadCSVs {
     private void readFontSizesCSV() {
         String line;
 
-        try (BufferedReader br = new BufferedReader(new FileReader("resources/" + "font_sizes.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath + "font_sizes.csv"))) {
             while ((line = br.readLine()) != null) {
                 fontSizeArrayList.add(Integer.parseInt(line));
 
@@ -59,7 +60,7 @@ public class ReadCSVs {
     private void readColorsCSV() {
         String line;
 
-        try (BufferedReader br = new BufferedReader(new FileReader("resources/" + "colors.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath + "colors.csv"))) {
             while ((line = br.readLine()) != null) {
                 String[] temp = line.split(",");
 
