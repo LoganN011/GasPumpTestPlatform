@@ -23,5 +23,11 @@ public class Message implements Serializable {
         return message;
     }
 
+    public boolean equals(String other){
+        return message.equals(other);
+    }
 
+    public boolean equals(Message other) {
+        return this.message.equals(other.message);
+    }
 }

@@ -10,17 +10,42 @@ public class Harness {
         String device = args[0]; // Write device in arg line
 
         switch (device) {
-            case "display" -> testDisplay();
-            case "card"    -> testCard();
-            case "gas"     -> testGasServer();
-            case "bank"    -> testBankServer();
-            case "hose"    -> testHose();
-            case "pump"    -> testPump();
+            case "display" -> {
+                testDisplay();
+            }
+            case "card"    -> {
+                testCard();
+            }
+            case "gas"     -> {
+                testGasServer();
+            }
+            case "bank"    -> {
+                testBankServer();
+            }
+            case "hose"    -> {
+                testHose();
+            }
+            case "pump"    -> {
+                testPump();
+            }
         }
     }
 
     public static void testPump(){
-        System.out.println("not implemented");
+        try{
+            commPort pump = new commPort("pump");
+            commPort flow = new commPort("flow_meter");
+
+            Thread.sleep(1000);
+            flow.send(new Message("on"));
+            Thread.sleep(10000);
+            flow.send(new Message("off"));
+            System.out.println(flow.get());
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     public static void testBankServer() {
