@@ -7,7 +7,7 @@ public class Port {
      * associates the hose device to port 7150.
      * The numbering scheme is as follows:
      * 714x is for commPort devices
-     * 7140 for screen, 7141 for gas_server, 7142 for card_server
+     * 7140 for screen, 7141 for gas_server, 7142 for bank
      * 715x is for controlPort devices
      * 7150 for hose
      * 716x is for monitor devices
@@ -23,7 +23,7 @@ public class Port {
             //714x for commPort
             case "screen" -> 7140;
             case "gas_server" -> 7141;
-            case "card_sever" -> 7142;
+            case "bank" -> 7142;
             //715x for controlPort
             case "hose" -> 7150;
             case "card" -> 7151;

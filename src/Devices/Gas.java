@@ -2,20 +2,13 @@ package Devices;
 
 public class Gas {
     double price;
-    int number;
     String name;
     double availableQuantity;
 
-    public Gas(String name, int number, double price, double availableQuantity) {
+    public Gas(String name, double price, double availableQuantity) {
         this.price = price;
-        this.number = number;
         this.name = name;
         this.availableQuantity = availableQuantity;
-    }
-
-    public double sellGas(double gallons) {
-        availableQuantity -= gallons;
-        return availableQuantity;
     }
 
     public double getPrice() {
@@ -30,12 +23,8 @@ public class Gas {
         return getAvailableQuantity();
     }
 
-    public int getType() {
-        return number;
-    }
-
     public String toString() {
-        return name + " " + number + " $" + displayPrice(price);
+        return name + ": $" + displayPrice(price);
     }
 
     public static String displayPrice(double price) {
@@ -46,6 +35,10 @@ public class Gas {
             case 2 -> (curPrice[1].length() < 2) ? price + "0" : "" + price;
             default -> "problem in price display";
         };
+    }
+
+    public static String displayPrice(String price) {
+        return displayPrice(Double.parseDouble(price));
     }
 
 }
