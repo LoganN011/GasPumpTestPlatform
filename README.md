@@ -1,5 +1,9 @@
 Read me 
 
+### Running Test Harness
+1. Go to "Harness.java" and find device name. Type the device name as argument and run file.
+2. Run specific device (e.g., "Display.java")
+
 ### Font Information
 To use any font, font size, or color, use it's corresponding order in the associated CSV from ranges 0 to 2.
 
