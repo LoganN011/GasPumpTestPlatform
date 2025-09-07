@@ -42,6 +42,7 @@ public class commPort {
                         Message msg;
                         try {
                             while ((msg = (Message) in.readObject()) != null) {
+                                System.out.println("message in comm: "+msg);
                                 queue.put(msg);
                             }
                         } catch (Exception e) {
@@ -55,9 +56,10 @@ public class commPort {
 
         } catch (BindException e) {
             socket = new Socket("localhost", Port.portLookup(deviceName));
-            in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
             queue = new LinkedBlockingQueue<>();
+            connected.countDown();
 
             new Thread(() -> {
                 Message msg;
@@ -97,6 +99,7 @@ public class commPort {
         try{
             connected.await();
             out.writeObject(message);
+            out.flush();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
