@@ -2,6 +2,8 @@ package Devices;
 
 import Message.Message;
 import Sockets.commPort;
+import Sockets.statusPort;
+
 import java.io.IOException;
 
 public class Harness {
@@ -36,12 +38,15 @@ public class Harness {
             commPort pump = new commPort("pump");
             commPort flow = new commPort("flow_meter");
 
-            Thread.sleep(1000);
-            flow.send(new Message("on"));
-            Thread.sleep(10000);
-            flow.send(new Message("off"));
-            System.out.println(flow.get());
-
+            while(true){
+                Thread.sleep(1000);
+                flow.send(new Message("on"));
+                pump.send(new Message("on"));
+                Thread.sleep(10000);
+                flow.send(new Message("off"));
+                pump.send(new Message("off"));
+                System.out.println(flow.get());
+            }
         }catch(Exception e){
             e.printStackTrace();
         }
