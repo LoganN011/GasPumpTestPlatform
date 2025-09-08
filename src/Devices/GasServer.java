@@ -45,7 +45,7 @@ public class GasServer extends Application {
         log.setPrefWidth(root.getPrefWidth());
         log.setEditable(false);
         log.setBorder(VisualElements.THICK_BORDER);
-        log.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        log.setFocusTraversable(false);
         log.setText("Messages regarding sales will appear below:\n");
         root.setTop(log);
 
@@ -68,6 +68,7 @@ public class GasServer extends Application {
         sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND);
         sendInputs.setOnMouseEntered(x -> sendInputs.setBackground(VisualElements.ACTIVE_ELEMENT));
         sendInputs.setOnMouseExited(x -> sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND));
+        sendInputs.setBorder(VisualElements.THIN_BORDER);
         Button addFuel = new Button("Add New Fuel");
         addFuel.setOnMouseClicked(x -> {
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
@@ -76,6 +77,7 @@ public class GasServer extends Application {
         addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
         addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
         addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
+        addFuel.setBorder(VisualElements.THIN_BORDER);
         buttons.getChildren().addAll(sendInputs, addFuel);
         root.setBottom(buttons);
 

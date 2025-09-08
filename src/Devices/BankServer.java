@@ -39,7 +39,6 @@ public class BankServer extends Application {
         log = new TextArea("Incoming requests will appear here:\n");
         log.setEditable(false);
         log.setBorder(VisualElements.THICK_BORDER);
-        log.setBackground(VisualElements.ELEMENT_BACKGROUND);
         log.setFocusTraversable(false);
         log.setWrapText(true);
         root.setCenter(log);
