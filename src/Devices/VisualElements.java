@@ -1,0 +1,18 @@
+package Devices;
+
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+
+public class VisualElements {
+    public static final Color BACKGROUND = Color.color(231/255.0,249/255.0,255/255.0);
+    public static final Color ELEMENTS = Color.color(198/255.0,237/255.0,251/255.0);
+    public static final Color BORDERS = Color.color(32/255.0,106/255.0,131/255.0);
+    public static final Color ACTIVE_COLOR = Color.color(66/255.0,178/255.0,215/255.0);
+    public static final Border THIN_BORDER = new Border(new BorderStroke(BORDERS, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN));
+    public static final Border THICK_BORDER = new Border(new BorderStroke(BORDERS, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.MEDIUM));
+    public static final Background ROOT_BACKGROUND = new Background(new BackgroundFill(BACKGROUND, null, null));
+    public static final Background ELEMENT_BACKGROUND = new Background(new BackgroundFill(ELEMENTS, null, null));
+    public static final Background ACTIVE_ELEMENT = new Background(new BackgroundFill(ACTIVE_COLOR, null, null));
+
+
+}
