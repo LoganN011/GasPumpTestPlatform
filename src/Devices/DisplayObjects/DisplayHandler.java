@@ -3,13 +3,23 @@ package Devices.DisplayObjects;
 import Message.Message;
 import Devices.Display;
 import Sockets.commPort;
-import javafx.scene.layout.VBox;
+
+import java.io.IOException;
 
 public class DisplayHandler {
     private final Display display;
-    private boolean isPaymentAccepted = false;
     private String gasType = null;
     private boolean isGasSelected = false;
+
+    // Screen states
+    private Screen currentScreenState = Screen.WELCOME;
+    private enum Screen {
+        WELCOME, // 0
+        FUEL_SELECT, // 1
+        PUMPING, // 2
+        FINISH, // 3
+        RECEIPT // 4
+    }
 
     // IO
     private volatile boolean running = true;
@@ -24,8 +34,8 @@ public class DisplayHandler {
      * button ID was clicked.
      * @param buttonID int
      */
-    public void onButtonClick(int buttonID) {
-        System.out.println("From DisplayHandler.java:" + buttonID);
+    public void onButtonClick(int buttonID) throws IOException {
+        System.out.println("From DH.java:" + buttonID);
         handleInput(buttonID);
     }
 
@@ -55,32 +65,73 @@ public class DisplayHandler {
         running = false;
     }
 
-    public void receivePayment() {
-        isPaymentAccepted = true;
-    }
 
     /**
      * Handles incoming inputs from commPort
      * @param buttonID incoming commPort message
      */
-    public void handleInput(int buttonID) {
+    private void handleInput(int buttonID) throws IOException {
 
         switch (buttonID) {
-            case 9 -> cancel(); // "Cancel"
-            case 8 -> startPumping(); // "Begin Fueling"
-            case 7, 5, 3 -> selectGas(buttonID); // Gas Type
+            // "Cancel" or "Exit" or "No" or "Ok"
+            case 9 -> {
+                if (currentScreenState == Screen.WELCOME) {
+                    return;
+                }
 
-//            case 6:
-//                break;
-//            case 4:
-//                break;
-//            case 2:
-//                break;
-//            case 1:
-//                break;
-//            case 0:
-//                break;
+                if (currentScreenState == Screen.PUMPING) {
+                    clearAllSelections();
+                    changeToScreen(3);
+                    return;
 
+                } else if (currentScreenState == Screen.FUEL_SELECT) {
+                    cancel();
+                    return;
+                }
+
+                if (currentScreenState == Screen.FINISH) {
+                    clearAllSelections();
+                    changeToScreen(0);
+                    return;
+                }
+
+                if (currentScreenState == Screen.RECEIPT) {
+                    clearAllSelections();
+                    changeToScreen((0));
+                    return;
+                }
+
+            }
+
+            // "Begin Fueling" or "Pause" or "Begin" (BEGIN IS TEMPORARY) or "Yes"
+            case 8 ->  {
+                if (currentScreenState == Screen.WELCOME) {
+                    changeToScreen(1);
+                    return;
+                }
+
+                if (currentScreenState == Screen.FUEL_SELECT) {
+                    if (startPumping()) {
+                        changeToScreen(2);
+                        return;
+                    }
+
+
+                } else if (currentScreenState == Screen.PUMPING) {
+                    pausePumping();
+                    return;
+
+                }
+
+                if (currentScreenState == Screen.FINISH) {
+                    changeToScreen(4);
+                    return;
+                }
+
+            }
+
+            // Gas Type
+            case 7, 5, 3 -> selectGas(buttonID);
         }
     }
 
@@ -88,27 +139,34 @@ public class DisplayHandler {
      * Removes current selected gas, resets pump display to initial state.
      */
     private void cancel() {
-        System.out.println("From DP: Canceled");
-        display.clearCurrentGasSelection();
-        isGasSelected = false;
-        gasType = null;
+        clearAllSelections();
         display.createDialogBox("Canceled", "cancel.png");
+    }
+
+    private void finishPumping() throws IOException {
+        clearAllSelections();
+        display.createDialogBox("Thank you!", "greencheck.png");
     }
 
     //TODO: Still needs logic
     /**
      * Begin pumping
      */
-    private void startPumping() {
+    private boolean startPumping() throws IOException {
         if (!isGasSelected) {
             display.createDialogBox("Please select a fuel type first.", "cancel.png");
-            return;
+            return false;
         }
 
         display.createDialogBox("Pumping started!", "greencheck.png");
+
         // check hose is latched or something
 
-        // something lol
+        return true;
+    }
+
+    private void pausePumping() {
+        display.createDialogBox("Pumping paused.", "pause.png");
     }
 
     /**
@@ -123,6 +181,19 @@ public class DisplayHandler {
         gasType = display.getGasField(buttonID);
         System.out.println("From Display.java:" + gasType);
         isGasSelected = true;
+    }
+
+    private void clearAllSelections() {
+        display.clearCurrentGasSelection();
+        isGasSelected = false;
+        gasType = null;
+    }
+
+    private void changeToScreen(int state) throws IOException {
+        display.resetAll();
+        currentScreenState = Screen.values()[state];
+
+        port.send(new Message(String.valueOf(state)));
     }
 
 

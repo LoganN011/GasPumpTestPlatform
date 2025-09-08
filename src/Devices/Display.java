@@ -24,10 +24,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -188,7 +186,7 @@ public class Display extends Application {
     }
 
     // Rendering
-    private void resetAll() {
+    public void resetAll() {
         centers.values().forEach(p -> p.getChildren().clear());
         btns.values().forEach(b -> {
             b.setDisable(true);
