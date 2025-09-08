@@ -50,12 +50,13 @@ public class Harness {
         try{
             commPort display = new commPort("screen");
 
-            testFuelSelection(display);
+             testWelcome(display);
+//             testFuelSelection(display);
+            // testReceiptPrompt(display);
             while(true) {
                 System.out.println("Display responded: " + display.get());
             }
-//            testWelcome(display);
-//            testReceiptPrompt(display);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,7 +89,7 @@ public class Harness {
     /**
      * Example usage for selecting fuel
      */
-    private static void testFuelSelection(commPort device) throws IOException, InterruptedException {
+    private static void testFuelSelection(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
         device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
         device.send(new Message("b:4:m,b:5:m,t:45:s1:f1:c1:PLUS 89"));
@@ -99,10 +100,9 @@ public class Harness {
     /**
      * Example welcome screen
      */
-    private static void testWelcome(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s0:f2:c2:WELCOME!"));
-        Thread.sleep(40);
-        device.send(new Message("t:45:s0:f2:c2:PLEASE TAP YOUR CARD OR PHONE TO BEGIN"));
+    private static void testWelcome(commPort device) throws IOException {
+        device.send(new Message("t:01:s0:f0:c2:WELCOME!"));
+        device.send(new Message("t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
     }
 
     /**

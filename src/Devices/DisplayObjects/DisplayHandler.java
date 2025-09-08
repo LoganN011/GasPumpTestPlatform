@@ -6,8 +6,8 @@ import Sockets.commPort;
 import javafx.scene.layout.VBox;
 
 public class DisplayHandler {
-    private final VBox pumpDisplay;
     private final Display display;
+    private boolean isPaymentAccepted = false;
     private String gasType = null;
     private boolean isGasSelected = false;
 
@@ -17,7 +17,6 @@ public class DisplayHandler {
 
     public DisplayHandler(Display display) {
         this.display = display;
-        this.pumpDisplay = display.createPumpDisplay();
     }
 
     /**
@@ -56,6 +55,10 @@ public class DisplayHandler {
         running = false;
     }
 
+    public void receivePayment() {
+        isPaymentAccepted = true;
+    }
+
     /**
      * Handles incoming inputs from commPort
      * @param buttonID incoming commPort message
@@ -89,7 +92,7 @@ public class DisplayHandler {
         display.clearCurrentGasSelection();
         isGasSelected = false;
         gasType = null;
-        display.createDialogBox("Canceled", "cancel");
+        display.createDialogBox("Canceled", "cancel.png");
     }
 
     //TODO: Still needs logic
@@ -98,11 +101,11 @@ public class DisplayHandler {
      */
     private void startPumping() {
         if (!isGasSelected) {
-            display.createDialogBox("Please select a fuel type first.", "cancel");
+            display.createDialogBox("Please select a fuel type first.", "cancel.png");
             return;
         }
 
-        display.createDialogBox("Pumping started!", "greencheck");
+        display.createDialogBox("Pumping started!", "greencheck.png");
         // check hose is latched or something
 
         // something lol
