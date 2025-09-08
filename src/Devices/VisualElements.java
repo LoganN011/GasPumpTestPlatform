@@ -1,5 +1,6 @@
 package Devices;
 
+import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
