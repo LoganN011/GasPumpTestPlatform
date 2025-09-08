@@ -3,6 +3,7 @@ package Devices;
 import Message.Message;
 import Sockets.commPort;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -35,14 +36,25 @@ public class GasServer extends Application {
     public void start(Stage primaryStage) throws Exception {
         commPort server = new commPort("gas_server");
 
+        BorderPane root = new BorderPane();
+        root.setPrefSize(400, 400);
+        root.setBackground(VisualElements.ROOT_BACKGROUND);
+        root.setPadding(new Insets(10));
+
         log = new TextArea();
+        log.setPrefWidth(root.getPrefWidth());
         log.setEditable(false);
+        log.setBorder(VisualElements.THICK_BORDER);
+        log.setFocusTraversable(false);
         log.setText("Messages regarding sales will appear below:\n");
+        root.setTop(log);
 
         VBox fuelInputs = new VBox();
         fuelInputs.getChildren().addAll(generateFuelInputs(3));
+        root.setCenter(fuelInputs);
 
         HBox buttons = new HBox();
+        buttons.setPrefWidth(root.getPrefWidth());
         Button sendInputs = new Button("Set Prices");
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
@@ -52,16 +64,21 @@ public class GasServer extends Application {
                 e.printStackTrace();
             }
         });
+        sendInputs.setPrefWidth(buttons.getPrefWidth()/2);
+        sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        sendInputs.setOnMouseEntered(x -> sendInputs.setBackground(VisualElements.ACTIVE_ELEMENT));
+        sendInputs.setOnMouseExited(x -> sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND));
+        sendInputs.setBorder(VisualElements.THIN_BORDER);
         Button addFuel = new Button("Add New Fuel");
         addFuel.setOnMouseClicked(x -> {
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
         });
+        addFuel.setPrefWidth(buttons.getPrefWidth()/2);
+        addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
+        addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
+        addFuel.setBorder(VisualElements.THIN_BORDER);
         buttons.getChildren().addAll(sendInputs, addFuel);
-
-        BorderPane root = new BorderPane();
-        root.setMinSize(400, 400);
-        root.setTop(log);
-        root.setCenter(fuelInputs);
         root.setBottom(buttons);
 
         Scene scene = new Scene(root);
@@ -119,6 +136,14 @@ public class GasServer extends Application {
             fuelNameInput.setPromptText("Fuel Name");
             TextField fuelPriceInput = new TextField();
             fuelPriceInput.setPromptText("Fuel Price");
+            fuelNameInput.setPrefWidth(log.getPrefWidth()/2);
+            fuelNameInput.setBackground(VisualElements.ELEMENT_BACKGROUND);
+            fuelNameInput.setOnMouseEntered(x -> fuelNameInput.setBackground(VisualElements.ACTIVE_ELEMENT));
+            fuelNameInput.setOnMouseExited(x -> fuelNameInput.setBackground(VisualElements.ELEMENT_BACKGROUND));
+            fuelPriceInput.setPrefWidth(log.getPrefWidth()/2);
+            fuelPriceInput.setBackground(VisualElements.ELEMENT_BACKGROUND);
+            fuelPriceInput.setOnMouseEntered(x -> fuelPriceInput.setBackground(VisualElements.ACTIVE_ELEMENT));
+            fuelPriceInput.setOnMouseExited(x -> fuelPriceInput.setBackground(VisualElements.ELEMENT_BACKGROUND));
             HBox inputs = new HBox();
             inputs.setAlignment(Pos.CENTER);
             inputs.getChildren().addAll(fuelNameInput, fuelPriceInput);

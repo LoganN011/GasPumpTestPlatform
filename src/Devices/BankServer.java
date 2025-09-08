@@ -4,6 +4,7 @@ import Message.Message;
 import Sockets.commPort;
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -30,23 +31,38 @@ public class BankServer extends Application {
     public void start(Stage primaryStage) throws Exception {
         server = new commPort("bank");
 
+        BorderPane root = new BorderPane();
+        root.setPrefSize(400, 400);
+        root.setPadding(new Insets(10));
+        root.setBackground(VisualElements.ROOT_BACKGROUND);
+
         log = new TextArea("Incoming requests will appear here:\n");
         log.setEditable(false);
-        log.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        log.setBorder(VisualElements.THICK_BORDER);
+        log.setFocusTraversable(false);
+        log.setWrapText(true);
+        root.setCenter(log);
 
         HBox buttons = new HBox();
+        buttons.setPrefWidth(root.getPrefWidth());
         approve = new Button("Approve");
         approve.setDisable(true);
         decline = new Button("Decline");
         decline.setDisable(true);
         approve.setOnMouseClicked(x -> card("approved"));
         decline.setOnMouseClicked(x -> card("declined"));
+        approve.setPrefWidth(buttons.getPrefWidth()/2);
+        decline.setPrefWidth(buttons.getPrefWidth()/2);
+        approve.setBorder(VisualElements.THIN_BORDER);
+        decline.setBorder(VisualElements.THIN_BORDER);
+        approve.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        decline.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        approve.setOnMouseEntered(x -> approve.setBackground(VisualElements.ACTIVE_ELEMENT));
+        decline.setOnMouseEntered(x -> decline.setBackground(VisualElements.ACTIVE_ELEMENT));
+        approve.setOnMouseExited(x -> approve.setBackground(VisualElements.ELEMENT_BACKGROUND));
+        decline.setOnMouseExited(x -> decline.setBackground(VisualElements.ELEMENT_BACKGROUND));
         buttons.getChildren().addAll(approve, decline);
-
-        BorderPane root = new BorderPane();
-        root.setMinSize(400, 400);
         root.setBottom(buttons);
-        root.setCenter(log);
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
@@ -68,7 +84,7 @@ public class BankServer extends Application {
         String requestInfo = request[1];
         switch (requestType.toLowerCase()){
             case "card" -> {
-                updateLog("Request to use card: " + requestInfo + ", please approve or deny");
+                updateLog("Incoming Request For Card: " + requestInfo + ".");
                 approve.setDisable(false);
                 decline.setDisable(false);
             }

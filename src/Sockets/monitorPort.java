@@ -23,8 +23,8 @@ public class monitorPort {
      */
     public monitorPort(String deviceName) throws IOException {
         socket = new Socket("localhost", Port.portLookup(deviceName));
-        in = new ObjectInputStream(socket.getInputStream());
         out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
         new Thread(() -> {
             Message msg;
             try {
