@@ -3,6 +3,8 @@ package Sockets;
 import Message.Message;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -21,6 +23,7 @@ public class controlPort {
     public controlPort(String deviceName) throws IOException {
         socket = new Socket("localhost", Port.portLookup(deviceName));
         out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
     }
 
     /**

@@ -30,8 +30,8 @@ public class Harness {
 //                testPump();
 //            }
 //        }
-        testCard();
-        testGasServer();
+        testHose();
+//        testPump();
     }
 
     public static void testPump(){
@@ -69,6 +69,7 @@ public class Harness {
     public static void testHose(){
         try {
             commPort hose = new commPort("hose");
+
             while(true){
                 System.out.println(hose.get());
             }

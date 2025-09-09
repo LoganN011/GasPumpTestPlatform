@@ -2,9 +2,10 @@ import java.io.IOException;
 
 public class Launcher {
     public static void main(String[] args) throws Exception {
-        runApp("Devices.Card");
-        runApp("Devices.GasServer");
+        runApp("Devices.Hose");
         runApp("Devices.Harness");
+        runApp("Devices.Pump");
+
     }
 
     private static void runApp(String className) throws Exception {
@@ -20,7 +21,5 @@ public class Launcher {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 }
