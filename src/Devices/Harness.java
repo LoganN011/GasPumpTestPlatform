@@ -8,30 +8,28 @@ import java.io.IOException;
 public class Harness {
 
     public static void main(String[] args) {
-//        String device = "hose"; // Write device in arg line
-//
-//        switch (device) {
-//            case "display" -> {
-//                testDisplay();
-//            }
-//            case "card"    -> {
-//                testCard();
-//            }
-//            case "gas"     -> {
-//                testGasServer();
-//            }
-//            case "bank"    -> {
-//                testBankServer();
-//            }
-//            case "hose"    -> {
-//                testHose();
-//            }
-//            case "pump"    -> {
-//                testPump();
-//            }
-//        }
-        testHose();
-//        testPump();
+       String device = args[0]; // Write device in arg line
+
+        switch (device) {
+            case "display" -> {
+                testDisplay();
+            }
+            case "card"    -> {
+                testCard();
+            }
+            case "gas"     -> {
+                testGasServer();
+            }
+            case "bank"    -> {
+                testBankServer();
+            }
+            case "hose"    -> {
+                testHose();
+            }
+            case "pump"    -> {
+                testPump();
+            }
+        }
     }
 
     public static void testPump(){
@@ -164,7 +162,8 @@ public class Harness {
     // "꞉" is a usable colon that won't get caught by MessageReader
     private static void testPumpingScreen(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:PUMPING IN PROGRESS"));
-        device.send(new Message("t:23:s2:f1:c1:GALLONS꞉ " + 10 + "|PRICE꞉ $" + 9));
+        device.send(new Message("t:23:s2:f1:c1:Gallons꞉ " + 10));
+        device.send(new Message("t:45:s2:f1:c1:Price꞉ $" + 9));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT"));
     }
 

@@ -1,4 +1,4 @@
-package Message;
+package Utility;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;

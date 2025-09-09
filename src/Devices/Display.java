@@ -3,6 +3,7 @@ package Devices;
 import Devices.DisplayObjects.*;
 import Message.MessageReader;
 
+import Utility.MyTimer;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -53,6 +54,7 @@ public class Display extends Application {
     private DisplayHandler displayHandler;
     private final StackPane overlayLayer = new StackPane();
     private Label selectedGasLabel;
+    private MyTimer timer;
 
 
     private static final double WIDTH = 960, HEIGHT = 540;
@@ -67,6 +69,24 @@ public class Display extends Application {
     public void start(Stage stage) {
         displayHandler = new DisplayHandler(this);
         displayHandler.startIO();
+
+        // timer
+        timer = new MyTimer();
+        timer.timeProperty().addListener((obs, oldV, newV) -> {
+            System.out.println("Time: " + newV.longValue());
+            displayHandler.setTime(newV.longValue());
+
+            // 30-second timeout
+            if (newV.longValue() > 30) {
+                try {
+                    displayHandler.doTimeout();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
+        timer.start();
 
         Scene scene = new Scene(this.createPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);
@@ -287,17 +307,6 @@ public class Display extends Application {
             default: return -1;
         }
     }
-    private int rightIdxForPair(String pair) {
-        switch (pair) {
-            case "00":
-            case "01": return 1;
-            case "23": return 3;
-            case "45": return 5;
-            case "67": return 7;
-            case "89": return 9;
-            default: return -1;
-        }
-    }
 
     // Inbound handling
     public void handleInbound(String line) {
@@ -392,79 +401,6 @@ public class Display extends Application {
     }
 
     /**
-     * Creates text dialog box for Cancel button (so far)
-     * @param msg String text message
-     */
-    public void createDialogBox(String msg, String fileName) {
-        Platform.runLater(() -> {
-
-            // StackPane for larger message
-            StackPane overlaySP = new StackPane();
-            overlaySP.setMaxSize(300, 250);
-            overlaySP.setAlignment(Pos.CENTER);
-            overlaySP.setMouseTransparent(true);
-            overlaySP.setPickOnBounds(false);
-            overlaySP.setStyle("-fx-background-color: transparent;");
-
-            // Smaller StackPane to append text, image on
-            StackPane smallSP = new StackPane();
-            smallSP.setStyle(
-                    "-fx-background-color: rgba(30,30,30,0.92);" +
-                            "-fx-background-radius: 12;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, 0.2, 0, 2);"
-            );
-            smallSP.setPadding(new Insets(10, 14, 10, 14));
-            smallSP.setMaxWidth(300);
-            smallSP.setOpacity(0);          // for fade-in
-            smallSP.setTranslateY(12);      // for slide-in
-
-            VBox vbox = new VBox();
-            vbox.setAlignment(Pos.CENTER);
-
-            // Create text
-            Text text = new Text(msg);
-            text.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-            text.setFill(Color.WHITE);
-            text.setTextAlignment(TextAlignment.CENTER);
-            text.setWrappingWidth(263);
-
-            // Create image (if any)
-            if (fileName != null) {
-                ImageView imgView = DisplayHelper.getImage(fileName, 120);
-                imgView.setTranslateY(10);
-
-                vbox.getChildren().addAll(text, imgView);
-
-            } else {
-                vbox.getChildren().add(text);
-            }
-
-            // Add together
-            smallSP.getChildren().add(vbox);
-            overlaySP.getChildren().add(smallSP);
-            StackPane.setAlignment(smallSP, Pos.CENTER);
-            overlayLayer.getChildren().add(overlaySP);
-
-            // Fade in, pause, fade out animations
-            FadeTransition fadeIn = DisplayHelper.setFadeTransition(200, smallSP, 0, 1);
-            TranslateTransition slideIn = DisplayHelper.setSlideTransition(220, smallSP, 12, 0);
-            PauseTransition stay = new PauseTransition(Duration.seconds(1.6));
-            FadeTransition fadeOut = DisplayHelper.setFadeTransition(280, smallSP, 1, 0);
-            TranslateTransition slideOut = DisplayHelper.setSlideTransition(280, smallSP, 0, 8);
-
-            // Define transition timeline
-            SequentialTransition seq = new SequentialTransition(
-                    fadeIn, slideIn, // coming in
-                    stay, // pause for a second
-                    fadeOut, slideOut // going out
-            );
-
-            seq.setOnFinished(ev -> overlayLayer.getChildren().remove(overlaySP));
-            seq.play();
-        });
-    }
-
-    /**
      * Visually select gas with pill icon, checkmark icon, and pop-in animation.
      */
     public void markSelectedGas(int buttonIdx) {
@@ -480,8 +416,6 @@ public class Display extends Application {
                 clearSelectedStyle(selectedGasLabel);
             }
 
-            applyPillStyle(label);
-            DisplayHelper.playPop(label);
             selectedGasLabel = label;
         });
     }
@@ -513,49 +447,6 @@ public class Display extends Application {
     }
 
     /**
-     * Apply pill highlight + check chip to a label (no images required).
-     */
-    private void applyPillStyle(Label label) {
-        // Appends existing font style (if any)
-        String base;
-        if (label.getStyle() == null) {
-            base = "";
-        } else {
-            base = label.getStyle();
-        }
-
-        String pill =
-                "-fx-background-color: #ff6392;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-border-color: #DE63A9;" +
-                        "-fx-border-radius: 12;" +
-                        "-fx-border-width: 2;" +
-                        "-fx-padding: 6 12;";
-        String style;
-        if (base.endsWith(";")) {
-            style = base + pill;
-        } else {
-            style = base + ";" + pill;
-        }
-        label.setStyle(style);
-
-
-        Label check = new Label("✓");
-        check.setStyle(
-                "-fx-background-color: #10B981;" +
-                        "-fx-background-radius: 999;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 11px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 2 6;"
-        );
-
-        label.setGraphic(check);
-        label.setContentDisplay(ContentDisplay.RIGHT);
-        label.setGraphicTextGap(8);
-    }
-
-    /**
      * Remove current gas selection style.
      */
     private void clearSelectedStyle(Label label) {
@@ -569,8 +460,9 @@ public class Display extends Application {
         label.setGraphicTextGap(0);
     }
 
-    private void displayPaymentImage() {
-
+    public void resetTimer() {
+        timer.reset();
     }
+
 
 }

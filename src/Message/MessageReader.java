@@ -2,6 +2,7 @@ package Message;
 
 import Devices.DisplayObjects.ButtonCmd;
 import Devices.DisplayObjects.TextCmd;
+import Utility.ReadCSVs;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;

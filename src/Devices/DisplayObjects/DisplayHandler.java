@@ -9,7 +9,9 @@ import java.io.IOException;
 public class DisplayHandler {
     private final Display display;
     private String gasType = null;
+    private long timer = 0;
     private boolean isGasSelected = false;
+    private boolean isLatched = false;
 
     // Screen states
     private Screen currentScreenState = Screen.WELCOME;
@@ -35,7 +37,7 @@ public class DisplayHandler {
      * @param buttonID int
      */
     public void onButtonClick(int buttonID) throws IOException {
-        System.out.println("From DH.java:" + buttonID);
+        display.resetTimer();
         handleInput(buttonID);
     }
 
@@ -71,7 +73,6 @@ public class DisplayHandler {
      * @param buttonID incoming commPort message
      */
     private void handleInput(int buttonID) throws IOException {
-
         switch (buttonID) {
             // "Cancel" or "Exit" or "No" or "Ok"
             case 9 -> {
@@ -85,7 +86,8 @@ public class DisplayHandler {
                     return;
 
                 } else if (currentScreenState == Screen.FUEL_SELECT) {
-                    cancel();
+                    //cancel();
+                    changeToScreen(0);
                     return;
                 }
 
@@ -135,30 +137,19 @@ public class DisplayHandler {
         }
     }
 
-    /**
-     * Removes current selected gas, resets pump display to initial state.
-     */
-    private void cancel() {
-        clearAllSelections();
-        display.createDialogBox("Canceled", "cancel.png");
-    }
-
-    private void finishPumping() throws IOException {
-        clearAllSelections();
-        display.createDialogBox("Thank you!", "greencheck.png");
-    }
-
     //TODO: Still needs logic
     /**
      * Begin pumping
      */
     private boolean startPumping() throws IOException {
         if (!isGasSelected) {
-            display.createDialogBox("Please select a fuel type first.", "cancel.png");
             return false;
         }
 
-        display.createDialogBox("Pumping started!", "greencheck.png");
+        isLatched = true; // hardcore temporarily
+        if (!isLatched) {
+            return false;
+        }
 
         // check hose is latched or something
 
@@ -166,7 +157,7 @@ public class DisplayHandler {
     }
 
     private void pausePumping() {
-        display.createDialogBox("Pumping paused.", "pause.png");
+
     }
 
     /**
@@ -194,6 +185,23 @@ public class DisplayHandler {
         currentScreenState = Screen.values()[state];
 
         port.send(new Message(String.valueOf(state)));
+    }
+
+    public void setTime(long num) {
+        timer = num;
+    }
+
+    public void doTimeout() throws IOException {
+        if (timer > 5 && (currentScreenState != Screen.WELCOME && currentScreenState != Screen.PUMPING)) {
+
+            display.resetTimer();
+            clearAllSelections();
+            changeToScreen(0);
+
+        } else {
+            clearAllSelections();
+            display.resetTimer();
+        }
     }
 
 
