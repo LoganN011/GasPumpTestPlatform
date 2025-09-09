@@ -35,6 +35,7 @@ public class GasServer extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         commPort server = new commPort("gas_server");
+        server.send(new Message("status:off"));
 
         BorderPane root = new BorderPane();
         root.setPrefSize(400, 400);
@@ -87,6 +88,12 @@ public class GasServer extends Application {
         primaryStage.show();
 
         Thread io = new Thread(() -> {
+            try {
+                Thread.sleep(10000);
+                server.send(new Message("status:on"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             while(true) {
                 handleMessage(server.get());
             }

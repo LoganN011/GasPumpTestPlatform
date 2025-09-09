@@ -4,32 +4,104 @@ import Message.Message;
 import Sockets.commPort;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Harness {
 
     public static void main(String[] args) {
-        String device = args[0]; // Write device in arg line
+        specialTest();
+//        String device = args[0]; // Write device in arg line
+//
+//        switch (device) {
+//            case "display" -> {
+//                testDisplay();
+//            }
+//            case "card"    -> {
+//                testCard();
+//            }
+//            case "gas"     -> {
+//                testGasServer();
+//            }
+//            case "bank"    -> {
+//                testBankServer();
+//            }
+//            case "hose"    -> {
+//                testHose();
+//            }
+//            case "pump"    -> {
+//                testPump();
+//            }
+//        }
+//
 
-        switch (device) {
-            case "display" -> {
-                testDisplay();
+    }
+
+    private static void specialTest() {
+        AtomicReference<String> currentState = new AtomicReference<>("off");
+        System.out.println("i am starting");
+        Thread test = new Thread(() -> {
+            try {
+                commPort gasServerPort = new commPort("gas_server");
+                while (true) {
+                    switch (currentState.get()) {
+                        case "off" -> {
+                            String message = gasServerPort.get().toString();
+                            System.out.println("done blocking for message");
+                            String[] messageContents = message.split(":");
+                            if(messageContents[0].equals("status")) {
+                                if(messageContents[1].equals("on")) {
+                                    System.out.println("i am on now");
+                                    currentState.set("idle");
+                                }
+                            }
+                        }
+                        case "idle" -> {
+                            Message message = gasServerPort.get();
+                            String[] messageContents = message.toString().split(":");
+                            if(messageContents[0].equals("status")) {
+                                if(messageContents[1].equals("off")) {
+                                    System.out.println("i am off now");
+                                    currentState.set("off");
+                                }
+                            } else {
+                                ArrayList<Gas> fuelOptions = Gas.parseGasses(message);
+                                fuelOptions.forEach(System.out::println);
+                                currentState.set("ready");
+                            }
+                        }
+                        default -> {
+                            System.out.println("unknown state or ready");
+                            gasServerPort.get();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            case "card"    -> {
-                testCard();
+        });
+        test.start();
+
+
+        Thread test2 = new Thread(() -> {
+            try {
+                commPort cardPort = new commPort("card");
+                while (true) {
+                    switch (currentState.get()) {
+                        case "ready" -> {
+                            System.out.println("received card number: " + cardPort.get());
+                        }
+                        default -> {
+                            cardPort.get();
+
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            case "gas"     -> {
-                testGasServer();
-            }
-            case "bank"    -> {
-                testBankServer();
-            }
-            case "hose"    -> {
-                testHose();
-            }
-            case "pump"    -> {
-                testPump();
-            }
-        }
+        });
+        test2.start();
     }
 
     public static void testPump(){
