@@ -9,28 +9,30 @@ import java.io.IOException;
 public class Harness {
 
     public static void main(String[] args) {
-        String device = args[0]; // Write device in arg line
-
-        switch (device) {
-            case "display" -> {
-                testDisplay();
-            }
-            case "card"    -> {
-                testCard();
-            }
-            case "gas"     -> {
-                testGasServer();
-            }
-            case "bank"    -> {
-                testBankServer();
-            }
-            case "hose"    -> {
-                testHose();
-            }
-            case "pump"    -> {
-                testPump();
-            }
-        }
+//        String device = "hose"; // Write device in arg line
+//
+//        switch (device) {
+//            case "display" -> {
+//                testDisplay();
+//            }
+//            case "card"    -> {
+//                testCard();
+//            }
+//            case "gas"     -> {
+//                testGasServer();
+//            }
+//            case "bank"    -> {
+//                testBankServer();
+//            }
+//            case "hose"    -> {
+//                testHose();
+//            }
+//            case "pump"    -> {
+//                testPump();
+//            }
+//        }
+        testPump();
+        testDisplay();
     }
 
     public static void testPump(){
