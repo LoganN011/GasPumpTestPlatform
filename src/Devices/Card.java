@@ -3,6 +3,7 @@ package Devices;
 import Message.Message;
 import Sockets.controlPort;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -28,8 +29,16 @@ public class Card extends Application {
             System.exit(1);
         }
 
+        HBox root = new HBox();
+        root.setPrefSize(150, 150);
+        root.setBackground(VisualElements.ROOT_BACKGROUND);
 
         Button test = new Button();
+        test.setAlignment(Pos.CENTER);
+        test.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        test.setBorder(VisualElements.THICK_BORDER);
+        test.setOnMouseEntered(x -> test.setBackground(VisualElements.ACTIVE_ELEMENT));
+        test.setOnMouseExited(x -> test.setBackground(VisualElements.ELEMENT_BACKGROUND));
         test.setMinSize(100, 100);
         controlPort finalSelf = self; //TODO: fix this cause idk wants it want this way only sometimes
         test.setOnMouseClicked(x -> {
@@ -48,7 +57,6 @@ public class Card extends Application {
 
         });
 
-        HBox root = new HBox();
         root.getChildren().add(test);
 
         Scene scene = new Scene(root);

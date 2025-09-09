@@ -1,8 +1,6 @@
 package Devices;
 
-import Devices.DisplayObjects.ButtonCmd;
-import Devices.DisplayObjects.DisplayHandler;
-import Devices.DisplayObjects.TextCmd;
+import Devices.DisplayObjects.*;
 import Message.MessageReader;
 
 import javafx.animation.*;
@@ -26,10 +24,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -108,7 +104,7 @@ public class Display extends Application {
         grid.setStyle("-fx-background-color: #FFFDF8;"); //f9f9f9
         grid.setPrefSize(WIDTH, HEIGHT - 32);
 
-        // Clear otherwise grid builds incorrectly
+        // Must clear otherwise grid builds incorrectly
         grid.getChildren().clear();
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
@@ -190,7 +186,7 @@ public class Display extends Application {
     }
 
     // Rendering
-    private void resetAll() {
+    public void resetAll() {
         centers.values().forEach(p -> p.getChildren().clear());
         btns.values().forEach(b -> {
             b.setDisable(true);
@@ -434,17 +430,7 @@ public class Display extends Application {
 
             // Create image (if any)
             if (fileName != null) {
-                FileInputStream inputstream;
-                try {
-                    inputstream = new FileInputStream("resources/images/" + fileName + ".png");
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-
-                Image image = new Image(inputstream);
-                ImageView imgView = new ImageView(image);
-                imgView.setPreserveRatio(true);
-                imgView.setFitWidth(120);
+                ImageView imgView = DisplayHelper.getImage(fileName, 120);
                 imgView.setTranslateY(10);
 
                 vbox.getChildren().addAll(text, imgView);
@@ -460,11 +446,11 @@ public class Display extends Application {
             overlayLayer.getChildren().add(overlaySP);
 
             // Fade in, pause, fade out animations
-            FadeTransition fadeIn = setFadeTransition(200, smallSP, 0, 1);
-            TranslateTransition slideIn = setSlideTransition(220, smallSP, 12, 0);
+            FadeTransition fadeIn = DisplayHelper.setFadeTransition(200, smallSP, 0, 1);
+            TranslateTransition slideIn = DisplayHelper.setSlideTransition(220, smallSP, 12, 0);
             PauseTransition stay = new PauseTransition(Duration.seconds(1.6));
-            FadeTransition fadeOut = setFadeTransition(280, smallSP, 1, 0);
-            TranslateTransition slideOut = setSlideTransition(280, smallSP, 0, 8);
+            FadeTransition fadeOut = DisplayHelper.setFadeTransition(280, smallSP, 1, 0);
+            TranslateTransition slideOut = DisplayHelper.setSlideTransition(280, smallSP, 0, 8);
 
             // Define transition timeline
             SequentialTransition seq = new SequentialTransition(
@@ -476,40 +462,6 @@ public class Display extends Application {
             seq.setOnFinished(ev -> overlayLayer.getChildren().remove(overlaySP));
             seq.play();
         });
-    }
-
-    /**
-     * Helper: Sets fade in/fade out animation.
-     *
-     * @param ms Duration in milliseconds
-     * @param sp StackPane
-     * @param from Animation "from" in seconds
-     * @param to Animation "to" in seconds
-     * @return FadeTransition
-     */
-    private FadeTransition setFadeTransition(int ms, StackPane sp, int from, int to) {
-        FadeTransition fade = new FadeTransition(Duration.millis(ms), sp);
-        fade.setFromValue(from);
-        fade.setToValue(to);
-
-        return fade;
-    }
-
-    /**
-     * Helper: Sets slide in/slide out transition.
-     *
-     * @param ms Duration in milliseconds
-     * @param sp StackPane
-     * @param fromY From y-value
-     * @param toY To y-value
-     * @return TranslateTransition
-     */
-    private TranslateTransition setSlideTransition(int ms, StackPane sp, int fromY, int toY) {
-        TranslateTransition slide = new TranslateTransition(Duration.millis(ms), sp);
-        slide.setFromY(fromY);
-        slide.setToY(toY);
-
-        return slide;
     }
 
     /**
@@ -529,7 +481,7 @@ public class Display extends Application {
             }
 
             applyPillStyle(label);
-            playPop(label);
+            DisplayHelper.playPop(label);
             selectedGasLabel = label;
         });
     }
@@ -617,28 +569,8 @@ public class Display extends Application {
         label.setGraphicTextGap(0);
     }
 
-    /**
-     * Selected gas pop animation.
-     */
-    private void playPop(Node node) {
-        // Pop in, then settle down
-        ScaleTransition st1 = new ScaleTransition(Duration.millis(90), node);
-        st1.setFromX(1.0);
-        st1.setFromY(1.0);
+    private void displayPaymentImage() {
 
-        st1.setToX(1.06);
-        st1.setToY(1.06);
-
-        ScaleTransition st2 = new ScaleTransition(Duration.millis(110), node);
-        st2.setFromX(1.06);
-        st2.setFromY(1.06);
-
-        st2.setToX(1.0);
-        st2.setToY(1.0);
-
-        new SequentialTransition(st1, st2).play();
     }
-
-
 
 }

@@ -2,7 +2,6 @@ package Devices;
 
 import Message.Message;
 import Sockets.commPort;
-import Sockets.statusPort;
 
 import java.io.IOException;
 
@@ -82,12 +81,25 @@ public class Harness {
         try{
             commPort display = new commPort("screen");
 
-            testFuelSelection(display);
+            testWelcome(display);
+
             while(true) {
-                System.out.println("Display responded: " + display.get());
+                Message m = display.get();
+
+                if (m == null) continue;
+
+                System.out.println("Display responded: " + m.toString());
+
+                switch(m.toString()) {
+                    case "0" -> testWelcome(display);
+                    case "1" -> testFuelSelection(display);
+                    case "2" -> testPumpingScreen(display);
+                    case "3" -> testSummaryScreen(display);
+                    case "4" -> testReceiptPrompt(display);
+                    default -> System.out.println("ERROR ERROR ERROR");
+                }
             }
-//            testWelcome(display);
-//            testReceiptPrompt(display);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,10 +129,8 @@ public class Harness {
         }
     }
 
-    /**
-     * Example usage for selecting fuel
-     */
-    private static void testFuelSelection(commPort device) throws IOException, InterruptedException {
+    /** Example usage for selecting fuel */
+    private static void testFuelSelection(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
         device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
         device.send(new Message("b:4:m,b:5:m,t:45:s1:f1:c1:PLUS 89"));
@@ -128,26 +138,33 @@ public class Harness {
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL"));
     }
 
-    /**
-     * Example welcome screen
-     */
-    private static void testWelcome(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s0:f2:c2:WELCOME!"));
-        Thread.sleep(40);
-        device.send(new Message("t:45:s0:f2:c2:PLEASE TAP YOUR CARD OR PHONE TO BEGIN"));
+    /** Example welcome screen */
+    private static void testWelcome(commPort device) throws IOException {
+        device.send(new Message("t:01:s0:f0:c2:WELCOME!"));
+        device.send(new Message("t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN|CANCEL"));
     }
 
-    /**
-     * Example usage for receipts
-     */
-    private static void testReceiptPrompt(commPort device) throws IOException, InterruptedException {
-        device.send(new Message("t:01:s1:f2:c2:WOULD YOU LIKE A RECEIPT?"));
-        Thread.sleep(40);
-        device.send(new Message("b:6:x,b:7:x,t:67:s2:f2:c1:YES|NO"));
+    /** Example receipts screen */
+    private static void testReceiptPrompt(commPort device) throws IOException {
+        device.send(new Message("t:01:s0:f0:c2:RECEIPT WAS SENT TO"));
+        device.send(new Message("t:23:s1:f1:c1:user@example.com"));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:|OK"));
+    }
 
-        device.send(new Message("t:23:s1:f2:c2:RECEIPT WAS SENT TO"));
-        Thread.sleep(40);
-        device.send(new Message("t:45:s1:f0:c1:user@example.com"));
+    /** Example summary screen */
+    private static void testSummaryScreen(commPort device) throws IOException {
+        device.send(new Message("t:01:s0:f0:c2:PUMPING FINISHED"));
+        device.send(new Message("t:23:s1:f1:c1:Thank you for refilling with us!"));
+        device.send(new Message("t:45:s2:f1:c0:Would you like a receipt?"));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:YES|NO"));
+    }
+
+    // "꞉" is a usable colon that won't get caught by MessageReader
+    private static void testPumpingScreen(commPort device) throws IOException {
+        device.send(new Message("t:01:s0:f0:c2:PUMPING IN PROGRESS"));
+        device.send(new Message("t:23:s2:f1:c1:GALLONS꞉ " + 10 + "|PRICE꞉ $" + 9));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT"));
     }
 
 }
