@@ -1,14 +1,16 @@
 package Devices;
 
+import Message.Message;
+
+import java.util.ArrayList;
+
 public class Gas {
     double price;
     String name;
-    double availableQuantity;
 
-    public Gas(String name, double price, double availableQuantity) {
+    public Gas(String name, double price) {
         this.price = price;
         this.name = name;
-        this.availableQuantity = availableQuantity;
     }
 
     public double getPrice() {
@@ -17,10 +19,6 @@ public class Gas {
 
     public String getName() {
         return name;
-    }
-
-    public double getAvailableQuantity() {
-        return getAvailableQuantity();
     }
 
     public String toString() {
@@ -39,6 +37,20 @@ public class Gas {
 
     public static String displayPrice(String price) {
         return displayPrice(Double.parseDouble(price));
+    }
+
+    public Message makeMessage() {
+        return new Message("price:"+name+":"+displayPrice(price));
+    }
+
+    public static ArrayList<Gas> parseGasses(Message m) {
+        ArrayList<Gas> result = new ArrayList<>();
+        for(String curGas : m.toString().split(",")) {
+            if (curGas.isEmpty()) continue;
+            String[] fields = curGas.split(":");
+            result.add(new Gas(fields[1], Double.parseDouble(fields[2])));
+        }
+        return result;
     }
 
 }

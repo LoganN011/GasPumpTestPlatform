@@ -102,7 +102,7 @@ public class GasServer extends Application {
     private Message generateCurrentPrices() {
         String result = "";
         for(Gas cur: fuels) {
-            result += cur.toString();
+            result += cur.makeMessage()+",";
         }
         return new Message(result);
     }
@@ -117,7 +117,7 @@ public class GasServer extends Application {
             String price = fuelPriceInput.getText();
             try {
                 if (name.isEmpty() || price.isEmpty()) continue;
-                fuels.add(new Gas(name, Double.parseDouble(price), 100));
+                fuels.add(new Gas(name, Double.parseDouble(price)));
             } catch (Exception e) {
                 System.out.println("Invalid input in text entry, skipping");
                 continue;
