@@ -8,7 +8,7 @@ import java.io.IOException;
 public class Harness {
 
     public static void main(String[] args) {
-       String device = args[0]; // Write device in arg line
+        String device = args[0]; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -67,7 +67,6 @@ public class Harness {
     public static void testHose(){
         try {
             commPort hose = new commPort("hose");
-
             while(true){
                 System.out.println(hose.get());
             }
