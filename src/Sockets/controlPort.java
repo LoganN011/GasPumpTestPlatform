@@ -21,7 +21,19 @@ public class controlPort {
      * @throws IOException throws if the connections breaks
      */
     public controlPort(String deviceName) throws IOException {
-        socket = new Socket("localhost", Port.portLookup(deviceName));
+        boolean connected = false;
+        while (!connected) {
+            try {
+                socket = new Socket("localhost", Port.portLookup(deviceName));
+                connected = true;
+            }catch (Exception e){
+                try{
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
         out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
     }
