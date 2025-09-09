@@ -42,7 +42,6 @@ public class commPort {
                         Message msg;
                         try {
                             while ((msg = (Message) in.readObject()) != null) {
-                                System.out.println("message in comm: "+msg);
                                 queue.put(msg);
                             }
                         } catch (Exception e) {
