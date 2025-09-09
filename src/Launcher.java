@@ -1,17 +1,26 @@
+import java.io.IOException;
+
 public class Launcher {
     public static void main(String[] args) throws Exception {
-        runApp("Devices.Hose");
-        runApp("Devices.Display");
+        runApp("Devices.Card");
+        runApp("Devices.GasServer");
         runApp("Devices.Harness");
     }
 
     private static void runApp(String className) throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "java","-cp","out/production/GasPumpTestPlatform", className
+                "java","-cp","out\\production\\GasPumpTestPlatform", className
         );
         pb.inheritIO();
 
 
-        pb.start();
+
+        try {
+            pb.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 }

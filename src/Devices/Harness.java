@@ -30,8 +30,8 @@ public class Harness {
 //                testPump();
 //            }
 //        }
-        testPump();
-        testDisplay();
+        testCard();
+        testGasServer();
     }
 
     public static void testPump(){
