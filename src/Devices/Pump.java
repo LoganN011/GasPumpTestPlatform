@@ -91,6 +91,8 @@ public class Pump extends Application {
         new Thread(() -> {
 
             while(true){
+                //Update to take on and something else
+                //The something else is either reset the flow counter or send a message that is the amount of flow
                 Message msg= flow.read();
                 if(msg == null) {
                     continue;

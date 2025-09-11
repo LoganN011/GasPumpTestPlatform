@@ -40,15 +40,16 @@ public class Harness {
     private static void specialTest() {
         AtomicReference<String> currentState = new AtomicReference<>("off");
         System.out.println("i am starting");
-        Thread test = new Thread(() -> {
+        new Thread(() -> {
             try {
                 commPort gasServerPort = new commPort("gas_server");
                 while (true) {
+                    Message message = gasServerPort.get();
                     switch (currentState.get()) {
                         case "off" -> {
-                            String message = gasServerPort.get().toString();
+                            //String message = gasServerPort.get().toString();
                             System.out.println("done blocking for message");
-                            String[] messageContents = message.split(":");
+                            String[] messageContents = message.toString().split(":");
                             if(messageContents[0].equals("status")) {
                                 if(messageContents[1].equals("on")) {
                                     System.out.println("i am on now");
@@ -57,7 +58,7 @@ public class Harness {
                             }
                         }
                         case "idle" -> {
-                            Message message = gasServerPort.get();
+                            //Message message = gasServerPort.get();
                             String[] messageContents = message.toString().split(":");
                             if(messageContents[0].equals("status")) {
                                 if(messageContents[1].equals("off")) {
@@ -72,36 +73,33 @@ public class Harness {
                         }
                         default -> {
                             System.out.println("unknown state or ready");
-                            gasServerPort.get();
                         }
                     }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
-        test.start();
+        }).start();
 
 
-        Thread test2 = new Thread(() -> {
+        new Thread(() -> {
             try {
                 commPort cardPort = new commPort("card");
                 while (true) {
+                    Message message = cardPort.get();
                     switch (currentState.get()) {
                         case "ready" -> {
-                            System.out.println("received card number: " + cardPort.get());
+                            System.out.println("received card number: " + message);
                         }
                         default -> {
-                            cardPort.get();
-
+                            System.out.println("unknown state: "+message);
                         }
                     }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
-        test2.start();
+        }).start();
     }
 
     public static void testPump(){
