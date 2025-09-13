@@ -10,29 +10,29 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Harness {
 
     public static void main(String[] args) {
-        specialTest();
-//        String device = args[0]; // Write device in arg line
-//
-//        switch (device) {
-//            case "display" -> {
-//                testDisplay();
-//            }
-//            case "card"    -> {
-//                testCard();
-//            }
-//            case "gas"     -> {
-//                testGasServer();
-//            }
-//            case "bank"    -> {
-//                testBankServer();
-//            }
-//            case "hose"    -> {
-//                testHose();
-//            }
-//            case "pump"    -> {
-//                testPump();
-//            }
-//        }
+//        specialTest();
+        String device = "pump"; // Write device in arg line
+
+        switch (device) {
+            case "display" -> {
+                testDisplay();
+            }
+            case "card" -> {
+                testCard();
+            }
+            case "gas" -> {
+                testGasServer();
+            }
+            case "bank" -> {
+                testBankServer();
+            }
+            case "hose" -> {
+                testHose();
+            }
+            case "pump" -> {
+                testPump();
+            }
+        }
 //
 
     }
@@ -50,8 +50,8 @@ public class Harness {
                             //String message = gasServerPort.get().toString();
                             System.out.println("done blocking for message");
                             String[] messageContents = message.toString().split(":");
-                            if(messageContents[0].equals("status")) {
-                                if(messageContents[1].equals("on")) {
+                            if (messageContents[0].equals("status")) {
+                                if (messageContents[1].equals("on")) {
                                     System.out.println("i am on now");
                                     currentState.set("idle");
                                 }
@@ -60,8 +60,8 @@ public class Harness {
                         case "idle" -> {
                             //Message message = gasServerPort.get();
                             String[] messageContents = message.toString().split(":");
-                            if(messageContents[0].equals("status")) {
-                                if(messageContents[1].equals("off")) {
+                            if (messageContents[0].equals("status")) {
+                                if (messageContents[1].equals("off")) {
                                     System.out.println("i am off now");
                                     currentState.set("off");
                                 }
@@ -92,7 +92,7 @@ public class Harness {
                             System.out.println("received card number: " + message);
                         }
                         default -> {
-                            System.out.println("unknown state: "+message);
+                            System.out.println("unknown state: " + message);
                         }
                     }
                 }
@@ -102,28 +102,35 @@ public class Harness {
         }).start();
     }
 
-    public static void testPump(){
-        try{
+    public static void testPump() {
+        try {
             commPort pump = new commPort("pump");
             commPort flow = new commPort("flow_meter");
+            new Thread(() -> {
+                while (true) {
+                    System.out.println(flow.get());
+                }
+            }).start();
 
-            while(true){
+            while (true) {
                 Thread.sleep(1000);
-                flow.send(new Message("on"));
-                pump.send(new Message("on"));
+                pump.send(new Message("on:REG"));
+                flow.send(new Message("flow"));
                 Thread.sleep(10000);
-                flow.send(new Message("off"));
+                flow.send(new Message("reset"));
+                flow.send(new Message("flow"));
+                Thread.sleep(10000);
                 pump.send(new Message("off"));
-                System.out.println(flow.get());
+                flow.send(new Message("reset"));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
     public static void testBankServer() {
-        try{
+        try {
             commPort bankServer = new commPort("bank");
             bankServer.send(new Message("card:12345678910111213141"));
             System.out.println("Bank server sent: " + bankServer.get());
@@ -134,10 +141,10 @@ public class Harness {
         }
     }
 
-    public static void testHose(){
+    public static void testHose() {
         try {
             commPort hose = new commPort("hose");
-            while(true){
+            while (true) {
                 System.out.println(hose.get());
             }
         } catch (Exception e) {
@@ -145,20 +152,20 @@ public class Harness {
         }
     }
 
-    public static void testDisplay(){
-        try{
+    public static void testDisplay() {
+        try {
             commPort display = new commPort("screen");
 
             testWelcome(display);
 
-            while(true) {
+            while (true) {
                 Message m = display.get();
 
                 if (m == null) continue;
 
                 System.out.println("Display responded: " + m.toString());
 
-                switch(m.toString()) {
+                switch (m.toString()) {
                     case "0" -> testWelcome(display);
                     case "1" -> testFuelSelection(display);
                     case "2" -> testPumpingScreen(display);
@@ -173,12 +180,12 @@ public class Harness {
         }
     }
 
-    public static void testGasServer(){
+    public static void testGasServer() {
         //Gas Server simulation
-        try{
+        try {
             commPort gasServer = new commPort("gas_server");
             gasServer.send(new Message("sale:14.2,2.80"));
-            while(true) {
+            while (true) {
                 System.out.println("Gas server sent: " + gasServer.get());
             }
 
@@ -187,9 +194,9 @@ public class Harness {
         }
     }
 
-    public static void testCard(){
+    public static void testCard() {
         //Card simulation
-        try{
+        try {
             commPort card = new commPort("card");
             System.out.println("Received Card Number: " + card.get());
         } catch (Exception e) {
@@ -197,7 +204,9 @@ public class Harness {
         }
     }
 
-    /** Example usage for selecting fuel */
+    /**
+     * Example usage for selecting fuel
+     */
     private static void testFuelSelection(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
         device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
@@ -206,21 +215,27 @@ public class Harness {
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL"));
     }
 
-    /** Example welcome screen */
+    /**
+     * Example welcome screen
+     */
     private static void testWelcome(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:WELCOME!"));
         device.send(new Message("t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN|CANCEL"));
     }
 
-    /** Example receipts screen */
+    /**
+     * Example receipts screen
+     */
     private static void testReceiptPrompt(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:RECEIPT WAS SENT TO"));
         device.send(new Message("t:23:s1:f1:c1:user@example.com"));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:|OK"));
     }
 
-    /** Example summary screen */
+    /**
+     * Example summary screen
+     */
     private static void testSummaryScreen(commPort device) throws IOException {
         device.send(new Message("t:01:s0:f0:c2:PUMPING FINISHED"));
         device.send(new Message("t:23:s1:f1:c1:Thank you for refilling with us!"));
