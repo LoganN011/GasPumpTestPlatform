@@ -11,7 +11,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = "pump"; // Write device in arg line
+        String device = args[0]; // Write device in arg line
 
         switch (device) {
             case "display" -> {
