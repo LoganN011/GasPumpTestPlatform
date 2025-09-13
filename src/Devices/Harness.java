@@ -2,6 +2,7 @@ package Devices;
 
 import Message.Message;
 import Sockets.commPort;
+import Sockets.statusPort;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -146,9 +147,9 @@ public class Harness {
 
     public static void testHose() {
         try {
-            commPort hose = new commPort("hose");
+            statusPort hose = new statusPort("hose");
             while (true) {
-                System.out.println(hose.get());
+                System.out.println(hose.read());
             }
         } catch (Exception e) {
             e.printStackTrace();
