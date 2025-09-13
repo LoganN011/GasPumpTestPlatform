@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class IOPort {
 
@@ -19,7 +20,7 @@ public class IOPort {
     private ObjectOutputStream out;
     private BlockingQueue<Message> queue;
     private CountDownLatch connected = new CountDownLatch(1);
-    private Message lastMessage;
+    private AtomicReference<Message> lastMessage;
 
     /**
      * Make a new IOPort
@@ -28,13 +29,13 @@ public class IOPort {
      * @throws IOException throws if the connections breaks
      */
     protected IOPort(String deviceName) throws IOException {
+        lastMessage = new AtomicReference<Message>();
         try {
 
-            ServerSocket serverSocket = new ServerSocket(IOPort.portLookup(deviceName));
+            ServerSocket serverSocket = new ServerSocket(portLookup(deviceName));
             new Thread(() -> {
                 try {
                     socket = serverSocket.accept();
-
                     out = new ObjectOutputStream(socket.getOutputStream());
                     in = new ObjectInputStream(socket.getInputStream());
                     queue = new LinkedBlockingQueue<>();
@@ -43,8 +44,8 @@ public class IOPort {
                         Message msg;
                         try {
                             while ((msg = (Message) in.readObject()) != null) {
+                                lastMessage.set(msg);
                                 queue.put(msg);
-                                lastMessage = msg;
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -66,8 +67,8 @@ public class IOPort {
                 Message msg;
                 try {
                     while ((msg = (Message) in.readObject()) != null) {
+                        lastMessage.set(msg);
                         queue.put(msg);
-                        lastMessage = msg;
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -97,7 +98,7 @@ public class IOPort {
      * @return the message
      */
     protected Message read() {
-        return lastMessage;
+        return lastMessage.get();
     }
 
     /**
