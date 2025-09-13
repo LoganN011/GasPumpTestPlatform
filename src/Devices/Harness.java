@@ -32,6 +32,9 @@ public class Harness {
             case "pump" -> {
                 testPump();
             }
+            case "special" -> {
+                specialTest();
+            }
         }
 //
 

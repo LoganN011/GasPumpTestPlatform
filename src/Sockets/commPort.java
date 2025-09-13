@@ -3,74 +3,16 @@ package Sockets;
 import Message.Message;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.BindException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public class commPort {
-    //send and get messages
-    private Socket socket;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
-    private BlockingQueue<Message> queue;
-    private CountDownLatch connected = new CountDownLatch(1);
-
+public class commPort extends IOPort {
     /**
-     * Make a new commPort (can send and get)
+     * Make a new commPort(send and get)
      *
      * @param deviceName name of device you are connecting to/from
      * @throws IOException throws if the connections breaks
      */
     public commPort(String deviceName) throws IOException {
-        try {
-
-            ServerSocket serverSocket = new ServerSocket(Port.portLookup(deviceName));
-            new Thread(()->{
-                try{
-                    socket = serverSocket.accept();
-
-                    out = new ObjectOutputStream(socket.getOutputStream());
-                    in = new ObjectInputStream(socket.getInputStream());
-                    queue = new LinkedBlockingQueue<>();
-                    connected.countDown();
-                    new Thread(() -> {
-                        Message msg;
-                        try {
-                            while ((msg = (Message) in.readObject()) != null) {
-                                queue.put(msg);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-        } catch (BindException e) {
-            socket = new Socket("localhost", Port.portLookup(deviceName));
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-            queue = new LinkedBlockingQueue<>();
-            connected.countDown();
-
-            new Thread(() -> {
-                Message msg;
-                try {
-                    while ((msg = (Message) in.readObject()) != null) {
-                        queue.put(msg);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
-        }
+        super(deviceName);
     }
 
     /**
@@ -79,13 +21,7 @@ public class commPort {
      * @return A Message object
      */
     public Message get() {
-        try {
-            connected.await();
-            return queue.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return super.get();
     }
 
     /**
@@ -95,12 +31,7 @@ public class commPort {
      * @throws IOException if there is a socket error this will be thrown
      */
     public void send(Message message) throws IOException {
-        try{
-            connected.await();
-            out.writeObject(message);
-            out.flush();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        super.send(message);
     }
+
 }
