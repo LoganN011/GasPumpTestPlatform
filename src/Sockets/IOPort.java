@@ -117,6 +117,15 @@ public class IOPort {
         }
     }
 
+    /**
+     * Method to reset the last message seen
+     * and the queue of messages when moving called
+     */
+    public void reset(){
+        lastMessage.set(null);
+        queue.clear();
+    }
+
 
     /**
      * A method to determine the port number given a device name, for example
