@@ -5,14 +5,32 @@ import Sockets.controlPort;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.scene.image.ImageView;
+import javafx.animation.PauseTransition;
+import javafx.geometry.Insets;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
 public class Card extends Application {
 
+    private int WIDTH = 250;
+    private int HEIGHT = 250;
+    private controlPort self;
+
+    private Circle[] LEDs;
+    private enum LEDState {
+        OFF,
+        AWAITING,
+        ACCEPTED
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -20,48 +38,144 @@ public class Card extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        startIO();
+
+        Scene scene = new Scene(createCardReader(), WIDTH, HEIGHT);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Card Reader");
+        primaryStage.show();
+    }
+
+    private void startIO() {
         //todo replace with real handing of connection failing
-        controlPort self = null;
         try {
             self = new controlPort("card");
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
+    }
 
-        HBox root = new HBox();
-        root.setPrefSize(150, 150);
-        root.setBackground(VisualElements.ROOT_BACKGROUND);
+    /**
+     * Creates CardReader visual
+     * @return StackPane of CardReader
+     */
+    private StackPane createCardReader() {
+        StackPane background = new StackPane();
+        background.setPadding(new Insets(18));
+        background.setStyle("-fx-background-color: #2B2B2B");
 
-        Button test = new Button();
-        test.setAlignment(Pos.CENTER);
-        test.setBackground(VisualElements.ELEMENT_BACKGROUND);
-        test.setBorder(VisualElements.THICK_BORDER);
-        test.setOnMouseEntered(x -> test.setBackground(VisualElements.ACTIVE_ELEMENT));
-        test.setOnMouseExited(x -> test.setBackground(VisualElements.ELEMENT_BACKGROUND));
-        test.setMinSize(100, 100);
-        controlPort finalSelf = self; //TODO: fix this cause idk wants it want this way only sometimes
-        test.setOnMouseClicked(x -> {
-            String cardNumber = "";
-            while (cardNumber.length() < 20) cardNumber += (int) (Math.random() * 10);
+        // Payment Icon
+        ImageView icon = VisualElements.getImage("paymentIcon.png", 145);
+        icon.setSmooth(true);
+        icon.setPickOnBounds(true);
+        icon.setPreserveRatio(true);
+        icon.setEffect(new DropShadow(8, Color.rgb(0,0,0,0.18)));
+        icon.translateXProperty().set(5);
+        icon.translateYProperty().set(-15);
 
-            //todo relay message through communication Port containing number
-            //  may look like this:
+        // Top LED bar
+        LEDs = createLEDBar(4, 6);
+        setLEDState(LEDState.OFF);
+        HBox LEDLine = new HBox(45, LEDs);
+        LEDLine.translateYProperty().set(170);
+        LEDLine.setAlignment(Pos.CENTER);
+
+        // Combine
+        VBox vbox = new VBox();
+        vbox.getChildren().addAll(LEDLine, icon);
+        vbox.setAlignment(Pos.CENTER);
+
+        // Clicking logic
+        background.setOnMouseClicked(e -> {
+            // Set LED to orange while waiting for payment authorization
+            setLEDState(LEDState.AWAITING);
+            background.setDisable(true);
+
+            String cardNumber = generateCardNumber();
+            System.out.println(cardNumber);
             try {
-                finalSelf.send(new Message(cardNumber));
-            } catch (IOException e) {
-                e.printStackTrace();
+                self.send(new Message(cardNumber));
+            } catch (IOException ex) {
+                ex.printStackTrace();
                 System.exit(1);
-                //TODO: put real error handling
             }
 
+            // Turn LEDs green if authorized, red if declined
+            // Then reset LEDs back to initial gray state
+            PauseTransition authWait = new PauseTransition(Duration.millis(700));
+            authWait.setOnFinished(ev -> {
+                // TODO: add red for rejected
+                setLEDState(LEDState.ACCEPTED);
+
+                // Reset
+                PauseTransition resetWait = new PauseTransition(Duration.millis(900)); // show green ~0.9s
+                resetWait.setOnFinished(ev2 -> setLEDState(LEDState.OFF));
+                resetWait.playFromStart();
+//                background.setDisable(false);
+            });
+            authWait.playFromStart();
         });
 
-        root.getChildren().add(test);
-
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Card Reader");
-        primaryStage.show();
+        background.getChildren().add(vbox);
+        StackPane.setAlignment(vbox, Pos.CENTER);
+        return background;
     }
+
+    /**
+     * Creates horizontal bar of LEDs
+     * @param count int, number of LEDs
+     * @param radius int, size of LEDs
+     * @return Circle[] array
+     */
+    private Circle[] createLEDBar(int count, double radius) {
+        Circle[] circleArr = new Circle[count];
+
+        for (int i = 0; i < count; i++) {
+            Circle c = new Circle(radius);
+
+            c.setStroke(Color.BLACK);
+            c.setStrokeWidth(1.0);
+            c.setEffect(new DropShadow(4, Color.web("#2B2B2B")));
+            circleArr[i] = c;
+        }
+
+        return circleArr;
+    }
+
+    /**
+     * Sets LED state, which sets LED color
+     * @param state enum
+     */
+    private void setLEDState(LEDState state) {
+        Color fill = switch (state) {
+            case OFF      -> Color.web("#9AA0A6");
+            case AWAITING -> Color.web("#FBBC04");
+            case ACCEPTED -> Color.web("#34A853");
+        };
+
+        if (LEDs != null) {
+            for (Circle c : LEDs) c.setFill(fill);
+        }
+    }
+
+
+    /**
+     * Generates 20-digit card number in format of:
+     * xxxx xxxx xxxx xxxx
+     * @return String of card number
+     */
+    private String generateCardNumber() {
+        String cardNumber = "";
+        for (int numSet = 0; numSet < 4; numSet++) {
+            for (int i = 0; i < 4; i++) {
+                cardNumber += (int) (Math.random() * 10);
+            }
+
+            cardNumber += " ";
+        }
+
+        return cardNumber;
+    }
+
 }
