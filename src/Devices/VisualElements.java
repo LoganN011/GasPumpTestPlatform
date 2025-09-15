@@ -1,8 +1,14 @@
 package Devices;
 
 import javafx.geometry.Insets;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class VisualElements {
     public static final Color BACKGROUND = Color.color(231/255.0,249/255.0,255/255.0);
@@ -16,4 +22,28 @@ public class VisualElements {
     public static final Background ACTIVE_ELEMENT = new Background(new BackgroundFill(ACTIVE_COLOR, null, null));
 
 
+    /**
+     * Gets ImageView
+     *
+     * @param fileName String, name of file including extension
+     * @param size int, pixel size of image
+     * @return ImageView
+     */
+    public static ImageView getImage(String fileName, int size) {
+        FileInputStream inputStream;
+
+        try {
+            inputStream = new FileInputStream("resources/images/" + fileName);
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        ImageView imgView = new ImageView(new Image(inputStream));
+
+        imgView.setPreserveRatio(true);
+        imgView.setFitWidth(size);
+
+        return imgView;
+    }
 }
