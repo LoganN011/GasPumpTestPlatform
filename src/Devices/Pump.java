@@ -24,8 +24,7 @@ import java.io.IOException;
 public class Pump extends Application {
 
     monitorPort flow;
-    statusPort pump;
-    boolean flowOn =false;
+    statusPort pump;;
     boolean pumpOn =false;
     RotateTransition animation;
     Circle gauge;
@@ -70,7 +69,7 @@ public class Pump extends Application {
 
 
         line.rotateProperty().addListener((obs, oldVal, newVal) -> {
-            if (flowOn && oldVal.doubleValue() > 300 && newVal.doubleValue() < 60) {
+            if (pumpOn && oldVal.doubleValue() > 300 && newVal.doubleValue() < 60) {
                 counter++;
                 Platform.runLater(() -> flowCounter.setText("" + counter));
             }
@@ -92,19 +91,19 @@ public class Pump extends Application {
 
             while(true){
                 Message msg= flow.read();
-                if(msg == null) {
+                if(msg==null){
                     continue;
                 }
-                if(msg.equals("on")&&!flowOn){
-                    toggleFlow();
-                }
-                else if(msg.equals("off")&& flowOn){
+                if(msg.equals("flow")&&pumpOn){ // maybe delete this && if we still want to input that there is not flow
                     try {
-                        flow.send(new Message(""+counter));
-                        toggleFlow();
-
+                        flow.send(new Message("flow:"+counter));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
+                    }
+                }
+                else if(msg.equals("reset")){
+                    if(counter!=0){
+                        resetFlow();
                     }
                 }
             }
@@ -116,11 +115,15 @@ public class Pump extends Application {
                 if(msg == null) {
                     continue;
                 }
-                if(msg.equals("on")&&!pumpOn){
+                String[] msgContent = msg.toString().split(":");
+                if(msgContent[0].equals("on")&&!pumpOn){
+                    System.out.println("pumping: "+msgContent[1]);
                     togglePump();
+                    toggleFlow();
                 }
-                else if(msg.equals("off")&& pumpOn){
+                else if(msgContent[0].equals("off")&& pumpOn){
                     togglePump();
+                    toggleFlow();
                 }
             }
 
@@ -129,12 +132,8 @@ public class Pump extends Application {
     }
 
     private void toggleFlow() {
-        flowOn = !flowOn;
-
-        if (flowOn) {
-            counter = 0;
+        if (pumpOn) {
             Platform.runLater(() -> {
-                flowCounter.setText("0");
                 gauge.setFill(Color.YELLOW);
                 line.setRotate(0);
                 animation.playFromStart();
@@ -145,6 +144,14 @@ public class Pump extends Application {
                 animation.stop();
             });
         }
+    }
+
+    private void resetFlow(){
+        counter=0;
+        Platform.runLater(()->{
+            flowCounter.setText(""+0);
+
+        });
     }
 
     private void togglePump() {

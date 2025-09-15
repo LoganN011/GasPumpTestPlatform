@@ -7,19 +7,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.Border;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.sql.Array;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GasServer extends Application {
     private ArrayList<Gas> fuels;
@@ -49,12 +45,11 @@ public class GasServer extends Application {
         log.setText("Messages regarding sales will appear below:\n");
         root.setTop(log);
 
+
         VBox fuelInputs = new VBox();
         fuelInputs.getChildren().addAll(generateFuelInputs(3));
-        root.setCenter(fuelInputs);
-
-        HBox buttons = new HBox();
-        buttons.setPrefWidth(root.getPrefWidth());
+        HBox fuelButtons = new HBox();
+        fuelButtons.setPrefWidth(root.getPrefWidth());
         Button sendInputs = new Button("Set Prices");
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
@@ -64,7 +59,7 @@ public class GasServer extends Application {
                 e.printStackTrace();
             }
         });
-        sendInputs.setPrefWidth(buttons.getPrefWidth()/2);
+        sendInputs.setPrefWidth(fuelButtons.getPrefWidth()/2);
         sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND);
         sendInputs.setOnMouseEntered(x -> sendInputs.setBackground(VisualElements.ACTIVE_ELEMENT));
         sendInputs.setOnMouseExited(x -> sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND));
@@ -73,13 +68,32 @@ public class GasServer extends Application {
         addFuel.setOnMouseClicked(x -> {
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
         });
-        addFuel.setPrefWidth(buttons.getPrefWidth()/2);
+        addFuel.setPrefWidth(fuelButtons.getPrefWidth()/2);
         addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
         addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
         addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
         addFuel.setBorder(VisualElements.THIN_BORDER);
-        buttons.getChildren().addAll(sendInputs, addFuel);
-        root.setBottom(buttons);
+        fuelButtons.getChildren().addAll(sendInputs, addFuel);
+        root.setBottom(fuelButtons);
+        VBox fuelOptions = new VBox();
+        fuelOptions.getChildren().addAll(fuelInputs, fuelButtons);
+        root.setCenter(fuelOptions);
+
+        ToggleButton statusButton = new ToggleButton("Turn On");
+        statusButton.setPrefWidth(root.getPrefWidth());
+        AtomicBoolean activeStatus = new AtomicBoolean(false);
+        statusButton.setBackground(VisualElements.ELEMENT_BACKGROUND);
+        statusButton.setBorder(VisualElements.THIN_BORDER);
+        statusButton.setOnMouseClicked(x -> {
+            statusButton.setText(!(activeStatus.get()) ? "Turn OFF" : "Turn On");
+            try {
+                server.send(new Message("status:" + (!(activeStatus.get()) ? "on" : "off")));
+            } catch (IOException e) {
+                System.out.println("Error: could not send message");
+            }
+            activeStatus.set(!activeStatus.get());
+        });
+        root.setBottom(statusButton);
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
