@@ -2,6 +2,9 @@ package Devices;
 
 import Message.Message;
 import Sockets.commPort;
+import Sockets.controlPort;
+import Sockets.monitorPort;
+import Sockets.statusPort;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +14,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = args[0]; // Write device in arg line
+        String device = "pump"; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -31,6 +34,9 @@ public class Harness {
             }
             case "pump" -> {
                 testPump();
+            }
+            case "special" -> {
+                specialTest();
             }
         }
 //
@@ -104,11 +110,15 @@ public class Harness {
 
     public static void testPump() {
         try {
-            commPort pump = new commPort("pump");
-            commPort flow = new commPort("flow_meter");
+            controlPort pump = new controlPort("pump");
+            monitorPort flow = new monitorPort("flow_meter");
             new Thread(() -> {
                 while (true) {
-                    System.out.println(flow.get());
+                    Message msg = flow.read();
+                    if(msg != null) {
+                        System.out.println(msg);
+                    }
+
                 }
             }).start();
 
@@ -143,9 +153,9 @@ public class Harness {
 
     public static void testHose() {
         try {
-            commPort hose = new commPort("hose");
+            statusPort hose = new statusPort("hose");
             while (true) {
-                System.out.println(hose.get());
+                System.out.println(hose.read());
             }
         } catch (Exception e) {
             e.printStackTrace();

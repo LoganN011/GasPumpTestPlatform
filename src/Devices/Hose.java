@@ -77,7 +77,12 @@ public class Hose extends Application {
                 if(e.getX() >= 700) {
                     System.out.println("on car");
                     connected = true;
-                    harness.send(new Message("connected"));
+                    if(full){
+                        harness.send(new Message("full_tank"));
+                    }else {
+                        harness.send(new Message("connected"));
+                    }
+
                     pumpHandle.setCenterX(700);
                     pumpHandle.setCenterY(200);
                     animation.playFromStart();

@@ -3,50 +3,17 @@ package Sockets;
 import Message.Message;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 
-public class monitorPort {
-    //send and read
-
-    private Socket socket;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
-    private volatile Message lastMessage;
+public class monitorPort extends IOPort {
 
     /**
-     * Make a new monitorPort (can send and read)
+     * Make a new monitorPort (send and read)
      *
      * @param deviceName name of device you are connecting to/from
      * @throws IOException throws if the connections breaks
      */
     public monitorPort(String deviceName) throws IOException {
-        boolean connected = false;
-        while (!connected) {
-            try {
-                socket = new Socket("localhost", Port.portLookup(deviceName));
-                connected = true;
-            }catch (Exception e){
-                try{
-                    Thread.sleep(100);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
-        new Thread(() -> {
-            Message msg;
-            try {
-                while ((msg = (Message) in.readObject()) != null) {
-                    lastMessage = msg;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
+        super(deviceName);
     }
 
     /**
@@ -55,7 +22,7 @@ public class monitorPort {
      * @return the message
      */
     public Message read() {
-        return lastMessage;
+        return super.read();
     }
 
     /**
@@ -65,6 +32,9 @@ public class monitorPort {
      * @throws IOException if there is a socket error this will be thrown
      */
     public void send(Message message) throws IOException {
-        out.writeObject(message);
+        super.send(message);
     }
+    //send and read
+
+
 }
