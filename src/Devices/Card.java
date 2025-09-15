@@ -4,6 +4,7 @@ import Message.Message;
 import Sockets.controlPort;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -16,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+import javafx.stage.Screen;
 
 import java.io.IOException;
 
@@ -28,7 +30,6 @@ public class Card extends Application {
     private Circle[] LEDs;
     private enum LEDState {
         OFF,
-        AWAITING,
         ACCEPTED
     }
 
@@ -41,6 +42,14 @@ public class Card extends Application {
         startIO();
 
         Scene scene = new Scene(createCardReader(), WIDTH, HEIGHT);
+
+        // Screen dimensions
+        Rectangle2D bounds = Screen.getPrimary().getBounds();
+        double screenWidth = bounds.getWidth();
+        double screenHeight = bounds.getHeight();
+//        primaryStage.setX(screenWidth/15);
+//        primaryStage.setY(screenHeight/8);
+
         primaryStage.setScene(scene);
         primaryStage.setTitle("Card Reader");
         primaryStage.show();
@@ -88,31 +97,24 @@ public class Card extends Application {
 
         // Clicking logic
         background.setOnMouseClicked(e -> {
-            // Set LED to orange while waiting for payment authorization
-            setLEDState(LEDState.AWAITING);
+            // Set LEDs to green
+            setLEDState(LEDState.ACCEPTED);
             background.setDisable(true);
 
             String cardNumber = generateCardNumber();
-            System.out.println(cardNumber);
+            System.out.println("Generated: " + cardNumber);
             try {
-                self.send(new Message(cardNumber));
+                self.send(new Message(cardNumber.replaceAll(" ", "")));
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.exit(1);
             }
 
-            // Turn LEDs green if authorized, red if declined
-            // Then reset LEDs back to initial gray state
+            // Reset LEDs
             PauseTransition authWait = new PauseTransition(Duration.millis(700));
             authWait.setOnFinished(ev -> {
-                // TODO: add red for rejected
-                setLEDState(LEDState.ACCEPTED);
+                setLEDState(LEDState.OFF);
 
-                // Reset
-                PauseTransition resetWait = new PauseTransition(Duration.millis(900)); // show green ~0.9s
-                resetWait.setOnFinished(ev2 -> setLEDState(LEDState.OFF));
-                resetWait.playFromStart();
-//                background.setDisable(false);
             });
             authWait.playFromStart();
         });
@@ -150,7 +152,6 @@ public class Card extends Application {
     private void setLEDState(LEDState state) {
         Color fill = switch (state) {
             case OFF      -> Color.web("#9AA0A6");
-            case AWAITING -> Color.web("#FBBC04");
             case ACCEPTED -> Color.web("#34A853");
         };
 
