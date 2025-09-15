@@ -20,7 +20,7 @@ public class DisplayHandler {
         FUEL_SELECT, // 1
         PUMPING, // 2
         FINISH, // 3
-        RECEIPT // 4
+        PAYMENT_FAIL // 4
     }
 
     // IO
@@ -97,12 +97,6 @@ public class DisplayHandler {
                     return;
                 }
 
-                if (currentScreenState == Screen.RECEIPT) {
-                    clearAllSelections();
-                    changeToScreen((0));
-                    return;
-                }
-
             }
 
             // "Begin Fueling" or "Pause" or "Begin" (BEGIN IS TEMPORARY) or "Yes"
@@ -126,7 +120,7 @@ public class DisplayHandler {
                 }
 
                 if (currentScreenState == Screen.FINISH) {
-                    changeToScreen(4);
+                    changeToScreen(0);
                     return;
                 }
 
