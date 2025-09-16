@@ -1,16 +1,15 @@
 package Controller;
 
-import Sockets.commPort;
+public class Transaction extends Thread {
 
-import java.io.IOException;
+    private CardReader cardReader;
+    private GasStationServer gasStationServer;
+    private BankServer bankServer;
 
-public class Transaction implements Runnable {
+    public Transaction() {
+        start();
 
-
-    public Transaction() throws IOException {
-        run();
-
-
+        cardReader = new CardReader();
     }
 
     @Override
