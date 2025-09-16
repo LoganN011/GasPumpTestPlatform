@@ -6,9 +6,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.QuadCurve;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -39,6 +42,22 @@ public class HoseGUI extends Application {
         gasTank.setLayoutX(725);
         gasTank.setLayoutY(200);
 
+        Button clear = new Button("Empty Tank");
+
+        clear.setOnAction(e -> {
+            gasTank.setProgress(0);
+            full = false;
+            if (connected) {
+                harness.send(new Message("connected"));
+            }
+            else  {
+                harness.send(new Message("disconnected"));
+            }
+        });
+
+        clear.setLayoutX(725);
+        clear.setLayoutY(300);
+
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (gasTank.getProgress() < 1.0) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
@@ -46,12 +65,7 @@ public class HoseGUI extends Application {
             } else {
                 if (!full) {
                     full = true;
-                    try {
-                        harness.send(new Message("full_tank"));
-
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    harness.send(new Message("full_tank"));
                 }
             }
         }));
@@ -61,38 +75,47 @@ public class HoseGUI extends Application {
         pumpHandle.setCenterX(100);
         pumpHandle.setCenterY(150);
 
+        Line hoseLine = new Line();
+        hoseLine.setStartX(100);
+        hoseLine.setStartY(25);
+        hoseLine.setEndX(100);
+        hoseLine.setEndY(15);
+        hoseLine.setStrokeWidth(2);
+
 
         pumpHandle.setOnMouseDragged(e -> {
             pumpHandle.setCenterX(e.getX());
             pumpHandle.setCenterY(e.getY());
-
+            hoseLine.setEndX(e.getX());
+            hoseLine.setEndY(e.getY());
         });
         pumpHandle.setOnMouseReleased(e -> {
-            try {
-                if (e.getX() >= 700) {
-                    System.out.println("on car");
-                    connected = true;
-                    if (full) {
-                        harness.send(new Message("full_tank"));
-                    } else {
-                        harness.send(new Message("connected"));
-                    }
-
-                    pumpHandle.setCenterX(700);
-                    pumpHandle.setCenterY(200);
-                    animation.playFromStart();
+            if (e.getX() >= 700) {
+                System.out.println("on car");
+                connected = true;
+                if (full) {
+                    harness.send(new Message("full_tank"));
                 } else {
-                    if (connected) {
-                        animation.stop();
-                        connected = false;
-                        harness.send(new Message("disconnected"));
-                    }
-
+                    harness.send(new Message("connected"));
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
 
+                pumpHandle.setCenterX(700);
+                pumpHandle.setCenterY(200);
+                animation.playFromStart();
+                hoseLine.setEndX(700);
+                hoseLine.setEndY(200);
+            } else {
+                if (connected) {
+                    animation.stop();
+                    connected = false;
+                    harness.send(new Message("disconnected"));
+                    pumpHandle.setCenterX(100);
+                    pumpHandle.setCenterY(150);
+                    hoseLine.setEndX(100);
+                    hoseLine.setEndY(150);
+                }
+
+            }
         });
 
         Rectangle pump = new Rectangle(100, 400);
@@ -105,7 +128,8 @@ public class HoseGUI extends Application {
 
         Pane root = new Pane();
         root.setPrefSize(800, 400);
-        root.getChildren().addAll(pump, car, pumpHandle, gasTank);
+        root.getChildren().addAll(pump, car,hoseLine, pumpHandle, gasTank, clear);
+//        root.getChildren().addAll(pump, car, pumpHandle, gasTank, clear);
 
 
         Scene scene = new Scene(root);
