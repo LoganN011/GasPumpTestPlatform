@@ -30,7 +30,7 @@ import java.util.*;
  * Outbound (UI → backend):
  *   click:<idx>
  */
-public class Display extends Application {
+public class DisplayGUI extends Application {
     private static final Set<String> PAIRS  = Set.of("00","01","23","45","67","89");
 
     private static class ParsedLine {

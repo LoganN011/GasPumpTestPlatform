@@ -3,22 +3,16 @@ package Devices;
 import Message.Message;
 import Sockets.commPort;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import jdk.jshell.execution.JdiExecutionControl;
 
 import java.io.IOException;
 
-public class BankServer extends Application {
+public class BankServerGUI extends Application {
     commPort server;
     TextArea log;
     Button approve, decline;

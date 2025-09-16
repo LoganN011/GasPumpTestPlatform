@@ -21,7 +21,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 
 
-public class Pump extends Application {
+public class PumpGUI extends Application {
 
     monitorPort flow;
     statusPort pump;;

@@ -21,7 +21,7 @@ import javafx.stage.Screen;
 
 import java.io.IOException;
 
-public class Card extends Application {
+public class CardReaderGUI extends Application {
 
     private int WIDTH = 250;
     private int HEIGHT = 250;

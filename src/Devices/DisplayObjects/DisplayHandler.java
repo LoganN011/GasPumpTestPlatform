@@ -1,13 +1,13 @@
 package Devices.DisplayObjects;
 
 import Message.Message;
-import Devices.Display;
+import Devices.DisplayGUI;
 import Sockets.commPort;
 
 import java.io.IOException;
 
 public class DisplayHandler {
-    private final Display display;
+    private final DisplayGUI display;
     private String gasType = null;
     private long timer = 0;
     private boolean isGasSelected = false;
@@ -27,7 +27,7 @@ public class DisplayHandler {
     private volatile boolean running = true;
     private volatile commPort port;
 
-    public DisplayHandler(Display display) {
+    public DisplayHandler(DisplayGUI display) {
         this.display = display;
     }
 

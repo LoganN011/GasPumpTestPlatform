@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class GasServer extends Application {
+public class GasServerGUI extends Application {
     private ArrayList<Gas> fuels;
     private double totalSales;
     private int salesCount;
