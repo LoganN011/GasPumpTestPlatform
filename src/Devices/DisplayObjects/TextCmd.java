@@ -8,7 +8,8 @@ public class TextCmd {
     public final boolean split;
     public final String left, right, text;
     public final Text styledFromMR; // copy font/fill from MR text node
-    public TextCmd (String pair, int s, int f, int c, boolean split, String left, String right, String text, Text styledFromMR) {
+
+    public TextCmd(String pair, int s, int f, int c, boolean split, String left, String right, String text, Text styledFromMR) {
         this.pair = pair;
         this.s = s;
         this.f = f;

@@ -7,10 +7,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class BankServerGUI extends Application {
     commPort server;
@@ -45,8 +44,8 @@ public class BankServerGUI extends Application {
         decline.setDisable(true);
         approve.setOnMouseClicked(x -> card("approved"));
         decline.setOnMouseClicked(x -> card("declined"));
-        approve.setPrefWidth(buttons.getPrefWidth()/2);
-        decline.setPrefWidth(buttons.getPrefWidth()/2);
+        approve.setPrefWidth(buttons.getPrefWidth() / 2);
+        decline.setPrefWidth(buttons.getPrefWidth() / 2);
         approve.setBorder(VisualElements.THIN_BORDER);
         decline.setBorder(VisualElements.THIN_BORDER);
         approve.setBackground(VisualElements.ELEMENT_BACKGROUND);
@@ -64,9 +63,9 @@ public class BankServerGUI extends Application {
         primaryStage.show();
 
         Thread io = new Thread(() -> {
-           while(true) {
-               handleMessage(server.get());
-           }
+            while (true) {
+                handleMessage(server.get());
+            }
         });
         io.start();
 
@@ -76,7 +75,7 @@ public class BankServerGUI extends Application {
         String[] request = message.toString().split(":");
         String requestType = request[0];
         String requestInfo = request[1];
-        switch (requestType.toLowerCase()){
+        switch (requestType.toLowerCase()) {
             case "card" -> {
                 updateLog("Incoming Request For Card: " + requestInfo + ".");
                 approve.setDisable(false);
@@ -92,16 +91,13 @@ public class BankServerGUI extends Application {
     private void card(String status) {
         approve.setDisable(true);
         decline.setDisable(true);
-        try {
-            server.send(new Message(status));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        server.send(new Message(status));
+
         updateLog("Sending " + status);
     }
 
     private void updateLog(String message) {
-        log.setText(log.getText() + "\n"+ message);
+        log.setText(log.getText() + "\n" + message);
     }
 
 }

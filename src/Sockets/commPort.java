@@ -2,16 +2,13 @@ package Sockets;
 
 import Message.Message;
 
-import java.io.IOException;
-
 public class commPort extends IOPort {
     /**
      * Make a new commPort(send and get)
      *
      * @param deviceName name of device you are connecting to/from
-     * @throws IOException throws if the connections breaks
      */
-    public commPort(String deviceName) throws IOException {
+    public commPort(String deviceName) {
         super(deviceName);
     }
 
@@ -28,9 +25,8 @@ public class commPort extends IOPort {
      * Send a message to the connected device
      *
      * @param message the message being sent
-     * @throws IOException if there is a socket error this will be thrown
      */
-    public void send(Message message) throws IOException {
+    public void send(Message message) {
         super.send(message);
     }
 

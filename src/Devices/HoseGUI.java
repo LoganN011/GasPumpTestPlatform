@@ -23,10 +23,10 @@ public class HoseGUI extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage)  {
+    public void start(Stage primaryStage) {
         controlPort control = null;
         try {
-             control = new controlPort("hose");
+            control = new controlPort("hose");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -39,17 +39,17 @@ public class HoseGUI extends Application {
         gasTank.setLayoutX(725);
         gasTank.setLayoutY(200);
 
-        Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event ->{
+        Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (gasTank.getProgress() < 1.0) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
                 System.out.println(gasTank.getProgress());
             } else {
-                if(!full){
-                    full=true;
-                    try{
+                if (!full) {
+                    full = true;
+                    try {
                         harness.send(new Message("full_tank"));
 
-                    }catch (Exception ex) {
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -62,54 +62,50 @@ public class HoseGUI extends Application {
         pumpHandle.setCenterY(150);
 
 
-        pumpHandle.setOnMouseDragged(e ->{
+        pumpHandle.setOnMouseDragged(e -> {
             pumpHandle.setCenterX(e.getX());
             pumpHandle.setCenterY(e.getY());
 
         });
         pumpHandle.setOnMouseReleased(e -> {
-            try{
-                if(e.getX() >= 700) {
+            try {
+                if (e.getX() >= 700) {
                     System.out.println("on car");
                     connected = true;
-                    if(full){
+                    if (full) {
                         harness.send(new Message("full_tank"));
-                    }else {
+                    } else {
                         harness.send(new Message("connected"));
                     }
 
                     pumpHandle.setCenterX(700);
                     pumpHandle.setCenterY(200);
                     animation.playFromStart();
-                }
-                else {
-                    if(connected) {
+                } else {
+                    if (connected) {
                         animation.stop();
                         connected = false;
                         harness.send(new Message("disconnected"));
                     }
 
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
         });
 
-        Rectangle pump = new Rectangle(100,400);
+        Rectangle pump = new Rectangle(100, 400);
         pump.setStyle("-fx-fill: #FF0000");
 
 
-        Rectangle car = new Rectangle(100,400);
+        Rectangle car = new Rectangle(100, 400);
         car.setStyle("-fx-fill: grey");
         car.setX(700);
 
         Pane root = new Pane();
-        root.setPrefSize(800,400);
-        root.getChildren().addAll(pump,car,pumpHandle,gasTank);
-
-
-
+        root.setPrefSize(800, 400);
+        root.getChildren().addAll(pump, car, pumpHandle, gasTank);
 
 
         Scene scene = new Scene(root);

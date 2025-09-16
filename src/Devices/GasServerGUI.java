@@ -7,13 +7,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,13 +55,13 @@ public class GasServerGUI extends Application {
         Button sendInputs = new Button("Set Prices");
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
-            try{
+            try {
                 server.send(generateCurrentPrices());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        sendInputs.setPrefWidth(fuelButtons.getPrefWidth()/2);
+        sendInputs.setPrefWidth(fuelButtons.getPrefWidth() / 2);
         sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND);
         sendInputs.setOnMouseEntered(x -> sendInputs.setBackground(VisualElements.ACTIVE_ELEMENT));
         sendInputs.setOnMouseExited(x -> sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND));
@@ -68,7 +70,7 @@ public class GasServerGUI extends Application {
         addFuel.setOnMouseClicked(x -> {
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
         });
-        addFuel.setPrefWidth(fuelButtons.getPrefWidth()/2);
+        addFuel.setPrefWidth(fuelButtons.getPrefWidth() / 2);
         addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
         addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
         addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
@@ -86,11 +88,9 @@ public class GasServerGUI extends Application {
         statusButton.setBorder(VisualElements.THIN_BORDER);
         statusButton.setOnMouseClicked(x -> {
             statusButton.setText(!(activeStatus.get()) ? "Turn OFF" : "Turn On");
-            try {
-                server.send(new Message("status:" + (!(activeStatus.get()) ? "on" : "off")));
-            } catch (IOException e) {
-                System.out.println("Error: could not send message");
-            }
+
+            server.send(new Message("status:" + (!(activeStatus.get()) ? "on" : "off")));
+
             activeStatus.set(!activeStatus.get());
         });
         root.setBottom(statusButton);
@@ -101,7 +101,7 @@ public class GasServerGUI extends Application {
         primaryStage.show();
 
         Thread io = new Thread(() -> {
-            while(true) {
+            while (true) {
                 handleMessage(server.get());
             }
         });
@@ -115,8 +115,8 @@ public class GasServerGUI extends Application {
 
     private Message generateCurrentPrices() {
         String result = "";
-        for(Gas cur: fuels) {
-            result += cur.makeMessage()+",";
+        for (Gas cur : fuels) {
+            result += cur.makeMessage() + ",";
         }
         return new Message(result);
     }
@@ -150,11 +150,11 @@ public class GasServerGUI extends Application {
             fuelNameInput.setPromptText("Fuel Name");
             TextField fuelPriceInput = new TextField();
             fuelPriceInput.setPromptText("Fuel Price");
-            fuelNameInput.setPrefWidth(log.getPrefWidth()/2);
+            fuelNameInput.setPrefWidth(log.getPrefWidth() / 2);
             fuelNameInput.setBackground(VisualElements.ELEMENT_BACKGROUND);
             fuelNameInput.setOnMouseEntered(x -> fuelNameInput.setBackground(VisualElements.ACTIVE_ELEMENT));
             fuelNameInput.setOnMouseExited(x -> fuelNameInput.setBackground(VisualElements.ELEMENT_BACKGROUND));
-            fuelPriceInput.setPrefWidth(log.getPrefWidth()/2);
+            fuelPriceInput.setPrefWidth(log.getPrefWidth() / 2);
             fuelPriceInput.setBackground(VisualElements.ELEMENT_BACKGROUND);
             fuelPriceInput.setOnMouseEntered(x -> fuelPriceInput.setBackground(VisualElements.ACTIVE_ELEMENT));
             fuelPriceInput.setOnMouseExited(x -> fuelPriceInput.setBackground(VisualElements.ELEMENT_BACKGROUND));
