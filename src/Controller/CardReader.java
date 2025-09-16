@@ -4,9 +4,13 @@ import Sockets.commPort;
 
 public class CardReader {
 
-    private commPort cardGUI;
+    private commPort device;
 
     public CardReader() {
-        cardGUI = new commPort("card");
+        device = new commPort("card");
+    }
+
+    public String readCard() {
+        return device.get().toString();
     }
 }
