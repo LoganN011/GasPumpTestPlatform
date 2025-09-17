@@ -66,22 +66,22 @@ public class DisplayGUI extends Application {
         displayHandler.startIO();
 
         // timer
-        timer = new MyTimer();
-        timer.timeProperty().addListener((obs, oldV, newV) -> {
-            System.out.println("Time: " + newV.longValue());
-            displayHandler.setTime(newV.longValue());
-
-            // 30-second timeout
-            if (newV.longValue() > 30) {
-                try {
-                    displayHandler.doTimeout();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        });
-        timer.start();
+//        timer = new MyTimer();
+//        timer.timeProperty().addListener((obs, oldV, newV) -> {
+//            System.out.println("Time: " + newV.longValue());
+//            displayHandler.setTime(newV.longValue());
+//
+//            // 30-second timeout
+//            if (newV.longValue() > 30) {
+//                try {
+//                    displayHandler.doTimeout();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//        });
+//        timer.start();
 
         Scene scene = new Scene(this.createPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);

@@ -1,15 +1,14 @@
 package Controller;
 
-import static Controller.InternalState.OFF;
+import static Controller.InternalState.*;
 
-public class Transaction extends Process {
+public class Transaction extends Thread {
 
     private CardReader cardReader;
     private GasStationServer gasStationServer;
     private BankServer bankServer;
 
-    public Transaction(InternalState state) {
-        super(state);
+    public Transaction() {
         cardReader = new CardReader();
         gasStationServer = new GasStationServer();
         bankServer = new BankServer();
@@ -19,13 +18,19 @@ public class Transaction extends Process {
 
     @Override
     public void run() {
-        switch(state) {
-            case OFF -> {
-                gasStationServer.waitForPower();
-                System.out.println("ive been powered on");
+        while (true) {
+            switch (Controller.getState()) {
+                case OFF -> {
+                    gasStationServer.waitForPower();
+                    System.out.println("ive been powered on");
+                    Controller.setState(STANDBY);
+                }
+                case STANDBY -> {
+                    //todo: save this into a variable?
+                    System.out.println("i have gotten the prices: " + gasStationServer.waitForPrices().toString());
+                    Controller.setState(IDLE);
+                }
             }
         }
-
-        System.out.println(cardReader.readCard());
     }
 }

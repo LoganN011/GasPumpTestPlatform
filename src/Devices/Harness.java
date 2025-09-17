@@ -14,7 +14,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = "card"; // Write device in arg line
+        String device = "display"; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -160,24 +160,29 @@ public class Harness {
         try {
             commPort display = new commPort("screen");
 
-            ScreenState.welcomeScreen(display);
+            display.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable,t:23:s1:f0:c2:test"));
+            Thread.sleep(5000);
+            display.send(new Message("t:01:s0:f0:c2:Welcome"));
 
-            while (true) {
-                Message m = display.get();
 
-                if (m == null) continue;
-
-                System.out.println("Display responded: " + m.toString());
-
-                switch (m.toString()) {
-                    case "0" -> ScreenState.welcomeScreen(display);
-                    case "1" -> ScreenState.fuelSelectionScreen(display);
-                    case "2" -> ScreenState.pumpingScreen(display);
-                    case "3" -> ScreenState.finishScreen(display);
-                    case "4" -> ScreenState.paymentDeclinedScreen(display);
-                    default -> System.out.println("ERROR ERROR ERROR");
-                }
-            }
+//            ScreenState.welcomeScreen(display);
+//
+//            while (true) {
+//                Message m = display.get();
+//
+//                if (m == null) continue;
+//
+//                System.out.println("Display responded: " + m.toString());
+//
+//                switch (m.toString()) {
+//                    case "0" -> ScreenState.welcomeScreen(display);
+//                    case "1" -> ScreenState.fuelSelectionScreen(display);
+//                    case "2" -> ScreenState.pumpingScreen(display);
+//                    case "3" -> ScreenState.finishScreen(display);
+//                    case "4" -> ScreenState.paymentDeclinedScreen(display);
+//                    default -> System.out.println("ERROR ERROR ERROR");
+//                }
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();
