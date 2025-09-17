@@ -17,8 +17,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.io.InputStream;
 
 
 public class PumpGUI extends Application {
@@ -52,13 +55,27 @@ public class PumpGUI extends Application {
 
         StackPane flowMeter = new StackPane();
         gauge = new Circle(50);
-        gauge.setFill(Color.TRANSPARENT);
+        gauge.setFill(Color.WHITE);
         gauge.setStroke(Color.BLACK);
         line = new Rectangle(10, 100);
-        flowMeter.getChildren().addAll(gauge, line);
-        VBox flowAssembly = new VBox(10);
+        Rectangle background = new Rectangle(125,125);
+
+        flowMeter.getChildren().addAll(background,gauge, line);
+        VBox flowAssembly = new VBox();
+
         flowCounter = new Label("0");
-        flowAssembly.getChildren().addAll(flowCounter, flowMeter);
+
+        flowCounter.setFont(new Font("Lucida Console",24));
+        flowCounter.setStyle(
+                "-fx-text-fill: red;" +
+                        "-fx-background-color: black;" +
+                        "-fx-padding: 10;" +
+                        "-fx-border-color: darkred;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 4;"
+        );
+        Rectangle textBackground = new Rectangle(125,50);
+        flowAssembly.getChildren().addAll(new StackPane(textBackground,flowCounter), flowMeter);
 
         animation = new RotateTransition(Duration.millis(250), line);
         animation.setByAngle(360);
@@ -133,7 +150,7 @@ public class PumpGUI extends Application {
             });
         } else {
             Platform.runLater(() -> {
-                gauge.setFill(Color.TRANSPARENT);
+                gauge.setFill(Color.WHITE);
                 animation.stop();
             });
         }
