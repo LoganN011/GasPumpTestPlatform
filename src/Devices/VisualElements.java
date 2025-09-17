@@ -44,4 +44,16 @@ public class VisualElements {
 
         return imgView;
     }
+    public static Image getImage(String fileName) {
+        FileInputStream inputStream;
+
+        try {
+            inputStream = new FileInputStream("resources/images/" + fileName);
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new Image(inputStream);
+    }
 }
