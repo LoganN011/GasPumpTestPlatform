@@ -9,6 +9,8 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -23,14 +25,12 @@ public class PumpGUI extends Application {
 
     monitorPort flow;
     statusPort pump;
-    ;
     boolean pumpOn = false;
     RotateTransition animation;
     Circle gauge;
     int counter = 0;
     Label flowCounter;
-    Rectangle pumpRec;
-    Label pumpLabel;
+    ImageView pumpImage;
     Rectangle line;
 
     public static void main(String[] args) {
@@ -46,11 +46,9 @@ public class PumpGUI extends Application {
             e.printStackTrace();
         }
 
-        StackPane pumpDevice = new StackPane();
-        pumpRec = new Rectangle(200, 150);
-        pumpRec.setFill(Color.GREY);
-        pumpLabel = new Label("Pump OFF");
-        pumpDevice.getChildren().addAll(pumpRec, pumpLabel);
+        pumpImage = VisualElements.getImage("off.png", 200);
+        pumpImage.setFitHeight(200);
+        pumpImage.setFitWidth(200);
 
         StackPane flowMeter = new StackPane();
         gauge = new Circle(50);
@@ -78,7 +76,7 @@ public class PumpGUI extends Application {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
         root.setMinSize(300, 300);
-        root.setCenter(pumpDevice);
+        root.setCenter(pumpImage);
         root.setRight(flowAssembly);
 
         Scene scene = new Scene(root);
@@ -153,14 +151,12 @@ public class PumpGUI extends Application {
         pumpOn = !pumpOn;
         if (pumpOn) {
             Platform.runLater(() -> {
-                pumpRec.setFill(Color.GREEN);
-                pumpLabel.setText("Pump ON");
+                pumpImage.setImage(VisualElements.getImage("on.png"));
             });
 
         } else {
             Platform.runLater(() -> {
-                pumpRec.setFill(Color.GREY);
-                pumpLabel.setText("Pump OFF");
+                pumpImage.setImage(VisualElements.getImage("off.png"));
             });
         }
     }
