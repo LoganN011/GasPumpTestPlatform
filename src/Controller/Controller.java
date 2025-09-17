@@ -2,7 +2,7 @@ package Controller;
 
 public class Controller {
 
-    private static InternalState internalState = InternalState.OFF;
+    private static InternalState internalState = InternalState.OFF; //Maybe we want this atomic because of threads
 
     public static void main(String[] args) {
 

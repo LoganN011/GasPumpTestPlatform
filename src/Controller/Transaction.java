@@ -2,7 +2,7 @@ package Controller;
 
 import static Controller.InternalState.*;
 
-public class Transaction extends Thread {
+public class Transaction extends Thread { //Is this not extending process anymore?
 
     private CardReader cardReader;
     private GasStationServer gasStationServer;
