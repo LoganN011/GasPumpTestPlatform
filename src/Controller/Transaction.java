@@ -1,5 +1,9 @@
 package Controller;
 
+import Devices.Gas;
+
+import java.util.ArrayList;
+
 import static Controller.InternalState.*;
 
 public class Transaction extends Thread { //Is this not extending process anymore?
@@ -8,10 +12,16 @@ public class Transaction extends Thread { //Is this not extending process anymor
     private GasStationServer gasStationServer;
     private BankServer bankServer;
 
+    //todo should these be atomic reference?
+    private ArrayList<Gas> newPriceList;
+    private String cardNumber;
+
     public Transaction() {
         cardReader = new CardReader();
         gasStationServer = new GasStationServer();
         bankServer = new BankServer();
+        newPriceList = null;
+        cardNumber = null;
 
         start();
     }
@@ -26,10 +36,26 @@ public class Transaction extends Thread { //Is this not extending process anymor
                     Controller.setState(STANDBY);
                 }
                 case STANDBY -> {
-                    //todo: save this into a variable?
-                    System.out.println("i have gotten the prices: " + gasStationServer.waitForPrices().toString());
+                    newPriceList = gasStationServer.waitForPrices();
+                    System.out.println("prices received: " + newPriceList.toString());
                     Controller.setState(IDLE);
                 }
+                case IDLE -> {
+                    cardNumber = cardReader.readCard();
+                    Controller.setState(AUTHORIZING);
+                }
+                case AUTHORIZING -> {
+                    //todo continue from here...
+                    boolean approved = bankServer.authorize(cardNumber);
+                    if(approved){
+                        Controller.setState(SELECTION);
+                        System.out.println("approved");
+                    } else {
+                        Controller.setState(DECLINED);
+                        System.out.println("approved");
+                    }
+                }
+
             }
         }
     }

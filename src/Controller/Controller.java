@@ -1,8 +1,10 @@
 package Controller;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class Controller {
 
-    private static InternalState internalState = InternalState.OFF; //Maybe we want this atomic because of threads
+    private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF); //Maybe we want this atomic because of threads
 
     public static void main(String[] args) {
 
@@ -10,15 +12,14 @@ public class Controller {
         Display displayProcess = new Display();
         Pumping pumpingProcess = new Pumping();
 
-
     }
 
     public static InternalState getState(){
-        return internalState;
+        return internalState.get();
     }
 
     public static void setState(InternalState newState) {
-        internalState = newState;
+        internalState.set(newState);
     }
 
 }
