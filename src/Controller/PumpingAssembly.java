@@ -12,24 +12,20 @@ public class PumpingAssembly {
         pump = new controlPort("pump");
         flow = new monitorPort("flow_meter");
     }
-    /*
-    Some get flow method
-    some method to turn on and off the pump
-    some method to reset the flow meter
-     */
 
-    public void pumpOn(){
-        pump.send(new Message("on"));
+    public void pumpOn(String type){
+        pump.send(new Message("on:"+type));
+        flow.send(new Message("flow"));
     }
 
     public void pumpOff(){
         pump.send(new Message("off"));
     }
 
-    public void requestFlow(){ // bad name because this tells to flow meter to start telling us the flow rate
-        flow.send(new Message("flow"));
+    public Message readFlow(){
+        //might want to check here if it is null if it is then return 0 but i am not sure
+        return  flow.read();
     }
-    //Some method to get the current flow but might combine in request flow??
 
     public void resetFlow(){
         flow.send(new Message("reset"));

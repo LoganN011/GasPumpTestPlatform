@@ -10,7 +10,7 @@ public class Controller {
 
         Transaction transactionProcess = new Transaction();
         Display displayProcess = new Display();
-        Pumping pumpingProcess = new Pumping();
+        Fueling pumpingProcess = new Fueling();
 
     }
 

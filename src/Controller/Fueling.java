@@ -1,11 +1,11 @@
 package Controller;
 
-public class Pumping extends Thread{
+public class Fueling extends Thread{
 
     private Hose hose;
     private PumpingAssembly pumpingAssembly;
 
-    public Pumping(){
+    public Fueling(){
         hose = new Hose();
         pumpingAssembly = new PumpingAssembly();
     }
