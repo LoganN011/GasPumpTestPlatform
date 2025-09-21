@@ -53,4 +53,12 @@ public class Gas {
         return result;
     }
 
+    public static String makePricesMessage(ArrayList<Gas> fuels) {
+        String result = "";
+        for (Gas cur : fuels) {
+            result += cur.makeMessage() + ",";
+        }
+        return result;
+    }
+
 }

@@ -1,7 +1,10 @@
 package Controller;
 
+import Devices.Gas;
 import Message.Message;
 import Sockets.commPort;
+
+import java.util.ArrayList;
 
 import static Controller.InternalState.*;
 
@@ -58,9 +61,26 @@ public class Display extends Thread {
     private void fuelSelect() {
         //todo show the correct screen
         if (lastState != SELECTION) {
-            device.send(new Message("t:01:s0:f0:c2:Show the selection screen:45:s1:f1:c1:APPROVED!"));
+            Message options = optionsDisplayable(Transaction.getPrices());
+            device.send(options);
         }
         lastState = SELECTION;
+    }
+
+    private Message optionsDisplayable(ArrayList<Gas> options) {
+        String result = "t:01:s0:f0:c2:SELECT YOUR GAS TYPE,";
+        int position = 2;
+        for(Gas cur: options) {
+            result += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
+            position += 2;
+        }
+        result += "b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL";
+        //        device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
+//        device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
+//        device.send(new Message("b:4:m,b:5:m,t:45:s1:f1:c1:PLUS 89"));
+//        device.send(new Message("b:6:m,b:7:m,t:67:s1:f1:c1:PREMIUM 91"));
+//        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL"));
+        return new Message(result);
     }
 
     private void cardDeclined() {

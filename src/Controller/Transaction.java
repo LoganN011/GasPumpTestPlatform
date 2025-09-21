@@ -1,20 +1,22 @@
 package Controller;
 
 import Devices.Gas;
+import Message.Message;
 
 import java.util.ArrayList;
 
 import static Controller.InternalState.*;
 
-public class Transaction extends Thread { //Is this not extending process anymore?
+public class Transaction extends Thread {
 
     private CardReader cardReader;
     private GasStationServer gasStationServer;
     private BankServer bankServer;
 
     //todo should these be atomic reference?
-    private ArrayList<Gas> newPriceList;
-    private String cardNumber;
+    private static ArrayList<Gas> newPriceList;
+    private static String cardNumber;
+    private static ArrayList<Gas> inUsePriceList;
 
     public Transaction() {
         cardReader = new CardReader();
@@ -22,6 +24,7 @@ public class Transaction extends Thread { //Is this not extending process anymor
         bankServer = new BankServer();
         newPriceList = null;
         cardNumber = null;
+        inUsePriceList = null;
 
         start();
     }
@@ -48,6 +51,7 @@ public class Transaction extends Thread { //Is this not extending process anymor
                     //todo continue from here...
                     boolean approved = bankServer.authorize(cardNumber);
                     if(approved){
+                        inUsePriceList = newPriceList;
                         Controller.setState(SELECTION);
                         System.out.println("approved");
                     } else {
@@ -59,4 +63,9 @@ public class Transaction extends Thread { //Is this not extending process anymor
             }
         }
     }
+
+    public static ArrayList<Gas> getPrices(){
+        return inUsePriceList;
+    }
+
 }

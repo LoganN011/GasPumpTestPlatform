@@ -114,11 +114,7 @@ public class GasServerGUI extends Application {
     }
 
     private Message generateCurrentPrices() {
-        String result = "";
-        for (Gas cur : fuels) {
-            result += cur.makeMessage() + ",";
-        }
-        return new Message(result);
+        return new Message(Gas.makePricesMessage(fuels));
     }
 
     private ArrayList<Gas> readFuelInputs(VBox fuelInputs) {
