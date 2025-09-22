@@ -20,6 +20,7 @@ public class HoseGUI extends Application {
 
     private boolean connected;
     private boolean full;
+    private final double SIZE= 400;
 
     public static void main(String[] args) {
         launch(args);
@@ -37,12 +38,18 @@ public class HoseGUI extends Application {
         controlPort harness = control;
         ProgressBar gasTank = new ProgressBar();
         gasTank.setProgress((Math.random()));
-        gasTank.setStyle("-fx-accent: yellow;");
+        gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
         gasTank.setRotate(-90);
-        gasTank.setLayoutX(725);
-        gasTank.setLayoutY(200);
+        gasTank.setLayoutX((SIZE - (SIZE/8))+(SIZE/32));
+        gasTank.setLayoutY(SIZE/4);
+        //resize gas tank
+        gasTank.setPrefWidth(SIZE/8);
 
-        Button clear = new Button("Empty Tank");
+
+        Button clear = new Button("Empty");
+        clear.setPrefWidth(SIZE / 10);
+        clear.setPrefHeight(SIZE / 24);
+
 
         clear.setOnAction(e -> {
             gasTank.setProgress(0);
@@ -55,8 +62,8 @@ public class HoseGUI extends Application {
             }
         });
 
-        clear.setLayoutX(725);
-        clear.setLayoutY(300);
+        clear.setLayoutX((SIZE - (SIZE/8))+(SIZE/32));
+        clear.setLayoutY(SIZE/3);
 
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (gasTank.getProgress() < 1.0) {
@@ -71,15 +78,15 @@ public class HoseGUI extends Application {
         }));
         animation.setCycleCount(Timeline.INDEFINITE);
 
-        Circle pumpHandle = new Circle(25);
-        pumpHandle.setCenterX(100);
-        pumpHandle.setCenterY(150);
+        Circle pumpHandle = new Circle(SIZE/32);
+        pumpHandle.setCenterX(SIZE/8);
+        pumpHandle.setCenterY(SIZE/5);
 
         Line hoseLine = new Line();
-        hoseLine.setStartX(100);
-        hoseLine.setStartY(25);
-        hoseLine.setEndX(100);
-        hoseLine.setEndY(15);
+        hoseLine.setStartX(SIZE/8);
+        hoseLine.setStartY(SIZE/32);
+        hoseLine.setEndX(pumpHandle.getCenterX());
+        hoseLine.setEndY(pumpHandle.getCenterY());
         hoseLine.setStrokeWidth(2);
 
 
@@ -90,7 +97,7 @@ public class HoseGUI extends Application {
             hoseLine.setEndY(e.getY());
         });
         pumpHandle.setOnMouseReleased(e -> {
-            if (e.getX() >= 700) {
+            if (e.getX() >= (SIZE - (SIZE/8))) {
                 System.out.println("on car");
                 connected = true;
                 if (full) {
@@ -99,35 +106,35 @@ public class HoseGUI extends Application {
                     harness.send(new Message("connected"));
                 }
 
-                pumpHandle.setCenterX(700);
-                pumpHandle.setCenterY(200);
+                pumpHandle.setCenterX(SIZE - (SIZE/8));
+                pumpHandle.setCenterY(SIZE/4);
                 animation.playFromStart();
-                hoseLine.setEndX(700);
-                hoseLine.setEndY(200);
+                hoseLine.setEndX(SIZE - (SIZE/8));
+                hoseLine.setEndY(SIZE/4);
             } else {
                 if (connected) {
                     animation.stop();
                     connected = false;
                     harness.send(new Message("disconnected"));
-                    pumpHandle.setCenterX(100);
-                    pumpHandle.setCenterY(150);
-                    hoseLine.setEndX(100);
-                    hoseLine.setEndY(150);
+                    pumpHandle.setCenterX(SIZE/8);
+                    pumpHandle.setCenterY(SIZE/5);
+                    hoseLine.setEndX(SIZE/8);
+                    hoseLine.setEndY(SIZE/5);
                 }
 
             }
         });
 
-        Rectangle pump = new Rectangle(100, 400);
+        Rectangle pump = new Rectangle(SIZE/8, SIZE/2);
         pump.setStyle("-fx-fill: #FF0000");
 
 
-        Rectangle car = new Rectangle(100, 400);
+        Rectangle car = new Rectangle(SIZE/8, SIZE/2);
         car.setStyle("-fx-fill: grey");
-        car.setX(700);
+        car.setX(SIZE - (SIZE/8));
 
         Pane root = new Pane();
-        root.setPrefSize(800, 400);
+        root.setPrefSize(SIZE, SIZE/2);
         root.getChildren().addAll(pump, car,hoseLine, pumpHandle, gasTank, clear);
 //        root.getChildren().addAll(pump, car, pumpHandle, gasTank, clear);
 

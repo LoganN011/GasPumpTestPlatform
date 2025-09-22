@@ -35,6 +35,7 @@ public class PumpGUI extends Application {
     Label flowCounter;
     ImageView pumpImage;
     Rectangle line;
+    private final double SIZE= 200;
 
     public static void main(String[] args) {
         launch(args);
@@ -49,32 +50,32 @@ public class PumpGUI extends Application {
             e.printStackTrace();
         }
 
-        pumpImage = VisualElements.getImage("off.png", 200);
-        pumpImage.setFitHeight(200);
-        pumpImage.setFitWidth(200);
+        pumpImage = VisualElements.getImage("off.png", (int) (SIZE/2));
+        pumpImage.setFitHeight(SIZE/2);
+        pumpImage.setFitWidth(SIZE/2);
 
         StackPane flowMeter = new StackPane();
-        gauge = new Circle(50);
+        gauge = new Circle(SIZE/8);
         gauge.setFill(Color.WHITE);
         gauge.setStroke(Color.BLACK);
-        line = new Rectangle(10, 100);
-        Rectangle background = new Rectangle(125,125);
+        line = new Rectangle(SIZE/40, SIZE/4);
+        Rectangle background = new Rectangle(SIZE/3.2,SIZE/3.2);
 
         flowMeter.getChildren().addAll(background,gauge, line);
         VBox flowAssembly = new VBox();
 
         flowCounter = new Label("0");
 
-        flowCounter.setFont(new Font("Lucida Console",24));
+        flowCounter.setFont(new Font("Lucida Console",SIZE/16));
         flowCounter.setStyle(
                 "-fx-text-fill: red;" +
                         "-fx-background-color: black;" +
-                        "-fx-padding: 10;" +
+                        "-fx-padding: SIZE/40;" +
                         "-fx-border-color: darkred;" +
-                        "-fx-border-width: 2;" +
-                        "-fx-border-radius: 4;"
+                        "-fx-border-width: SIZE/200;" +
+                        "-fx-border-radius: SIZE/100;"
         );
-        Rectangle textBackground = new Rectangle(125,50);
+        Rectangle textBackground = new Rectangle(SIZE/3.2,SIZE/8);
         flowAssembly.getChildren().addAll(new StackPane(textBackground,flowCounter), flowMeter);
 
         animation = new RotateTransition(Duration.millis(250), line);
@@ -92,7 +93,7 @@ public class PumpGUI extends Application {
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
-        root.setMinSize(300, 300);
+        root.setMinSize(SIZE, SIZE);
         root.setCenter(pumpImage);
         root.setRight(flowAssembly);
 
