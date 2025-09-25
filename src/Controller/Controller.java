@@ -4,7 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller {
 
-    private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF); //Maybe we want this atomic because of threads
+    private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF);
+    //todo move variables here
 
     public static void main(String[] args) {
 
