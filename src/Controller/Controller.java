@@ -8,6 +8,7 @@ public class Controller {
 
     public static void main(String[] args) {
 
+        //Consider changing these to regular methods not constructors
         Transaction transactionProcess = new Transaction();
         Display displayProcess = new Display();
         Fueling pumpingProcess = new Fueling();
