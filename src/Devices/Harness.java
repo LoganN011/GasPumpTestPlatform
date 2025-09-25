@@ -1,13 +1,12 @@
 package Devices;
 
-import Message.Message;
 import Devices.DisplayObjects.ScreenState;
+import Message.Message;
 import Sockets.commPort;
 import Sockets.controlPort;
 import Sockets.monitorPort;
 import Sockets.statusPort;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,7 +14,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = "pump"; // Write device in arg line
+        String device = "display"; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -48,63 +47,57 @@ public class Harness {
         AtomicReference<String> currentState = new AtomicReference<>("off");
         System.out.println("i am starting");
         new Thread(() -> {
-            try {
-                commPort gasServerPort = new commPort("gas_server");
-                while (true) {
-                    Message message = gasServerPort.get();
-                    switch (currentState.get()) {
-                        case "off" -> {
-                            //String message = gasServerPort.get().toString();
-                            System.out.println("done blocking for message");
-                            String[] messageContents = message.toString().split(":");
-                            if (messageContents[0].equals("status")) {
-                                if (messageContents[1].equals("on")) {
-                                    System.out.println("i am on now");
-                                    currentState.set("idle");
-                                }
+
+            commPort gasServerPort = new commPort("gas_server");
+            while (true) {
+                Message message = gasServerPort.get();
+                switch (currentState.get()) {
+                    case "off" -> {
+                        //String message = gasServerPort.get().toString();
+                        System.out.println("done blocking for message");
+                        String[] messageContents = message.toString().split(":");
+                        if (messageContents[0].equals("status")) {
+                            if (messageContents[1].equals("on")) {
+                                System.out.println("i am on now");
+                                currentState.set("idle");
                             }
-                        }
-                        case "idle" -> {
-                            //Message message = gasServerPort.get();
-                            String[] messageContents = message.toString().split(":");
-                            if (messageContents[0].equals("status")) {
-                                if (messageContents[1].equals("off")) {
-                                    System.out.println("i am off now");
-                                    currentState.set("off");
-                                }
-                            } else {
-                                ArrayList<Gas> fuelOptions = Gas.parseGasses(message);
-                                fuelOptions.forEach(System.out::println);
-                                currentState.set("ready");
-                            }
-                        }
-                        default -> {
-                            System.out.println("unknown state or ready");
                         }
                     }
+                    case "idle" -> {
+                        //Message message = gasServerPort.get();
+                        String[] messageContents = message.toString().split(":");
+                        if (messageContents[0].equals("status")) {
+                            if (messageContents[1].equals("off")) {
+                                System.out.println("i am off now");
+                                currentState.set("off");
+                            }
+                        } else {
+                            ArrayList<Gas> fuelOptions = Gas.parseGasses(message);
+                            fuelOptions.forEach(System.out::println);
+                            currentState.set("ready");
+                        }
+                    }
+                    default -> {
+                        System.out.println("unknown state or ready");
+                    }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }).start();
 
 
         new Thread(() -> {
-            try {
-                commPort cardPort = new commPort("card");
-                while (true) {
-                    Message message = cardPort.get();
-                    switch (currentState.get()) {
-                        case "ready" -> {
-                            System.out.println("received card number: " + message);
-                        }
-                        default -> {
-                            System.out.println("unknown state: " + message);
-                        }
+
+            commPort cardPort = new commPort("card");
+            while (true) {
+                Message message = cardPort.get();
+                switch (currentState.get()) {
+                    case "ready" -> {
+                        System.out.println("received card number: " + message);
+                    }
+                    default -> {
+                        System.out.println("unknown state: " + message);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }).start();
     }
@@ -116,7 +109,7 @@ public class Harness {
             new Thread(() -> {
                 while (true) {
                     Message msg = flow.read();
-                    if(msg != null) {
+                    if (msg != null) {
                         System.out.println(msg);
                     }
 
@@ -167,24 +160,29 @@ public class Harness {
         try {
             commPort display = new commPort("screen");
 
-            ScreenState.welcomeScreen(display);
+            display.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable,t:23:s1:f0:c2:test"));
+            Thread.sleep(5000);
+            display.send(new Message("t:01:s0:f0:c2:Welcome"));
 
-            while (true) {
-                Message m = display.get();
 
-                if (m == null) continue;
-
-                System.out.println("Display responded: " + m.toString());
-
-                switch (m.toString()) {
-                    case "0" -> ScreenState.welcomeScreen(display);
-                    case "1" -> ScreenState.fuelSelectionScreen(display);
-                    case "2" -> ScreenState.pumpingScreen(display);
-                    case "3" -> ScreenState.finishScreen(display);
-                    case "4" -> ScreenState.paymentDeclinedScreen(display);
-                    default -> System.out.println("ERROR ERROR ERROR");
-                }
-            }
+//            ScreenState.welcomeScreen(display);
+//
+//            while (true) {
+//                Message m = display.get();
+//
+//                if (m == null) continue;
+//
+//                System.out.println("Display responded: " + m.toString());
+//
+//                switch (m.toString()) {
+//                    case "0" -> ScreenState.welcomeScreen(display);
+//                    case "1" -> ScreenState.fuelSelectionScreen(display);
+//                    case "2" -> ScreenState.pumpingScreen(display);
+//                    case "3" -> ScreenState.finishScreen(display);
+//                    case "4" -> ScreenState.paymentDeclinedScreen(display);
+//                    default -> System.out.println("ERROR ERROR ERROR");
+//                }
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();

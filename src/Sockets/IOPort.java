@@ -26,9 +26,9 @@ public class IOPort {
      * Make a new IOPort
      *
      * @param deviceName name of device you are connecting to/from
-     * @throws IOException throws if the connections breaks
+     *
      */
-    protected IOPort(String deviceName) throws IOException {
+    protected IOPort(String deviceName) {
         lastMessage = new AtomicReference<Message>();
         try {
 
@@ -57,23 +57,29 @@ public class IOPort {
             }).start();
 
         } catch (BindException e) {
-            socket = new Socket("localhost", portLookup(deviceName));
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
-            queue = new LinkedBlockingQueue<>();
-            connected.countDown();
+            try {
+                socket = new Socket("localhost", portLookup(deviceName));
+                out = new ObjectOutputStream(socket.getOutputStream());
+                in = new ObjectInputStream(socket.getInputStream());
+                queue = new LinkedBlockingQueue<>();
+                connected.countDown();
 
-            new Thread(() -> {
-                Message msg;
-                try {
-                    while ((msg = (Message) in.readObject()) != null) {
-                        lastMessage.set(msg);
-                        queue.put(msg);
+                new Thread(() -> {
+                    Message msg;
+                    try {
+                        while ((msg = (Message) in.readObject()) != null) {
+                            lastMessage.set(msg);
+                            queue.put(msg);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
+                }).start();
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -105,14 +111,13 @@ public class IOPort {
      * Send a message to the connected device
      *
      * @param message the message being sent
-     * @throws IOException if there is a socket error this will be thrown
      */
-    protected void send(Message message) throws IOException {
+    protected void send(Message message) {
         try {
             connected.await();
             out.writeObject(message);
             out.flush();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -121,7 +126,7 @@ public class IOPort {
      * Method to reset the last message seen
      * and the queue of messages when moving called
      */
-    public void reset(){
+    public void reset() {
         lastMessage.set(null);
         queue.clear();
     }

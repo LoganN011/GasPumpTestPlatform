@@ -2,8 +2,6 @@ package Sockets;
 
 import Message.Message;
 
-import java.io.IOException;
-
 
 public class statusPort extends IOPort {
 
@@ -11,9 +9,8 @@ public class statusPort extends IOPort {
      * Make a new statusPort(read)
      *
      * @param deviceName name of device you are connecting to/from
-     * @throws IOException throws if the connections breaks
      */
-    public statusPort(String deviceName) throws IOException {
+    public statusPort(String deviceName) {
         super(deviceName);
     }
 

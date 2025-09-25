@@ -2,32 +2,31 @@ package Devices;
 
 import Message.Message;
 import Sockets.controlPort;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.scene.image.ImageView;
-import javafx.animation.PauseTransition;
-import javafx.geometry.Insets;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.util.Duration;
 import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
-import java.io.IOException;
-
-public class Card extends Application {
+public class CardReaderGUI extends Application {
 
     private int WIDTH = 250;
     private int HEIGHT = 250;
     private controlPort self;
 
     private Circle[] LEDs;
+
     private enum LEDState {
         OFF,
         ACCEPTED
@@ -56,17 +55,15 @@ public class Card extends Application {
     }
 
     private void startIO() {
-        //todo replace with real handing of connection failing
-        try {
-            self = new controlPort("card");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+
+
+        self = new controlPort("card");
+
     }
 
     /**
      * Creates CardReader visual
+     *
      * @return StackPane of CardReader
      */
     private StackPane createCardReader() {
@@ -79,7 +76,7 @@ public class Card extends Application {
         icon.setSmooth(true);
         icon.setPickOnBounds(true);
         icon.setPreserveRatio(true);
-        icon.setEffect(new DropShadow(8, Color.rgb(0,0,0,0.18)));
+        icon.setEffect(new DropShadow(8, Color.rgb(0, 0, 0, 0.18)));
         icon.translateXProperty().set(5);
         icon.translateYProperty().set(-15);
 
@@ -103,12 +100,9 @@ public class Card extends Application {
 
             String cardNumber = generateCardNumber();
             System.out.println("Generated: " + cardNumber);
-            try {
-                self.send(new Message(cardNumber.replaceAll(" ", "")));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.exit(1);
-            }
+
+            self.send(new Message(cardNumber.replaceAll(" ", "")));
+
 
             // Reset LEDs
             PauseTransition authWait = new PauseTransition(Duration.millis(700));
@@ -126,7 +120,8 @@ public class Card extends Application {
 
     /**
      * Creates horizontal bar of LEDs
-     * @param count int, number of LEDs
+     *
+     * @param count  int, number of LEDs
      * @param radius int, size of LEDs
      * @return Circle[] array
      */
@@ -147,11 +142,12 @@ public class Card extends Application {
 
     /**
      * Sets LED state, which sets LED color
+     *
      * @param state enum
      */
     private void setLEDState(LEDState state) {
         Color fill = switch (state) {
-            case OFF      -> Color.web("#9AA0A6");
+            case OFF -> Color.web("#9AA0A6");
             case ACCEPTED -> Color.web("#34A853");
         };
 
@@ -164,6 +160,7 @@ public class Card extends Application {
     /**
      * Generates 20-digit card number in format of:
      * xxxx xxxx xxxx xxxx
+     *
      * @return String of card number
      */
     private String generateCardNumber() {

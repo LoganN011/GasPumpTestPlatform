@@ -40,15 +40,23 @@ public class Gas {
     }
 
     public Message makeMessage() {
-        return new Message("price:"+name+":"+displayPrice(price));
+        return new Message("price:" + name + ":" + displayPrice(price));
     }
 
     public static ArrayList<Gas> parseGasses(Message m) {
         ArrayList<Gas> result = new ArrayList<>();
-        for(String curGas : m.toString().split(",")) {
+        for (String curGas : m.toString().split(",")) {
             if (curGas.isEmpty()) continue;
             String[] fields = curGas.split(":");
             result.add(new Gas(fields[1], Double.parseDouble(fields[2])));
+        }
+        return result;
+    }
+
+    public static String makePricesMessage(ArrayList<Gas> fuels) {
+        String result = "";
+        for (Gas cur : fuels) {
+            result += cur.makeMessage() + ",";
         }
         return result;
     }

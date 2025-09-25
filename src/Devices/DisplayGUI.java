@@ -1,8 +1,9 @@
 package Devices;
 
-import Devices.DisplayObjects.*;
+import Devices.DisplayObjects.ButtonCmd;
+import Devices.DisplayObjects.DisplayHandler;
+import Devices.DisplayObjects.TextCmd;
 import Message.MessageReader;
-
 import Utility.MyTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,19 +20,20 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.util.*;
 
 /**
  * Screen UI (sockets only).
  * Inbound (backend → UI):
- *   b:<idx>:(x|m)
- *   t:(00|01|23|45|67|89):s#:f#:c#:<text or left|right>
+ * b:<idx>:(x|m)
+ * t:(00|01|23|45|67|89):s#:f#:c#:<text or left|right>
  * Outbound (UI → backend):
- *   click:<idx>
+ * click:<idx>
  */
-public class Display extends Application {
-    private static final Set<String> PAIRS  = Set.of("00","01","23","45","67","89");
+public class DisplayGUI extends Application {
+    private static final Set<String> PAIRS = Set.of("00", "01", "23", "45", "67", "89");
 
     private static class ParsedLine {
         final List<ButtonCmd> buttons = new ArrayList<>();
@@ -57,29 +59,29 @@ public class Display extends Application {
      * instance of Display.
      *
      * @param stage the primary stage for this application, onto which
-     * the application scene can be set.
+     *              the application scene can be set.
      */
     public void start(Stage stage) {
         displayHandler = new DisplayHandler(this);
         displayHandler.startIO();
 
         // timer
-        timer = new MyTimer();
-        timer.timeProperty().addListener((obs, oldV, newV) -> {
-            System.out.println("Time: " + newV.longValue());
-            displayHandler.setTime(newV.longValue());
-
-            // 30-second timeout
-            if (newV.longValue() > 30) {
-                try {
-                    displayHandler.doTimeout();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        });
-        timer.start();
+//        timer = new MyTimer();
+//        timer.timeProperty().addListener((obs, oldV, newV) -> {
+//            System.out.println("Time: " + newV.longValue());
+//            displayHandler.setTime(newV.longValue());
+//
+//            // 30-second timeout
+//            if (newV.longValue() > 30) {
+//                try {
+//                    displayHandler.doTimeout();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//        });
+//        timer.start();
 
         Scene scene = new Scene(this.createPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);
@@ -136,7 +138,7 @@ public class Display extends Application {
             grid.getRowConstraints().add(rr);
         }
 
-        String[] pairs = {"01","23","45","67","89"};
+        String[] pairs = {"01", "23", "45", "67", "89"};
         for (int row = 0; row < 5; row++) {
             int leftIdx = row * 2;      // 0,2,4,6,8
             int rightIdx = leftIdx + 1; // 1,3,5,7,9
@@ -278,9 +280,11 @@ public class Display extends Application {
             b.setStyle("-fx-background-color: #E5E7EB; -fx-border-color: #94A3B8; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
         }
     }
+
     private String inactiveButtonStyle() {
         return "-fx-background-color: #F3F4F6; -fx-border-color: #CBD5E1; -fx-border-radius: 12; -fx-background-radius: 12;";
     }
+
     private void clearMultiSelections() {
         for (int idx : multiActive) {
             Region b = btns.get(idx);
@@ -292,12 +296,18 @@ public class Display extends Application {
     private int leftIdxForPair(String pair) {
         switch (pair) {
             case "00":
-            case "01": return 0;
-            case "23": return 2;
-            case "45": return 4;
-            case "67": return 6;
-            case "89": return 8;
-            default: return -1;
+            case "01":
+                return 0;
+            case "23":
+                return 2;
+            case "45":
+                return 4;
+            case "67":
+                return 6;
+            case "89":
+                return 8;
+            default:
+                return -1;
         }
     }
 
@@ -306,7 +316,8 @@ public class Display extends Application {
         ParsedLine parsed = parseLineUsingMR(line);
         Platform.runLater(() -> {
             for (ButtonCmd b : parsed.buttons) applyButton(b);
-            for (TextCmd t : parsed.texts) if (PAIRS.contains(t.pair)) applyText(t);
+            for (TextCmd t : parsed.texts)
+                if (PAIRS.contains(t.pair)) applyText(t);
         });
     }
 
@@ -325,6 +336,7 @@ public class Display extends Application {
 
     /**
      * Creates visual footer on bottom of pump display
+     *
      * @return HBox of footer
      */
     private HBox footerBar() {
@@ -344,22 +356,35 @@ public class Display extends Application {
 
     /**
      * Helper: Find middle pair ID
+     *
      * @param idx int of ButtonID
      * @return String pair
      */
     private String pairForButton(int idx) {
         switch (idx) {
-            case 0: case 1: return "01";
-            case 2: case 3: return "23";
-            case 4: case 5: return "45";
-            case 6: case 7: return "67";
-            case 8: case 9: return "89";
-            default: return null;
+            case 0:
+            case 1:
+                return "01";
+            case 2:
+            case 3:
+                return "23";
+            case 4:
+            case 5:
+                return "45";
+            case 6:
+            case 7:
+                return "67";
+            case 8:
+            case 9:
+                return "89";
+            default:
+                return null;
         }
     }
 
     /**
      * Helper: Gets center text by pair ID
+     *
      * @param pair String ID
      * @return String content
      */

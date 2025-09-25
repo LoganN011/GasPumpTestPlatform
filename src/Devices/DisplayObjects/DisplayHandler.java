@@ -1,13 +1,13 @@
 package Devices.DisplayObjects;
 
+import Devices.DisplayGUI;
 import Message.Message;
-import Devices.Display;
 import Sockets.commPort;
 
 import java.io.IOException;
 
 public class DisplayHandler {
-    private final Display display;
+    private final DisplayGUI display;
     private String gasType = null;
     private long timer = 0;
     private boolean isGasSelected = false;
@@ -15,6 +15,7 @@ public class DisplayHandler {
 
     // Screen states
     private Screen currentScreenState = Screen.WELCOME;
+
     private enum Screen {
         WELCOME, // 0
         FUEL_SELECT, // 1
@@ -27,13 +28,14 @@ public class DisplayHandler {
     private volatile boolean running = true;
     private volatile commPort port;
 
-    public DisplayHandler(Display display) {
+    public DisplayHandler(DisplayGUI display) {
         this.display = display;
     }
 
     /**
      * Display communicates with DisplayHandler through sending which
      * button ID was clicked.
+     *
      * @param buttonID int
      */
     public void onButtonClick(int buttonID) throws IOException {
@@ -70,6 +72,7 @@ public class DisplayHandler {
 
     /**
      * Handles incoming inputs from commPort
+     *
      * @param buttonID incoming commPort message
      */
     private void handleInput(int buttonID) throws IOException {
@@ -100,7 +103,7 @@ public class DisplayHandler {
             }
 
             // "Begin Fueling" or "Pause" or "Begin" (BEGIN IS TEMPORARY) or "Yes"
-            case 8 ->  {
+            case 8 -> {
                 if (currentScreenState == Screen.WELCOME) {
                     changeToScreen(1);
                     return;
@@ -132,6 +135,7 @@ public class DisplayHandler {
     }
 
     //TODO: Still needs logic
+
     /**
      * Begin pumping
      */
@@ -156,6 +160,7 @@ public class DisplayHandler {
 
     /**
      * Selects gas and plays selection animation
+     *
      * @param buttonID int of button ID from pump display
      */
     private void selectGas(int buttonID) {
