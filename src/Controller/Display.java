@@ -23,7 +23,6 @@ public class Display extends Thread {
 
     @Override
     public void run() {
-        //todo make it so this is not needed
         while (true) {
             System.out.println(Controller.getState());
             switch (Controller.getState()) {
@@ -31,8 +30,8 @@ public class Display extends Thread {
                 case IDLE -> welcome();
                 case AUTHORIZING -> authorizing();
                 case SELECTION -> fuelSelect();
+                //TODO add the remainder of the states
             }
-            System.out.println("down here");
         }
     }
 
@@ -65,6 +64,7 @@ public class Display extends Thread {
             device.send(options);
         }
         lastState = SELECTION;
+
     }
 
     private Message optionsDisplayable(ArrayList<Gas> options) {
