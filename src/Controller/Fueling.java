@@ -2,11 +2,14 @@ package Controller;
 
 public class Fueling extends Thread{
     private Hose hose;
-    private PumpingAssembly pumpingAssembly;
+    private Pump pump;
+    private FlowMeter flowMeter;
 
     public Fueling(){
         hose = new Hose();
-        pumpingAssembly = new PumpingAssembly();
+        pump = new Pump();
+        flowMeter = new FlowMeter();
+
         start();
     }
 
@@ -22,20 +25,20 @@ public class Fueling extends Thread{
                 case FUELING -> {
                     if(hose.isFull()){
                         Controller.setState(InternalState.DETACHING);
-                        pumpingAssembly.pumpOff();
+                        pump.pumpOff();
                     }
                     else if (!hose.isAttached()){
-                        pumpingAssembly.pumpOff();
+                        pump.pumpOff();
                         Controller.setState(InternalState.DETACHED);
                     }
                     else {
-                        pumpingAssembly.pumpOn("TYPE"); //Get the type somehow
+                        pump.pumpOn("TYPE"); //Get the type somehow
                         //return flow somehow with
-                        System.out.println(pumpingAssembly.readFlow());
+                        System.out.println(flowMeter.readFlow());
                     }
                 }
                 case PAUSED -> {
-                    pumpingAssembly.pumpOff();
+                    pump.pumpOff();
 
                 }
                 case DETACHING -> {
@@ -44,8 +47,8 @@ public class Fueling extends Thread{
                     }
                 }
                 case OFF,COMPLETE -> {
-                    pumpingAssembly.pumpOff();
-                    pumpingAssembly.resetFlow();
+                    pump.pumpOff();
+                    flowMeter.resetFlow();
                 }
             }
         }
