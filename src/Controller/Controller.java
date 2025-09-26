@@ -12,7 +12,7 @@ public class Controller {
         //Consider changing these to regular methods not constructors
         Transaction transactionProcess = new Transaction();
         Display displayProcess = new Display();
-        Fueling pumpingProcess = new Fueling();
+        Fueling.start();
 
     }
 
