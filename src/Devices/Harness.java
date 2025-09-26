@@ -1,5 +1,6 @@
 package Devices;
 
+import Controller.Timer;
 import Devices.DisplayObjects.ScreenState;
 import Message.Message;
 import Sockets.commPort;
@@ -14,7 +15,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = "display"; // Write device in arg line
+        String device = "timer"; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -38,9 +39,20 @@ public class Harness {
             case "special" -> {
                 specialTest();
             }
+            case "timer"-> timerExample();
         }
 //
 
+    }
+
+    private static void timerExample() {
+        Timer.set(10);
+        while (true) {
+            if(Timer.timerEnded()){
+                System.out.println("TImer over");
+                Timer.set(2);
+            }
+        }
     }
 
     private static void specialTest() {

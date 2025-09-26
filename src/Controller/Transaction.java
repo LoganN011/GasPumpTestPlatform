@@ -14,6 +14,7 @@ public class Transaction extends Thread {
     private BankServer bankServer;
 
     //todo should these be atomic reference?
+    // could also use some like  Collections.synchronizedList()
     private static ArrayList<Gas> newPriceList;
     private static String cardNumber;
     private static ArrayList<Gas> inUsePriceList;
