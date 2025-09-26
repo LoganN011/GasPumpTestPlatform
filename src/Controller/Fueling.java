@@ -22,9 +22,8 @@ public class Fueling {
                             pump.pumpOff();
                             Controller.setState(InternalState.DETACHED);
                         } else {
-                            pump.pumpOn("TYPE"); //Get the type somehow
-                            //return flow somehow with
-                            System.out.println(flowMeter.readFlow());
+                            pump.pumpOn(Controller.getCurrentGas().getName());
+                            Controller.setGasAmount(Integer.parseInt(flowMeter.readFlow().toString()));
                         }
                     }
                     case PAUSED -> {
