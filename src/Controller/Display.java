@@ -54,6 +54,9 @@ public class Display extends Thread {
         if (lastState != AUTHORIZING) {
             device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
         }
+        if(Controller.timerEnded()){
+            Controller.setState(STANDBY);
+        }
         lastState = AUTHORIZING;
     }
 
@@ -62,6 +65,9 @@ public class Display extends Thread {
         if (lastState != SELECTION) {
             Message options = optionsDisplayable(Transaction.getPrices());
             device.send(options);
+        }
+        if(Controller.timerEnded()){
+            Controller.setState(STANDBY);
         }
         lastState = SELECTION;
 
@@ -86,6 +92,9 @@ public class Display extends Thread {
     private void cardDeclined() {
         if (lastState != DECLINED) {
             device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
+        }
+        if(Controller.timerEnded()){
+            Controller.setState(STANDBY);
         }
         lastState = DECLINED;
     }

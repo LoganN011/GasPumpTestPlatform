@@ -50,13 +50,16 @@ public class Transaction extends Thread {
                 }
                 case AUTHORIZING -> {
                     //todo continue from here...
+                    Controller.setTimer(10);
                     boolean approved = bankServer.authorize(cardNumber);
                     if(approved){
                         inUsePriceList = newPriceList;
                         Controller.setState(SELECTION);
+                        Controller.setTimer(10);
                         System.out.println("approved");
                     } else {
                         Controller.setState(DECLINED);
+                        Controller.setTimer(10);
                         System.out.println("approved");
                     }
                 }

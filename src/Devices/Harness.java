@@ -1,6 +1,6 @@
 package Devices;
 
-import Controller.Timer;
+import Controller.Controller;
 import Devices.DisplayObjects.ScreenState;
 import Message.Message;
 import Sockets.commPort;
@@ -46,11 +46,11 @@ public class Harness {
     }
 
     private static void timerExample() {
-        Timer.set(10);
+        Controller.setTimer(10);
         while (true) {
-            if(Timer.timerEnded()){
+            if(Controller.timerEnded()){
                 System.out.println("TImer over");
-                Timer.set(2);
+                Controller.setTimer(2);
             }
         }
     }

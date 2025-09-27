@@ -10,6 +10,7 @@ public class Controller {
     private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF);
     private static AtomicInteger gasAmount = new AtomicInteger(0);
     private static AtomicReference<Gas> currentGas = new AtomicReference<>();
+    private static long endingTime;
     //todo move variables here
 
     public static void main(String[] args) {
@@ -43,6 +44,15 @@ public class Controller {
 
     public static void setState(InternalState newState) {
         internalState.set(newState);
+    }
+
+    public static void setTimer(int durationSeconds) {
+        long now = System.currentTimeMillis();
+        endingTime = now + (durationSeconds * 1000L);
+    }
+
+    public static boolean timerEnded() {
+        return System.currentTimeMillis() >= endingTime;
     }
 
 }
