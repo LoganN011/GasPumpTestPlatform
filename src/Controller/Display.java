@@ -24,7 +24,6 @@ public class Display extends Thread {
     @Override
     public void run() {
         while (true) {
-            System.out.println(Controller.getState());
             switch (Controller.getState()) {
                 case OFF, STANDBY -> pumpUnavailable();
                 case IDLE -> welcome();

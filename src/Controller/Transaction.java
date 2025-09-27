@@ -26,6 +26,7 @@ public class Transaction {
 //        newPriceList = null;
 //        cardNumber = null;
 //        inUsePriceList = null;
+        new Thread(() -> {
 
         while (true) {
             switch (Controller.getState()) {
@@ -61,6 +62,7 @@ public class Transaction {
 
             }
         }
+        }).start();
     }
 
 }
