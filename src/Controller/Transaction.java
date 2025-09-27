@@ -47,7 +47,6 @@ public class Transaction {
                     //todo continue from here...
                     boolean approved = bankServer.authorize(Controller.getCardNumber());
                     Controller.setTimer(10);
-                    boolean approved = bankServer.authorize(cardNumber);
                     if(approved){
                         Controller.setInUsePriceList();
                         Controller.setState(SELECTION);
@@ -62,10 +61,6 @@ public class Transaction {
 
             }
         }
-    }
-
-    public static ArrayList<Gas> getPrices(){
-        return inUsePriceList;
     }
 
 }
