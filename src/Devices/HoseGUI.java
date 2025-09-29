@@ -53,7 +53,7 @@ public class HoseGUI extends Application {
 
         monitorPort port = control;
         ProgressBar gasTank = new ProgressBar();
-        gasTank.setProgress((Math.random()));
+        gasTank.setProgress(0.01);
         gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
         gasTank.setRotate(-90);
         gasTank.setLayoutX((rootWidth - (rootWidth/8))+(rootWidth/32));

@@ -78,6 +78,7 @@ public class Controller {
     }
 
     public static boolean timerEnded() {
+        //TODO if returning true then set the ending time to the max value
         return System.currentTimeMillis() >= endingTime;
     }
 
