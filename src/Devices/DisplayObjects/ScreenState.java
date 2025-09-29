@@ -33,7 +33,9 @@ public class ScreenState {
      */
     public static void paymentDeclinedScreen(commPort device) {
         device.send(new Message("t:01:s0:f0:c2:PAYMENT FAILURE"));
-        device.send(new Message("t:23:s1:f1:c1:Payment was declined."));
+        device.send(new Message("t:23:s0:f0:c2: "));
+        device.send(new Message("t:45:s1:f1:c1:Payment was declined."));
+        device.send(new Message("t:67:s0:f0:c2: "));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:|OK"));
     }
 
@@ -78,9 +80,9 @@ public class ScreenState {
      * Attaching nozzle / lift nozzle
      */
     public static void attachingScreen(commPort device) {
-        device.send(new Message("t:01:s0:f0:c2:INSERT NOZZLE"));
+        device.send(new Message("t:01:s0:f0:c2:ATTACH NOZZLE"));
         device.send(new Message("t:23:s0:f0:c2: "));
-        device.send(new Message("t:45:s1:f1:c1:Lift nozzle and select grade."));
+        device.send(new Message("t:45:s1:f1:c1:Insert nozzle into your vehicle."));
         device.send(new Message("t:67:s0:f0:c2: "));
         device.send(new Message("t:89:s0:f0:c2: "));
     }
@@ -97,6 +99,40 @@ public class ScreenState {
         device.send(new Message(String.format("t:45:s2:f1:c1:Price꞉ $%.2f", amount)));
         device.send(new Message("t:67:s0:f0:c2: "));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT"));
+    }
+
+    /**
+     * Nozzle detached unexpectedly
+     */
+    public static void detachedScreen(commPort device) {
+        device.send(new Message("t:01:s0:f0:c2:NOZZLE REMOVED"));
+        device.send(new Message("t:45:s1:f1:c1:Re-insert to resume or press DONE"));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:RESUME|DONE"));
+    }
+
+    /**
+     * Paused screen
+     */
+    public static void pausedScreen(commPort device) {
+        device.send(new Message("t:01:s0:f0:c2:PAUSED"));
+        device.send(new Message("t:45:s1:f1:c1:Press RESUME to continue or DONE"));
+        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:RESUME|DONE"));
+    }
+
+    /**
+     * Detaching (replace nozzle)
+     */
+    public static void detachingScreen(commPort device) {
+        device.send(new Message("t:01:s0:f0:c2:REPLACE NOZZLE"));
+        device.send(new Message("t:45:s1:f0:c1:Please wait…"));
+    }
+
+    /**
+     * Going OFF but waiting for nozzle replacement
+     */
+    public static void offDetachingScreen(commPort device) {
+        device.send(new Message("t:01:s0:f0:c2:PUMP UNAVAILABLE"));
+        device.send(new Message("t:45:s1:f1:c1:Replace nozzle to finish"));
     }
 
 }

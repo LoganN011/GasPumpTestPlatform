@@ -93,57 +93,49 @@ public class Display extends Thread {
 
         double total = gallons * pricePerGallon;
 
-        Devices.DisplayObjects.ScreenState.pumpingScreen(device, gallons, total);
+        ScreenState.pumpingScreen(device, gallons, total);
+    }
+
+    public void updateFueling(int gallons, double total) {
+        ScreenState.pumpingScreen(device, gallons, total);
     }
 
 
-    public void detached() {
-
+    public void showDetached() {
+        ScreenState.detachedScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
     }
 
-    public void pause() {
+    public void showPause() {
+        ScreenState.pausedScreen(device);
 
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
     }
 
-    public void detaching() {
+
+    public void showDetaching() {
+        ScreenState.detachingScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
     }
 
-    private void complete() {
 
+    public void showComplete() {
+        ScreenState.finishScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
     }
 
-    private void offDetaching() {
-
-    }
-
-    public int getButtonID() {
-        return buttonID;
-    }
-
-    public void handleClick(int buttonID) {
-        switch (buttonID) {
-            // "Cancel" or "Exit" or "No" or "Ok"
-            case 9 -> {
-                // WELCOME SCREEN
-                if (Controller.getState() == IDLE) {
-                    Controller.setState(STANDBY);
-                    return;
-                }
-
-            }
-
-            // "Begin Fueling" or "Pause" or "Begin" (BEGIN IS TEMPORARY) or "Yes"
-            case 8 -> {
-
-//                if (getState() == InternalState.)
-            }
-
-            // Gas Type
-            //case 7, 5, 3 -> selectGas(buttonID);
-            default -> {
-                System.out.println("welcome");
-                //displayProcess.welcome();
-            }
+    public void showOffDetaching() {
+        ScreenState.offDetachingScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(OFF);
         }
     }
 
