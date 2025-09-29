@@ -4,6 +4,7 @@ public class Fueling {
     private static Hose hose;
     private static Pump pump;
     private static FlowMeter flowMeter;
+    private static boolean pauseTimer = false;
 
     public static void start() {
         hose = new Hose();
@@ -12,8 +13,18 @@ public class Fueling {
 
         new Thread(() -> {
             while (true) {
+                if (Controller.getState() == InternalState.PAUSED) {
+                    if (!pauseTimer) {
+                        pump.pumpOff();
+                        Controller.setTimer(10);
+                        pauseTimer = true;
+                    }
+
+                    continue;
+                }
+
+                pauseTimer = false;
                 hose.check();
-                //System.out.println("\nFUELING: " + Controller.getState());
 
                 switch (Controller.getState()) {
                     case OFF, COMPLETE -> {
@@ -23,14 +34,23 @@ public class Fueling {
 
                     case ATTACHING -> {
                         if (hose.isAttached()) {
-                            System.out.println("FUELING: Attached");
+                            System.out.println("\nFUELING: Attached");
                             Controller.setState(InternalState.FUELING);
+                        }
+                    }
+
+                    case DETACHING -> {
+                        if (!hose.isAttached()) {
+                            System.out.println("\nFUELING: Detaching");
+                            Controller.setState(InternalState.COMPLETE);
+//                            Controller.setTimer(10);
                         }
                     }
 
                     case DETACHED ->{
                         Controller.setTimer(10);
                         if (hose.isAttached()) {
+                            System.out.println("\nFUELING: Detached");
                             Controller.setState(InternalState.FUELING);
                         }
                     }
@@ -52,18 +72,8 @@ public class Fueling {
 
                         } else {
                             pump.pumpOn(Controller.getCurrentGas().getName());
+                            //TODO: Fix when it pauses from detach or pause and keep flow counter the same
                             Controller.setGasAmount(Integer.parseInt(flowMeter.readFlow().toString()));
-                        }
-                    }
-                    case PAUSED -> {
-                        pump.pumpOff();
-                        Controller.setTimer(10);
-                    }
-
-                    case DETACHING -> {
-                        if (!hose.isAttached()) {
-                            Controller.setState(InternalState.COMPLETE);
-                            Controller.setTimer(10);
                         }
                     }
 

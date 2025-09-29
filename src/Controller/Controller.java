@@ -158,9 +158,19 @@ public class Controller {
                     displayProcess.showFueling();
                 }
 
+                case DETACHED -> {
+                    System.out.println("MAIN: Showing DetachED");
+                    displayProcess.showDetached(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
+                }
+
                 case DETACHING -> {
-                    System.out.println("MAIN: Showing Detaching");
-                    displayProcess.showDetaching();
+                    System.out.println("MAIN: Showing DetachING");
+                    displayProcess.showDetaching(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
+                }
+
+                case PAUSED -> {
+                    System.out.println("MAIN: Showing Paused");
+                    displayProcess.showPause(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
                 }
 
                 case COMPLETE -> {
@@ -186,7 +196,7 @@ public class Controller {
                 System.out.println("MAIN: " + getCurrentGas().getName());
             }
 
-            // Begin fueling
+            // Begin fueling, pause, resume
             case 8 -> {
                 if (getState() == InternalState.SELECTION && getCurrentGas() != null) {
                     if (!isNozzleAttached()) {
@@ -197,13 +207,35 @@ public class Controller {
 
                     System.out.println("MAIN: Begin Fueling");
                     setState(InternalState.FUELING);
+                    return;
+                }
+
+                if (getState() == InternalState.FUELING) {
+                    System.out.println("\nMAIN: Paused");
+                    setState(InternalState.PAUSED);
+                    return;
+                }
+
+                if (getState() == InternalState.PAUSED) {
+                    System.out.println("\nMAIN: Resuming");
+                    setState(InternalState.FUELING);
+                    return;
                 }
             }
 
-            // Cancel, OK (Payment Declined)
+            // Cancel, OK (Payment Declined), finish
             case 9 -> {
+                if (getState() == InternalState.PAUSED || getState() == InternalState.DETACHED) {
+                    setState(InternalState.DETACHING);
+                    return;
+                }
+
                 cardNumber.set(null);
+                setCurrentGas(null);
+                setInUsePriceList();
                 setState(InternalState.IDLE);
+
+                setGasAmount(0); // needs to be changed
             }
         }
 

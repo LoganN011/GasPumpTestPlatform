@@ -101,35 +101,38 @@ public class Display extends Thread {
     }
 
 
-    public void showDetached() {
-        ScreenState.detachedScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
+    public void showDetached(int gallons, double total) {
+        ScreenState.detachedScreen(device, gallons, total);
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
-    public void showPause() {
-        ScreenState.pausedScreen(device);
+    public void showPause(int gallons, double total) {
+        ScreenState.pausedScreen(device, gallons, total);
 
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
 
-    public void showDetaching() {
-        ScreenState.detachingScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
+    public void showDetaching(int gallons, double total) {
+        ScreenState.detachingScreen(device, gallons, total);
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
 
     public void showComplete() {
         ScreenState.finishScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
     public void showOffDetaching() {

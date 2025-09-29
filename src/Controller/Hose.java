@@ -24,7 +24,7 @@ public class Hose {
 
         switch (s) {
             case "connected" -> attached = true;
-            case "detached" -> attached = false;
+            case "disconnected" -> attached = false;
             case "tank_full", "full_tank" -> full = true;
         }
     }

@@ -147,7 +147,7 @@ public class PumpGUI extends Application {
 //                    flow.send(new Message("flow:" + counter));
                     flow.send(new Message(String.valueOf(counter)));
 
-                } else if (msg.equals("reset")) {
+                } else if (msg.toString().equals("reset")) {
                     if (counter != 0) {
                         resetFlow();
                     }
