@@ -174,7 +174,6 @@ public class HoseGUI extends Application {
             while(true){
                 Message m = control.read();
                 if(m != null){
-                    System.out.println(m);
                     if(m.equals("on")){
                         pumpOn = true;
                     }

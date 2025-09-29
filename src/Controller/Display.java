@@ -56,7 +56,7 @@ public class Display {
     private static void paused() {
         String message = "";
         message += "t:01:s0:f0:c2:FUELING PAUSED";
-        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
+        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
         message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
         message += ",t:67:s1:f1:c1:Press RESUME to continue or FINISH";
         message += ",t:89:s0:f0:c2: ";
@@ -67,7 +67,7 @@ public class Display {
     private static void detached() {
         String message = "";
         message += "t:01:s0:f0:c2:NOZZLE REMOVED";
-        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
+        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
         message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
         message += ",t:67:s1:f1:c1:Re-insert to resume or FINISH.";
         message += ",b:9:x,t:89:s2:f2:c0:|FINISH";
@@ -88,7 +88,7 @@ public class Display {
         //The display is also broken
         if (lastState != OFF && lastState != STANDBY) {
             message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
-            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
+            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
             message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
             message += ",b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
 

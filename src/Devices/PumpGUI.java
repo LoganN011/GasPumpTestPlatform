@@ -30,7 +30,7 @@ public class PumpGUI extends Application {
     boolean pumpOn = false;
     RotateTransition animation;
     Circle gauge;
-    int counter = 0;
+    double counter = 0;
     Label flowCounter;
     ImageView pumpImage;
     Rectangle line;
@@ -100,9 +100,9 @@ public class PumpGUI extends Application {
 
 
         line.rotateProperty().addListener((obs, oldVal, newVal) -> {
-            if (pumpOn && oldVal.doubleValue() > 300 && newVal.doubleValue() < 60) {
-                counter++;
-                Platform.runLater(() -> flowCounter.setText("" + counter));
+            if (pumpOn) {
+                counter += .04;
+                Platform.runLater(() -> flowCounter.setText(Gas.displayPrice(counter)));
             }
         });
 

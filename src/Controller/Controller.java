@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Controller {
 
     private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF);
-    private static AtomicInteger gasAmount = new AtomicInteger(0);
+    private static AtomicReference<Double> gasAmount = new AtomicReference<>();
     private static AtomicReference<Gas> currentGas = new AtomicReference<>();
     private static long endingTime;
     private static AtomicReference<ArrayList<Gas>> newPriceList = new AtomicReference<>();
@@ -39,8 +39,8 @@ public class Controller {
         return currentGas.get();
     }
 
-    public static void setGasAmount(int newGasAmount) {
-        gasAmount.set(newGasAmount);
+    public static void setGasAmount(double newGasAmount) {
+        gasAmount.set(Double.parseDouble(Gas.displayPrice(newGasAmount)));
     }
 
     public static double getCurPrice() {
@@ -48,7 +48,7 @@ public class Controller {
         return (getCurrentGas() == null) ? 0 : getCurrentGas().getPrice() * getGasAmount();
     }
 
-    public static int getGasAmount() {
+    public static double getGasAmount() {
         return gasAmount.get();
     }
 
@@ -67,7 +67,7 @@ public class Controller {
 
     public static void reset() {
         internalState.set(InternalState.OFF);
-        gasAmount.set(0);
+        gasAmount.set(0.0);
         currentGas = new AtomicReference<>();
         //todo consider changing
         endingTime = Long.MAX_VALUE;

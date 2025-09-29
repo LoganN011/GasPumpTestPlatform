@@ -12,10 +12,11 @@ public class FlowMeter {
         flow.send(new Message("flow"));
     }
 
-    public int readFlow(){
+    public double readFlow(){
+        flow.send(new Message("flow"));
         Message m = flow.read();
         if (m != null) {
-            return Integer.parseInt(flow.read().toString());
+            return Double.parseDouble(m.toString());
         }
         return 0;
     }
