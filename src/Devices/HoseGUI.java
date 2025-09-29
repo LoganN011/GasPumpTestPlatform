@@ -37,10 +37,12 @@ public class HoseGUI extends Application {
             e.printStackTrace();
         }
 
-        Pane root = new Pane();
-        Scene scene = new Scene(root, 500,500);
-
         double SIZE = 400;
+
+        Pane root = new Pane();
+        Scene scene = new Scene(root, SIZE*1.25,SIZE*1.25);
+
+
         double rootHeight = root.getHeight();
         double rootWidth = root.getWidth();
         double sceneW = scene.getHeight();
@@ -117,11 +119,11 @@ public class HoseGUI extends Application {
                     port.send(new Message("connected"));
                 }
 
-                pumpHandle.setCenterX(sceneW - (sceneW/2));
-                pumpHandle.setCenterY(sceneH/4);
+                pumpHandle.setCenterX(sceneW - (sceneW/4));
+                pumpHandle.setCenterY(sceneH/2);
                 animation.playFromStart();
-                hoseLine.setEndX(sceneW - (sceneW/2));
-                hoseLine.setEndY(sceneH/4);
+                hoseLine.setEndX(sceneW - (sceneW/4));
+                hoseLine.setEndY(sceneH/2);
             } else {
                 if (connected) {
                     animation.stop();
@@ -136,19 +138,11 @@ public class HoseGUI extends Application {
             }
         });
 
-//        Rectangle pump = new Rectangle(rootWidth/8, rootHeight/2);
-//        pump.setStyle("-fx-fill: #FF0000");
-
-
-//        Rectangle car = new Rectangle(SIZE/8, SIZE/2);
-//        car.setStyle("-fx-fill: grey");
-//        car.setX(SIZE - (SIZE/8));
-
         Image backgroundImage = VisualElements.getImage("hose.png");
 
         BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
-                100,
-                100,
+                SIZE/8,
+                SIZE/8,
                 true,
                 true,
                 false,
@@ -158,7 +152,6 @@ public class HoseGUI extends Application {
 
         root.setPrefSize(SIZE, SIZE/2);
         root.getChildren().addAll(hoseLine, pumpHandle, gasTank, clear);
-//        root.getChildren().addAll(pump, car, pumpHandle, gasTank, clear);
         root.setBackground(new Background(background));
 
 
