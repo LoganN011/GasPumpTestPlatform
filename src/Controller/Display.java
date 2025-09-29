@@ -22,20 +22,6 @@ public class Display extends Thread {
     @Override
     public void run() {
         while (true) {
-//            switch (Controller.getState()) {
-//                case OFF, STANDBY -> pumpUnavailable();
-//                case IDLE -> showWelcome();
-//                case AUTHORIZING -> showAuthorizing();
-//                case SELECTION -> showFuelSelect();
-//                case DECLINED -> showCardDeclined();
-//                case ATTACHING -> attaching();
-//                case FUELING -> fueling();
-//                case DETACHED -> detached();
-//                case PAUSED -> pause();
-//                case DETACHING -> detaching();
-//                case COMPLETE -> complete();
-//                case OFF_DETACHING -> offDetaching();
-//            }
 
             Message m = device.get();
             if (m == null) continue;
@@ -60,9 +46,9 @@ public class Display extends Thread {
     public void showAuthorizing(){
         ScreenState.paymentAuthorizing(device);
 
-        if (Controller.timerEnded()){
-            Controller.setState(STANDBY);
-        }
+//        if (Controller.timerEnded()){
+//            Controller.setState(STANDBY);
+//        }
     }
 
     public void showFuelSelect() {

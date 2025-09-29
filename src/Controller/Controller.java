@@ -26,7 +26,7 @@ public class Controller {
         Fueling.start();
 
         setState(InternalState.IDLE);
-        startProcess(getState());
+//        startProcess(getState());
     }
 
 
@@ -51,8 +51,9 @@ public class Controller {
         return internalState.get();
     }
 
-    public static void setState(InternalState newState) {
+    public static synchronized void setState(InternalState newState) {
         internalState.set(newState);
+        startProcess(getState());
     }
 
     public static void setTimer(int durationSeconds) {
@@ -101,39 +102,27 @@ public class Controller {
             switch (s) {
                // case STANDBY -> display.showWelcome();
                 case IDLE    -> {
-                    //System.out.println("showing welcome");
+                    System.out.println("MAIN: showing welcome");
                     displayProcess.showWelcome();
 
-                    System.out.println(getCardNumber());
-
-
-                    //startProcess(getState());
+                    if (getCardNumber() != null) {
+                        setState(InternalState.AUTHORIZING);
+                    }
                 }
                 case SELECTION -> {
-                    System.out.println("showing selection");
+                    System.out.println("MAIN: showing selection");
                     displayProcess.showFuelSelect();
                 }
                 case AUTHORIZING -> {
-                    System.out.println("showing auth");
+                    System.out.println("MAIN: showing auth");
                     displayProcess.showAuthorizing();
                 }
             }
     }
 
     public static void handleClick(int buttonID) {
-        switch (buttonID) {
-            case 8 -> {
-                System.out.println(getCardNumber());
-                System.out.println(getState().toString());
-                if (getState() == InternalState.IDLE) {
-                    System.out.println("truer");
-                    setState(InternalState.AUTHORIZING);
-                    startProcess(getState());
-                }
+        //soon
 
-
-            }
-        }
     }
 
 

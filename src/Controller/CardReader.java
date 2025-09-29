@@ -1,5 +1,6 @@
 package Controller;
 
+import Message.Message;
 import Sockets.commPort;
 
 public class CardReader {
@@ -11,6 +12,12 @@ public class CardReader {
     }
 
     public String readCard() {
-        return device.get().toString();
+        Message m = device.get();
+
+        if (m != null) {
+            return m.toString();
+        }
+
+        return null;
     }
 }
