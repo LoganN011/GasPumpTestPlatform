@@ -111,7 +111,7 @@ public class Display {
 
     private static void authorizing() {
         if (lastState != AUTHORIZING) {
-            device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
+            device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
         }
         if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
