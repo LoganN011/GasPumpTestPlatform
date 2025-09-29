@@ -4,6 +4,7 @@ import Devices.Gas;
 import Message.Message;
 import Sockets.commPort;
 
+import javax.naming.ldap.Control;
 import java.util.ArrayList;
 
 import static Controller.InternalState.*;
@@ -119,13 +120,46 @@ public class Display {
     private static void fuelSelect() {
         //todo show the correct screen
         if (lastState != SELECTION) {
-            Message options = optionsDisplayable(Controller.getNewPriceList());
+            Message options = optionsDisplayable(Controller.getInUsePriceList());
             device.send(options);
         }
         if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
         lastState = SELECTION;
+        int recentInput = -1;
+        int numberSelected = -1;
+        boolean begin = false;
+        boolean cancel = false;
+        while(true) {
+            String buttonInput = device.get().toString();
+            try{
+                recentInput = Integer.parseInt(buttonInput);
+                System.out.println("button " + recentInput + " last used");
+            } catch (Exception e) {
+                System.out.println("bad button selection");
+                e.printStackTrace();
+            }
+            switch (recentInput) {
+                case 3,5,7 ->  numberSelected = recentInput;
+                case 8 -> {
+                    System.out.println("begin pressed");
+                    if(numberSelected != -1) begin = true;
+                }
+                case 9 -> cancel = true;
+            }
+            System.out.println(numberSelected);
+            if (cancel) {
+                //todo consider this
+            }
+            if(begin) {
+                String options = "357";
+                Controller.setCurrentGas(Controller.getInUsePriceList().get(options.indexOf("" + numberSelected)));
+                Controller.setState(ATTACHING);
+                System.out.println("moving on");
+                break;
+            }
+        }
 
     }
 
