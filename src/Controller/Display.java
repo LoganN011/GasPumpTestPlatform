@@ -1,6 +1,5 @@
 package Controller;
 
-import Devices.DisplayGUI;
 import Devices.DisplayObjects.ScreenState;
 import Devices.Gas;
 import Message.Message;
@@ -12,10 +11,8 @@ import static Controller.InternalState.*;
 
 public class Display extends Thread {
 
-    private commPort device;
-
-    //todo: remove once displayGUI code properly removes old texts and shows all new messages independently
-    private static InternalState lastState = DETACHING;
+    private final commPort device;
+    private int buttonID;
 
     public Display() {
         device = new commPort("screen");
@@ -25,54 +22,50 @@ public class Display extends Thread {
     @Override
     public void run() {
         while (true) {
-            switch (Controller.getState()) {
-                case OFF, STANDBY -> pumpUnavailable();
-                case IDLE -> welcome();
-                case AUTHORIZING -> authorizing();
-                case SELECTION -> fuelSelect();
-                case DECLINED -> cardDeclined();
-                case ATTACHING -> attaching();
-                case FUELING -> fueling();
-                case DETACHED -> detached();
-                case PAUSED -> pause();
-                case DETACHING -> detaching();
-                case COMPLETE -> complete();
-                case OFF_DETACHING -> offDetaching();
-            }
+//            switch (Controller.getState()) {
+//                case OFF, STANDBY -> pumpUnavailable();
+//                case IDLE -> showWelcome();
+//                case AUTHORIZING -> showAuthorizing();
+//                case SELECTION -> showFuelSelect();
+//                case DECLINED -> showCardDeclined();
+//                case ATTACHING -> attaching();
+//                case FUELING -> fueling();
+//                case DETACHED -> detached();
+//                case PAUSED -> pause();
+//                case DETACHING -> detaching();
+//                case COMPLETE -> complete();
+//                case OFF_DETACHING -> offDetaching();
+//            }
 
             Message m = device.get();
             if (m == null) continue;
             System.out.println("Display responded: " + m.toString());
+
+            buttonID = Integer.parseInt(m.toString());
+            Controller.handleClick(buttonID);
         }
     }
+
 
     //todo: remove these if statements when displayGUI is fixed
-    private void pumpUnavailable() {
+    public void pumpUnavailable() {
+        ScreenState.pumpUnavailableScreen(device);
+    }
+
+    public void showWelcome() {
         ScreenState.welcomeScreen(device);
-//        if (lastState != OFF && lastState != STANDBY) {
-          //  ScreenState.pumpUnavailableScreen(device);
-//        }
-        lastState = STANDBY;
+//        Controller.setState(AUTHORIZING);
     }
 
-    private void welcome() {
-//        if (lastState != IDLE) {
-            ScreenState.welcomeScreen(device);
-//        }
-        lastState = IDLE;
-    }
+    public void showAuthorizing(){
+        ScreenState.paymentAuthorizing(device);
 
-    private void authorizing(){
-//        if (lastState != AUTHORIZING) {
-            ScreenState.paymentAuthorizing(device);
-//        }
-        if(Controller.timerEnded()){
+        if (Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
-        lastState = AUTHORIZING;
     }
 
-    private void fuelSelect() {
+    public void showFuelSelect() {
         //todo show the correct screen
 //        if (lastState != SELECTION) {
             int position = 2;
@@ -88,37 +81,35 @@ public class Display extends Thread {
         if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
-        lastState = SELECTION;
 
     }
 
-    private void cardDeclined() {
+    public void showCardDeclined() {
 //        if (lastState != DECLINED) {
             ScreenState.paymentDeclinedScreen(device);
 //        }
         if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
-        lastState = DECLINED;
     }
 
-    private void attaching() {
-
-    }
-
-    private void fueling() {
+    public void attaching() {
 
     }
 
-    private void detached() {
+    public void fueling() {
 
     }
 
-    private void pause() {
+    public void detached() {
 
     }
 
-    private void detaching() {
+    public void pause() {
+
+    }
+
+    public void detaching() {
     }
 
     private void complete() {
@@ -127,6 +118,37 @@ public class Display extends Thread {
 
     private void offDetaching() {
 
+    }
+
+    public int getButtonID() {
+        return buttonID;
+    }
+
+    public void handleClick(int buttonID) {
+        switch (buttonID) {
+            // "Cancel" or "Exit" or "No" or "Ok"
+            case 9 -> {
+                // WELCOME SCREEN
+                if (Controller.getState() == IDLE) {
+                    Controller.setState(STANDBY);
+                    return;
+                }
+
+            }
+
+            // "Begin Fueling" or "Pause" or "Begin" (BEGIN IS TEMPORARY) or "Yes"
+            case 8 -> {
+
+//                if (getState() == InternalState.)
+            }
+
+            // Gas Type
+            //case 7, 5, 3 -> selectGas(buttonID);
+            default -> {
+                System.out.println("welcome");
+                //displayProcess.welcome();
+            }
+        }
     }
 
 }

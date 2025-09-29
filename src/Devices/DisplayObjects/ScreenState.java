@@ -13,7 +13,6 @@ public class ScreenState {
     public static void welcomeScreen(commPort device) {
         device.send(new Message("t:01:s0:f0:c2:WELCOME!"));
         device.send(new Message("t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
-        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN|CANCEL"));
     }
 
     /**

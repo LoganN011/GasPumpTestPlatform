@@ -4,7 +4,7 @@ import Sockets.commPort;
 
 public class CardReader {
 
-    private commPort device;
+    private final commPort device;
 
     public CardReader() {
         device = new commPort("card");

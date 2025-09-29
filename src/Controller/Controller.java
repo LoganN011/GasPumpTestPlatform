@@ -18,14 +18,18 @@ public class Controller {
     private static AtomicReference<String> cardNumber = new AtomicReference<>();
     //todo move variables here
 
-    public static void main(String[] args) {
+    private static Display displayProcess;
 
-        //Consider changing these to regular methods not constructors
-//        Transaction transactionProcess = new Transaction();
+    public static void main(String[] args) {
+        displayProcess = new Display();
         Transaction.start();
-        Display displayProcess = new Display();
         Fueling.start();
+
+        setState(InternalState.IDLE);
+        startProcess(getState());
     }
+
+
 
     public static void setCurrentGas(Gas currentGas) {
         Controller.currentGas.set(currentGas);
@@ -92,5 +96,45 @@ public class Controller {
     public static String getCardNumber() {
         return cardNumber.get();
     }
+
+    public static void startProcess(InternalState s) {
+            switch (s) {
+               // case STANDBY -> display.showWelcome();
+                case IDLE    -> {
+                    //System.out.println("showing welcome");
+                    displayProcess.showWelcome();
+
+                    System.out.println(getCardNumber());
+
+
+                    //startProcess(getState());
+                }
+                case SELECTION -> {
+                    System.out.println("showing selection");
+                    displayProcess.showFuelSelect();
+                }
+                case AUTHORIZING -> {
+                    System.out.println("showing auth");
+                    displayProcess.showAuthorizing();
+                }
+            }
+    }
+
+    public static void handleClick(int buttonID) {
+        switch (buttonID) {
+            case 8 -> {
+                System.out.println(getCardNumber());
+                System.out.println(getState().toString());
+                if (getState() == InternalState.IDLE) {
+                    System.out.println("truer");
+                    setState(InternalState.AUTHORIZING);
+                    startProcess(getState());
+                }
+
+
+            }
+        }
+    }
+
 
 }
