@@ -14,7 +14,7 @@ public class FlowMeter {
     public int readFlow(){
         Message m = flow.read();
         if (m != null) {
-            return Integer.parseInt(flow.read().toString().split(":")[0]);
+            return Integer.parseInt(flow.read().toString());
         }
         return 0;
     }
