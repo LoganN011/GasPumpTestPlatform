@@ -88,7 +88,7 @@ public class Display {
             message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
             message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
             message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
-            message += "b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
+            message += ",b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
             device.send(new Message(message));
         }
         lastState = ATTACHING;
