@@ -72,7 +72,8 @@ public class Fueling {
 
                         } else {
                             pump.pumpOn(Controller.getCurrentGas().getName());
-                            Controller.setGasAmount(flowMeter.readFlow());
+                            //TODO: Fix when it pauses from detach or pause and keep flow counter the same
+                            Controller.setGasAmount(Integer.parseInt(flowMeter.readFlow().toString()));
                         }
                     }
 

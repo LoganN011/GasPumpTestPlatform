@@ -11,8 +11,15 @@ public class FlowMeter {
         flow = new monitorPort("flow_meter");
     }
 
-    public int readFlow(){
-        return Integer.parseInt(flow.read().toString().split(":")[0]);
+    public Message readFlow(){
+        //might want to check here if it is null if it is then return 0 but i am not sure
+        Message m = flow.read();
+
+        if (m != null) {
+            return m;
+        }
+
+        return new Message("0");
     }
 
     public void resetFlow(){
