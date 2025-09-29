@@ -5,7 +5,6 @@ import Devices.DisplayObjects.TextCmd;
 import Message.Message;
 import Message.MessageReader;
 import Sockets.commPort;
-import Utility.MyTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -52,7 +51,6 @@ public class DisplayGUI extends Application {
     private final Label footer = new Label();                  // a status line (will remove later)
     private final StackPane overlayLayer = new StackPane();
     private Label selectedGasLabel;
-    private MyTimer timer;
 
 
     private static final double WIDTH = 960, HEIGHT = 540;
