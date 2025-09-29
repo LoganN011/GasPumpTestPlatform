@@ -44,7 +44,8 @@ public class Controller {
     }
 
     public static double getCurPrice() {
-        return getCurrentGas().getPrice() * getGasAmount();
+
+        return (getCurrentGas() == null) ? 0 : getCurrentGas().getPrice() * getGasAmount();
     }
 
     public static int getGasAmount() {
@@ -62,6 +63,18 @@ public class Controller {
     public static void setTimer(int durationSeconds) {
         long now = System.currentTimeMillis();
         endingTime = now + (durationSeconds * 1000L);
+    }
+
+    public static void reset() {
+        internalState.set(InternalState.OFF);
+        gasAmount.set(0);
+        currentGas = new AtomicReference<>();
+        //todo consider changing
+        endingTime = Long.MAX_VALUE;
+        newPriceList = new AtomicReference<>();
+        inUsePriceList = new AtomicReference<>();
+        cardNumber = new AtomicReference<>();
+
     }
 
     public static boolean timerEnded() {

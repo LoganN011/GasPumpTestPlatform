@@ -179,8 +179,7 @@ public class GasServerGUI extends Application {
     private void completeSale(String contents) {
         String[] info = contents.split(",");
         double gallonsSold = Double.parseDouble(info[0]);
-        double pricePromised = Double.parseDouble(info[1]);
-        double finalPrice = gallonsSold * pricePromised;
+        double finalPrice = Double.parseDouble(info[1]);
         totalSales += finalPrice;
         salesCount++;
         String priceString = Gas.displayPrice(finalPrice);

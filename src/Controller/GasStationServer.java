@@ -44,4 +44,8 @@ public class GasStationServer {
                 return Gas.parseGasses(messageContents);
         }
     }
+
+    public void report(){
+        device.send(new Message(String.format("sale:%d,%f",Controller.getGasAmount(),Controller.getCurPrice())));
+    }
 }

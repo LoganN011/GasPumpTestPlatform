@@ -24,4 +24,8 @@ public class BankServer {
         return response.equals("approved");
 
     }
+
+    public void charge() {
+        device.send(new Message("sale:" + Controller.getCurPrice()));
+    }
 }

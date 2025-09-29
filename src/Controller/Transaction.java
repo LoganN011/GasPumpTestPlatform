@@ -16,6 +16,14 @@ public class Transaction {
 
         new Thread(() -> {
             while (true) {
+                if(!gasStationServer.checkPower()) {
+                    if(Controller.getCurPrice() != 0) {
+                        System.out.println("off received during transaction, reporting transaction now");
+                        gasStationServer.report();
+                        bankServer.charge();
+                    }
+                    Controller.reset();
+                }
                 switch (Controller.getState()) {
                     case OFF -> {
                         while(!gasStationServer.checkPower()){
@@ -54,15 +62,13 @@ public class Transaction {
                     case AUTHORIZING -> {
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
 
-                        Controller.setTimer(2); //10
-
-                        if (approved) {
+                        if (gasStationServer.checkPower() && approved) {
                             Controller.setInUsePriceList();
                             Controller.setState(SELECTION);
 
                             System.out.println("TRANSACTION: CC Approved");
 
-                        } else {
+                        } else if(gasStationServer.checkPower()) {
                             Controller.setCardNumber(null);
                             Controller.setState(DECLINED);
 

@@ -145,6 +145,7 @@ public class Display {
                 case 9 -> cancel = true;
             }
             System.out.println(numberSelected);
+            if(Controller.getState() == OFF) break;
             if (cancel) {
                 //todo consider this
             }
