@@ -48,7 +48,9 @@ public class Gas {
         for (String curGas : m.toString().split(",")) {
             if (curGas.isEmpty()) continue;
             String[] fields = curGas.split(":");
-            result.add(new Gas(fields[1], Double.parseDouble(fields[2])));
+            double price = Double.parseDouble(fields[2]);
+            if(price == 0) continue;
+            result.add(new Gas(fields[1], price));
         }
         return result;
     }
