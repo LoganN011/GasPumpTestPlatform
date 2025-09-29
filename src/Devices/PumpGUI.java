@@ -136,15 +136,16 @@ public class PumpGUI extends Application {
         primaryStage.show();
 
         new Thread(() -> {
-
             while (true) {
                 Message msg = flow.read();
                 if (msg == null) {
                     continue;
                 }
-                if (msg.equals("flow") && pumpOn) { // maybe delete this && if we still want to input that there is not flow
 
-                    flow.send(new Message("flow:" + counter));
+//                if (msg.equals("flow") && pumpOn) { // maybe delete this && if we still want to input that there is not flow
+                if (pumpOn) {
+//                    flow.send(new Message("flow:" + counter));
+                    flow.send(new Message(String.valueOf(counter)));
 
                 } else if (msg.equals("reset")) {
                     if (counter != 0) {
