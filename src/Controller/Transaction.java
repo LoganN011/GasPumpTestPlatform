@@ -28,18 +28,18 @@ public class Transaction {
 //        inUsePriceList = null;
         new Thread(() -> {
             while (true) {
-                System.out.println("TRANSACTION: " + Controller.getState());
+                System.out.println("\nTRANSACTION: " + Controller.getState());
 
                 switch (Controller.getState()) {
                     case OFF -> {
-                        //gasStationServer.waitForPower();
-                        System.out.println("TRANSACTION: ive been powered on");
+                        gasStationServer.waitForPower();
+                        System.out.println("TRANSACTION: Gas Station server ON");
                         Controller.setState(STANDBY);
                     }
 
                     case STANDBY -> {
-//                        Controller.setNewPriceList(gasStationServer.waitForPrices());
-                        System.out.println("TRANSACTION: prices received: " + Controller.newPriceListString());
+                        Controller.setNewPriceList(gasStationServer.waitForPrices());
+                        System.out.println("TRANSACTION: Prices Received: " + Controller.newPriceListString());
                         Controller.setState(IDLE);
                     }
 
@@ -51,21 +51,27 @@ public class Transaction {
                     }
 
                     case AUTHORIZING -> {
-                        //todo continue from here...
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
-                        Controller.setTimer(10);
+                        Controller.setTimer(2); //10
 
-                        if (approved){
+                        if (approved) {
                             Controller.setInUsePriceList();
                             Controller.setState(SELECTION);
                             Controller.setTimer(10);
                             System.out.println("approved");
+
                         } else {
                             Controller.setState(DECLINED);
                             Controller.setTimer(10);
                             System.out.println("approved");
                         }
                     }
+
+                    case SELECTION -> {
+                        // do nothing
+                    }
+
+                    default -> System.out.println("TRANSACTION: MISSING");
 
                 }
             }

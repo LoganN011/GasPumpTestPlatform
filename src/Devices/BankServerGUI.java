@@ -4,11 +4,13 @@ import Message.Message;
 import Sockets.commPort;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class BankServerGUI extends Application {
@@ -58,6 +60,14 @@ public class BankServerGUI extends Application {
         root.setBottom(buttons);
 
         Scene scene = new Scene(root);
+
+        // Screen dimensions
+        Rectangle2D bounds = Screen.getPrimary().getBounds();
+        double screenWidth = bounds.getWidth();
+        double screenHeight = bounds.getHeight();
+        primaryStage.setX(screenWidth/1.5);
+        primaryStage.setY(screenHeight/15);
+
         primaryStage.setScene(scene);
         primaryStage.setTitle("Bank Server");
         primaryStage.show();

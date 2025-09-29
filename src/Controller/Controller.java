@@ -100,22 +100,28 @@ public class Controller {
 
     public static void startProcess(InternalState s) {
             switch (s) {
-               // case STANDBY -> display.showWelcome();
-                case IDLE    -> {
-                    System.out.println("MAIN: showing welcome");
+                case STANDBY -> {
+                    System.out.println("MAIN: Showing Unavail");
+                    displayProcess.showUnavailable();
+                }
+
+                case IDLE -> {
+                    System.out.println("MAIN: Showing Welcome");
                     displayProcess.showWelcome();
 
                     if (getCardNumber() != null) {
                         setState(InternalState.AUTHORIZING);
                     }
                 }
-                case SELECTION -> {
-                    System.out.println("MAIN: showing selection");
-                    displayProcess.showFuelSelect();
-                }
+
                 case AUTHORIZING -> {
-                    System.out.println("MAIN: showing auth");
+                    System.out.println("MAIN: Showing Authorizing");
                     displayProcess.showAuthorizing();
+                }
+
+                case SELECTION -> {
+                    System.out.println("MAIN: Showing Selection");
+                    displayProcess.showFuelSelect();
                 }
             }
     }

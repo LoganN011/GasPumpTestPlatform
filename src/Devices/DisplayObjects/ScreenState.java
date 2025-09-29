@@ -20,9 +20,6 @@ public class ScreenState {
      */
     public static void fuelSelectionScreen(commPort device, Message options) {
         device.send(new Message("t:01:s0:f0:c2:SELECT YOUR GAS TYPE"));
-//        device.send(new Message("b:2:m,b:3:m,t:23:s1:f1:c1:REGULAR 87"));
-//        device.send(new Message("b:4:m,b:5:m,t:45:s1:f1:c1:PLUS 89"));
-//        device.send(new Message("b:6:m,b:7:m,t:67:s1:f1:c1:PREMIUM 91"));
         device.send(options);
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL"));
     }
@@ -70,6 +67,6 @@ public class ScreenState {
      */
     public static void paymentAuthorizing(commPort device) {
         device.send(new Message("t:01:s0:f0:c2:AUTHORIZING PAYMENT"));
-        device.send(new Message("t:45:s1:f1:c1:Please wait."));
+        device.send(new Message("t:45:s1:f1:c1:Please wait..."));
     }
 }

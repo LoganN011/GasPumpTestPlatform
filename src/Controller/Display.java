@@ -34,7 +34,7 @@ public class Display extends Thread {
 
 
     //todo: remove these if statements when displayGUI is fixed
-    public void pumpUnavailable() {
+    public void showUnavailable() {
         ScreenState.pumpUnavailableScreen(device);
     }
 
@@ -52,29 +52,26 @@ public class Display extends Thread {
     }
 
     public void showFuelSelect() {
-        //todo show the correct screen
-//        if (lastState != SELECTION) {
-            int position = 2;
-            String list = "";
-            ArrayList<Gas> options = Controller.getNewPriceList();
-            for(Gas cur: options) {
-                list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
-                position += 2;
-            }
-
-            ScreenState.fuelSelectionScreen(device, new Message(list));
-//        }
-        if(Controller.timerEnded()){
-            Controller.setState(STANDBY);
+        int position = 2;
+        String list = "";
+        ArrayList<Gas> options = Controller.getNewPriceList();
+        for (Gas cur: options) {
+            String label = String.format("%s $%.2f", cur.getName(), cur.getPrice());
+            list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s,", position, position + 1, position, position + 1, label);
+            position += 2;
         }
 
+        ScreenState.fuelSelectionScreen(device, new Message(list));
+
+        if (Controller.timerEnded()){
+            Controller.setState(STANDBY);
+        }
     }
 
     public void showCardDeclined() {
-//        if (lastState != DECLINED) {
-            ScreenState.paymentDeclinedScreen(device);
-//        }
-        if(Controller.timerEnded()){
+        ScreenState.paymentDeclinedScreen(device);
+
+        if (Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
     }
