@@ -14,7 +14,7 @@ public class ScreenState {
         // temporary send empty string to clear
         device.send(new Message("t:01:s0:f0:c2:WELCOME!"));
         device.send(new Message("t:23:s0:f0:c2: "));
-        device.send(new Message("t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
+        device.send(new Message("t:45:s1:f1:c1:Tap card to begin."));
         device.send(new Message("t:67:s0:f0:c2: "));
         device.send(new Message("t:89:s0:f0:c2: "));
     }
@@ -39,14 +39,17 @@ public class ScreenState {
         device.send(new Message("b:9:x,t:89:s2:f2:c0:|OK"));
     }
 
+
     /**
-     * Currently pumping fuel screen
+     * Currently pumping fuel screen (W LIVE TOTALS)
+     * @param device
+     * @param gallons
+     * @param amount
      */
-    // "꞉" is a usable colon that won't get caught by MessageReader
-    public static void pumpingScreen(commPort device) {
-        device.send(new Message("t:01:s0:f0:c2:PUMPING IN PROGRESS"));
-        device.send(new Message("t:23:s2:f1:c1:Gallons꞉ " + 10));
-        device.send(new Message("t:45:s2:f1:c1:Price꞉ $" + 9));
+    public static void pumpingScreen(commPort device, double gallons, double amount) {
+        device.send(new Message("t:01:s0:f0:c2:FUELING"));
+        device.send(new Message(String.format("t:23:s2:f1:c1:Gallons꞉ %.3f", gallons)));
+        device.send(new Message(String.format("t:45:s2:f1:c1:Price꞉ $%.2f", amount)));
         device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT"));
     }
 
@@ -87,20 +90,6 @@ public class ScreenState {
         device.send(new Message("t:45:s1:f1:c1:Insert nozzle into your vehicle."));
         device.send(new Message("t:67:s0:f0:c2: "));
         device.send(new Message("t:89:s0:f0:c2: "));
-    }
-
-    /**
-     * Currently pumping fuel screen (W LIVE TOTALS)
-     * @param device
-     * @param gallons
-     * @param amount
-     */
-    public static void pumpingScreen(commPort device, double gallons, double amount) {
-        device.send(new Message("t:01:s0:f0:c2:FUELING"));
-        device.send(new Message(String.format("t:23:s2:f1:c1:Gallons꞉ %.3f", gallons)));
-        device.send(new Message(String.format("t:45:s2:f1:c1:Price꞉ $%.2f", amount)));
-        device.send(new Message("t:67:s0:f0:c2: "));
-        device.send(new Message("b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT"));
     }
 
     /**

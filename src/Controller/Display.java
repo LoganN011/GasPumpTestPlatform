@@ -51,19 +51,21 @@ public class Display extends Thread {
 //        }
     }
 
-    public void showFuelSelect() {
+    private void showFuelSelect() {
         int position = 2;
         String list = "";
         ArrayList<Gas> options = Controller.getNewPriceList();
-        for (Gas cur: options) {
-            String label = String.format("%s $%.2f", cur.getName(), cur.getPrice());
-            list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s,", position, position + 1, position, position + 1, label);
-            position += 2;
+        if (options != null) {
+            for (Gas cur : options) {
+                // Example line: "b:2:m,b:3:m,t:23:s1:f1:c1:Regular $3.59,"
+                String label = String.format("%s $%.2f", cur.getName(), cur.getPrice());
+                list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s,", position, position + 1, position, position + 1, label);
+                position += 2;
+            }
         }
-
         ScreenState.fuelSelectionScreen(device, new Message(list));
 
-        if (Controller.timerEnded()){
+        if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
     }
@@ -95,6 +97,7 @@ public class Display extends Thread {
 
         ScreenState.pumpingScreen(device, gallons, total);
     }
+
 
     public void updateFueling(int gallons, double total) {
         ScreenState.pumpingScreen(device, gallons, total);
