@@ -16,6 +16,8 @@ public class Controller {
     private static AtomicReference<ArrayList<Gas>> inUsePriceList = new AtomicReference<>();
     //todo consider deleting cardNumber variable and setter/getter
     private static AtomicReference<String> cardNumber = new AtomicReference<>();
+
+    private static AtomicReference<Boolean> nozzleAttached = new AtomicReference(false);
     //todo move variables here
 
     private static Display displayProcess;
@@ -25,11 +27,13 @@ public class Controller {
         Transaction.start();
         Fueling.start();
 
-        setState(InternalState.IDLE);
+        setState(getState());
 //        startProcess(getState());
     }
 
 
+    public static boolean isNozzleAttached() { return nozzleAttached.get(); }
+    public static void setNozzleAttached(boolean attached) { nozzleAttached.set(attached); }
 
     public static void setCurrentGas(Gas currentGas) {
         Controller.currentGas.set(currentGas);
@@ -100,7 +104,7 @@ public class Controller {
 
     public static void startProcess(InternalState s) {
             switch (s) {
-                case STANDBY -> {
+                case OFF, STANDBY -> {
                     System.out.println("MAIN: Showing Unavail");
                     displayProcess.showUnavailable();
                 }
@@ -123,11 +127,57 @@ public class Controller {
                     System.out.println("MAIN: Showing Selection");
                     displayProcess.showFuelSelect();
                 }
+
+                case ATTACHING -> {
+                    System.out.println("MAIN: Showing Attaching");
+                    displayProcess.showAttaching();
+                }
+
+                case FUELING -> {
+                    System.out.println("MAIN: Showing Fueling");
+                    displayProcess.showFueling();
+                }
             }
     }
 
     public static void handleClick(int buttonID) {
-        //soon
+        switch (buttonID) {
+            case 3, 5, 7 -> {
+                int index = 0;
+
+                ArrayList<Gas> prices = getInUsePriceList();
+                if (prices == null || prices.isEmpty()) return;
+                if (buttonID == 5) {
+                    index = 1;
+                } else if (buttonID == 7) {
+                    index = 2;
+                }
+                setCurrentGas(prices.get(index));
+                System.out.println("MAIN: " + getCurrentGas().getName());
+            }
+
+            // Begin fueling
+            case 8 -> {
+                if (getState() == InternalState.SELECTION && getCurrentGas() != null) {
+                    if (!isNozzleAttached()) {
+                        System.out.println("MAIN: Attach Nozzle");
+                        setState(InternalState.ATTACHING);
+                        return;
+                    }
+
+                    System.out.println("MAIN: Begin Fueling");
+                    setState(InternalState.FUELING);
+                }
+            }
+
+            // Cancel
+            case 9 -> {
+                if (getState() == InternalState.SELECTION) {
+                    cardNumber.set(null);
+                    setState(InternalState.IDLE);
+                }
+            }
+        }
 
     }
 

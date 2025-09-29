@@ -76,13 +76,26 @@ public class Display extends Thread {
         }
     }
 
-    public void attaching() {
+    public void showAttaching() {
+        ScreenState.attachingScreen(device);
 
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
-    public void fueling() {
+    public void showFueling() {
+        int gallons = Controller.getGasAmount();
 
+        // Read selected gas & price
+        Devices.Gas g = Controller.getCurrentGas();
+        double pricePerGallon = (g != null ? g.getPrice() : 0.0);
+
+        double total = gallons * pricePerGallon;
+
+        Devices.DisplayObjects.ScreenState.pumpingScreen(device, gallons, total);
     }
+
 
     public void detached() {
 

@@ -473,7 +473,7 @@ public class DisplayGUI extends Application {
                 while (running) {
                     Message m = port.get();
                     if (m == null) continue;
-                    String line = m.toString().trim();
+                    String line = m.toString();
                     if (!line.isEmpty()) {
                         this.handleInbound(line);
                     }

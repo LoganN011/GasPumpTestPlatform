@@ -1,9 +1,6 @@
 package Controller;
 
-import Devices.Gas;
-import Message.Message;
-
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static Controller.InternalState.*;
 
@@ -20,6 +17,7 @@ public class Transaction {
 //    private static ArrayList<Gas> inUsePriceList;
 
     public static void start() {
+        AtomicBoolean temp = new AtomicBoolean(true);
         cardReader = new CardReader();
         gasStationServer = new GasStationServer();
         bankServer = new BankServer();
@@ -27,7 +25,7 @@ public class Transaction {
 //        cardNumber = null;
 //        inUsePriceList = null;
         new Thread(() -> {
-            while (true) {
+            while (temp.get()) {
                 System.out.println("\nTRANSACTION: " + Controller.getState());
 
                 switch (Controller.getState()) {
@@ -58,17 +56,18 @@ public class Transaction {
                             Controller.setInUsePriceList();
                             Controller.setState(SELECTION);
                             Controller.setTimer(10);
-                            System.out.println("approved");
+                            System.out.println("TRANSACTION: CC Approved");
 
                         } else {
                             Controller.setState(DECLINED);
                             Controller.setTimer(10);
-                            System.out.println("approved");
+                            System.out.println("TRANSACTION: CC Declined");
                         }
                     }
 
                     case SELECTION -> {
-                        // do nothing
+                        // stop loop
+                        temp.set(false);
                     }
 
                     default -> System.out.println("TRANSACTION: MISSING");
