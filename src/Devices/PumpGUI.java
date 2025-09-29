@@ -7,13 +7,12 @@ import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -43,40 +42,57 @@ public class PumpGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        try {
-            pump = new statusPort("pump");
-            flow = new monitorPort("flow_meter");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        pump = new statusPort("pump");
+        flow = new monitorPort("flow_meter");
+
+        BorderPane root = new BorderPane();
 
         pumpImage = VisualElements.getImage("off.png", (int) (SIZE/2));
-        pumpImage.setFitHeight(SIZE/2);
-        pumpImage.setFitWidth(SIZE/2);
+        pumpImage.setPreserveRatio(true);
+        pumpImage.fitWidthProperty().bind(root.widthProperty().multiply(0.5));
+        pumpImage.fitHeightProperty().bind(root.heightProperty().multiply(0.5));
 
         StackPane flowMeter = new StackPane();
         gauge = new Circle(SIZE/8);
         gauge.setFill(Color.WHITE);
         gauge.setStroke(Color.BLACK);
-        line = new Rectangle(SIZE/40, SIZE/4);
-        Rectangle background = new Rectangle(SIZE/3.2,SIZE/3.2);
+        gauge.radiusProperty().bind(root.widthProperty().multiply(0.05));
 
-        flowMeter.getChildren().addAll(background,gauge, line);
+        line = new Rectangle();
+
+        line.widthProperty().bind(root.widthProperty().multiply(0.01));
+        line.heightProperty().bind(root.heightProperty().multiply(0.15));
+
+        Rectangle flowBackground = new Rectangle();
+
+        flowBackground.widthProperty().bind(root.widthProperty().multiply(0.25));
+        flowBackground.heightProperty().bind(root.heightProperty().multiply(0.25));
+
+        flowMeter.getChildren().addAll(flowBackground,gauge, line);
         VBox flowAssembly = new VBox();
 
         flowCounter = new Label("0");
 
-        flowCounter.setFont(new Font("Lucida Console",SIZE/16));
+        root.heightProperty().addListener((obs, oldVal, newVal) -> {
+            flowCounter.setFont(new Font("Lucida Console", newVal.doubleValue() / 20));
+        });
+
         flowCounter.setStyle(
                 "-fx-text-fill: red;" +
                         "-fx-background-color: black;" +
-                        "-fx-padding: SIZE/40;" +
+                        "-fx-padding: "+SIZE/40+";" +
                         "-fx-border-color: darkred;" +
-                        "-fx-border-width: SIZE/200;" +
-                        "-fx-border-radius: SIZE/100;"
+                        "-fx-border-width: "+ SIZE/200+ ";" +
+                        "-fx-border-radius: "+SIZE/100+ ";"
         );
-        Rectangle textBackground = new Rectangle(SIZE/3.2,SIZE/8);
+        Rectangle textBackground = new Rectangle();
+        textBackground.widthProperty().bind(root.widthProperty().multiply(0.25));
+        textBackground.heightProperty().bind(root.heightProperty().multiply(0.1));
+
         flowAssembly.getChildren().addAll(new StackPane(textBackground,flowCounter), flowMeter);
+        flowAssembly.prefWidthProperty().bind(root.widthProperty());
+        flowAssembly.prefHeightProperty().bind(root.heightProperty().multiply(0.6));
 
         animation = new RotateTransition(Duration.millis(250), line);
         animation.setByAngle(360);
@@ -90,30 +106,46 @@ public class PumpGUI extends Application {
             }
         });
 
+        Image backgroundImage = VisualElements.getImage("pump_background.png");
 
-        BorderPane root = new BorderPane();
+        BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
+                100,
+                100,
+                true,
+                true,
+                false,
+                true
+        ));
+
+
         root.setPadding(new Insets(10));
         root.setMinSize(SIZE, SIZE);
-        root.setCenter(pumpImage);
-        root.setRight(flowAssembly);
+        root.setBottom(pumpImage);
+        BorderPane.setAlignment(pumpImage, Pos.CENTER);
+        root.setTop(flowAssembly);
+        root.setBackground(new Background(background));
+        flowAssembly.prefWidthProperty().bind(root.widthProperty());
+        flowAssembly.prefHeightProperty().bind(root.heightProperty().multiply(0.8));
 
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root, 500, 500);
+
         primaryStage.setScene(scene);
         primaryStage.setTitle("Pump Assembly");
         primaryStage.show();
 
         new Thread(() -> {
-
             while (true) {
                 Message msg = flow.read();
                 if (msg == null) {
                     continue;
                 }
-                if (msg.equals("flow") && pumpOn) { // maybe delete this && if we still want to input that there is not flow
 
-                    flow.send(new Message("flow:" + counter));
+//                if (msg.equals("flow") && pumpOn) { // maybe delete this && if we still want to input that there is not flow
+                if (pumpOn) {
+//                    flow.send(new Message("flow:" + counter));
+                    flow.send(new Message(String.valueOf(counter)));
 
-                } else if (msg.equals("reset")) {
+                } else if (msg.toString().equals("reset")) {
                     if (counter != 0) {
                         resetFlow();
                     }

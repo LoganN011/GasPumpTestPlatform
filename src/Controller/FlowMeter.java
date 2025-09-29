@@ -5,7 +5,7 @@ import Message.Message;
 import Sockets.monitorPort;
 
 public class FlowMeter {
-    private monitorPort flow;
+    private final monitorPort flow;
 
     public FlowMeter() {
         flow = new monitorPort("flow_meter");
@@ -13,7 +13,13 @@ public class FlowMeter {
 
     public Message readFlow(){
         //might want to check here if it is null if it is then return 0 but i am not sure
-        return  flow.read();
+        Message m = flow.read();
+
+        if (m != null) {
+            return m;
+        }
+
+        return new Message("0");
     }
 
     public void resetFlow(){

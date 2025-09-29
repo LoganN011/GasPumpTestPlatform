@@ -5,7 +5,7 @@ import Sockets.commPort;
 
 public class BankServer {
 
-    private commPort device;
+    private final commPort device;
 
     public BankServer() {
         device = new commPort("bank");

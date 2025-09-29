@@ -1,6 +1,5 @@
 package Controller;
 
-import Devices.DisplayGUI;
 import Devices.DisplayObjects.ScreenState;
 import Devices.Gas;
 import Message.Message;
@@ -12,10 +11,8 @@ import static Controller.InternalState.*;
 
 public class Display extends Thread {
 
-    private commPort device;
-
-    //todo: remove once displayGUI code properly removes old texts and shows all new messages independently
-    private static InternalState lastState = DETACHING;
+    private final commPort device;
+    private int buttonID;
 
     public Display() {
         device = new commPort("screen");
@@ -25,54 +22,36 @@ public class Display extends Thread {
     @Override
     public void run() {
         while (true) {
-            switch (Controller.getState()) {
-                case OFF, STANDBY -> pumpUnavailable();
-                case IDLE -> welcome();
-                case AUTHORIZING -> authorizing();
-                case SELECTION -> fuelSelect();
-                case DECLINED -> cardDeclined();
-                case ATTACHING -> attaching();
-                case FUELING -> fueling();
-                case DETACHED -> detached();
-                case PAUSED -> pause();
-                case DETACHING -> detaching();
-                case COMPLETE -> complete();
-                case OFF_DETACHING -> offDetaching();
-            }
 
             Message m = device.get();
             if (m == null) continue;
             System.out.println("Display responded: " + m.toString());
+
+            buttonID = Integer.parseInt(m.toString());
+            Controller.handleClick(buttonID);
         }
     }
+
 
     //todo: remove these if statements when displayGUI is fixed
-    private void pumpUnavailable() {
+    public void showUnavailable() {
+        ScreenState.pumpUnavailableScreen(device);
+    }
+
+    public void showWelcome() {
         ScreenState.welcomeScreen(device);
-//        if (lastState != OFF && lastState != STANDBY) {
-            ScreenState.pumpUnavailableScreen(device);
-//        }
-        lastState = STANDBY;
+//        Controller.setState(AUTHORIZING);
     }
 
-    private void welcome() {
-//        if (lastState != IDLE) {
-            ScreenState.welcomeScreen(device);
+    public void showAuthorizing(){
+        ScreenState.paymentAuthorizing(device);
+
+//        if (Controller.timerEnded()){
+//            Controller.setState(STANDBY);
 //        }
-        lastState = IDLE;
     }
 
-    private void authorizing(){
-//        if (lastState != AUTHORIZING) {
-            ScreenState.paymentAuthorizing(device);
-//        }
-        if(Controller.timerEnded()){
-            Controller.setState(STANDBY);
-        }
-        lastState = AUTHORIZING;
-    }
-
-    private void fuelSelect() {
+    private void showFuelSelect() {
         int position = 2;
         String list = "";
         ArrayList<Gas> options = Controller.getNewPriceList();
@@ -89,28 +68,25 @@ public class Display extends Thread {
         if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
-        lastState = SELECTION;
     }
 
-    private void cardDeclined() {
-//        if (lastState != DECLINED) {
-            ScreenState.paymentDeclinedScreen(device);
-//        }
-        if(Controller.timerEnded()){
+    public void showCardDeclined() {
+        ScreenState.paymentDeclinedScreen(device);
+
+        if (Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
-        lastState = DECLINED;
     }
 
-    private void attaching() {
+    public void showAttaching() {
         ScreenState.attachingScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
-        lastState = ATTACHING;
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
-    private void fueling() {
+    public void showFueling() {
         int gallons = Controller.getGasAmount();
 
         // Read selected gas & price
@@ -119,51 +95,54 @@ public class Display extends Thread {
 
         double total = gallons * pricePerGallon;
 
-        Devices.DisplayObjects.ScreenState.pumpingScreen(device, gallons, total);
-
-        lastState = InternalState.FUELING;
+        ScreenState.pumpingScreen(device, gallons, total);
     }
 
 
-    private void detached() {
-        ScreenState.detachedScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
-        lastState = DETACHED;
-    }
-
-    private void pause() {
-        ScreenState.pausedScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
-        lastState = PAUSED;
+    public void updateFueling(int gallons, double total) {
+        ScreenState.pumpingScreen(device, gallons, total);
     }
 
 
-    private void detaching() {
-        ScreenState.detachingScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
-        lastState = DETACHING;
+    public void showDetached(int gallons, double total) {
+        ScreenState.detachedScreen(device, gallons, total);
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
+    }
+
+    public void showPause(int gallons, double total) {
+        ScreenState.pausedScreen(device, gallons, total);
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
 
-    private void complete() {
+    public void showDetaching(int gallons, double total) {
+        ScreenState.detachingScreen(device, gallons, total);
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
+    }
+
+
+    public void showComplete() {
         ScreenState.finishScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
-        lastState = COMPLETE;
+
+//        if (Controller.timerEnded()) {
+//            Controller.setState(STANDBY);
+//        }
     }
 
-    private void offDetaching() {
+    public void showOffDetaching() {
         ScreenState.offDetachingScreen(device);
         if (Controller.timerEnded()) {
             Controller.setState(OFF);
         }
-        lastState = OFF_DETACHING;
     }
+
 }
