@@ -12,7 +12,11 @@ public class FlowMeter {
     }
 
     public int readFlow(){
-        return Integer.parseInt(flow.read().toString().split(":")[0]);
+        Message m = flow.read();
+        if (m != null) {
+            return Integer.parseInt(flow.read().toString().split(":")[0]);
+        }
+        return 0;
     }
 
     public void resetFlow(){
