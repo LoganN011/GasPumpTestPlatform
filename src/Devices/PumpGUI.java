@@ -42,10 +42,12 @@ public class PumpGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        pump = new statusPort("pump");
-        flow = new monitorPort("flow_meter");
-
+        try {
+            pump = new statusPort("pump");
+            flow = new monitorPort("flow_meter");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         BorderPane root = new BorderPane();
 
         pumpImage = VisualElements.getImage("off.png", (int) (SIZE/2));
@@ -81,10 +83,10 @@ public class PumpGUI extends Application {
         flowCounter.setStyle(
                 "-fx-text-fill: red;" +
                         "-fx-background-color: black;" +
-                        "-fx-padding: "+SIZE/40+";" +
+                        "-fx-padding: SIZE/40;" +
                         "-fx-border-color: darkred;" +
-                        "-fx-border-width: "+ SIZE/200+ ";" +
-                        "-fx-border-radius: "+SIZE/100+ ";"
+                        "-fx-border-width: SIZE/200;" +
+                        "-fx-border-radius: SIZE/100;"
         );
         Rectangle textBackground = new Rectangle();
         textBackground.widthProperty().bind(root.widthProperty().multiply(0.25));
@@ -109,8 +111,8 @@ public class PumpGUI extends Application {
         Image backgroundImage = VisualElements.getImage("pump_background.png");
 
         BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
-                SIZE/2,
-                SIZE/2,
+                100,
+                100,
                 true,
                 true,
                 false,
@@ -127,7 +129,7 @@ public class PumpGUI extends Application {
         flowAssembly.prefWidthProperty().bind(root.widthProperty());
         flowAssembly.prefHeightProperty().bind(root.heightProperty().multiply(0.8));
 
-        Scene scene = new Scene(root, SIZE*2, SIZE*2);
+        Scene scene = new Scene(root, 500, 500);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Pump Assembly");
@@ -140,8 +142,11 @@ public class PumpGUI extends Application {
                     continue;
                 }
 
-                if (msg.equals("flow") && pumpOn) {
+//                if (msg.equals("flow") && pumpOn) { // maybe delete this && if we still want to input that there is not flow
+                if (pumpOn) {
+//                    flow.send(new Message("flow:" + counter));
                     flow.send(new Message(String.valueOf(counter)));
+
                 } else if (msg.toString().equals("reset")) {
                     if (counter != 0) {
                         resetFlow();
