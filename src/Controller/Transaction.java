@@ -49,8 +49,8 @@ public class Transaction {
                     case IDLE -> {
                         String card = cardReader.readCard();
                         Controller.setCardNumber(card);
+                        Controller.setState(AUTHORIZING);
                     }
-
                     case AUTHORIZING -> {
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
                         Controller.setTimer(2); //10

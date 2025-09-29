@@ -29,14 +29,27 @@ public class Display {
                     case FUELING -> fueling();
                     case DETACHED -> detached();
                     case PAUSED -> paused();
-//                case DETACHING -> detaching();
-//                case COMPLETE -> complete();
+                    case DETACHING -> detaching();
+                case COMPLETE -> complete();
 //                case OFF_DETACHING -> detaching();
                     //TODO add the remainder of the states
                 }
             }
         }).start();
 
+    }
+
+    private static void complete() {
+        String message = "";
+        message += "t:01:s0:f0:c2:PUMPING FINISHED";
+        message += ",t:23:s2:f1:c1: ";
+        message += ",t:45:s1:f1:c1:Thank you for refilling with us!";
+        device.send(new Message(",t:67:s2:f1:c1: "));
+        device.send(new Message(",b:9:x,t:89:s2:f2:c0:|OK"));
+    }
+
+    private static void detaching() {
+        device.send(new Message("t:01:s0:f0:c2:PLEASE DETACH THE HOSE"));
     }
 
     private static void paused() {
@@ -92,11 +105,11 @@ public class Display {
         lastState = IDLE;
     }
 
-    private static void authorizing(){
+    private static void authorizing() {
         if (lastState != AUTHORIZING) {
             device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
         }
-        if(Controller.timerEnded()){
+        if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
         lastState = AUTHORIZING;
@@ -108,7 +121,7 @@ public class Display {
             Message options = optionsDisplayable(Controller.getNewPriceList());
             device.send(options);
         }
-        if(Controller.timerEnded()){
+        if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
         lastState = SELECTION;
@@ -118,7 +131,7 @@ public class Display {
     private static Message optionsDisplayable(ArrayList<Gas> options) {
         String result = "t:01:s0:f0:c2:SELECT YOUR GAS TYPE,";
         int position = 2;
-        for(Gas cur: options) {
+        for (Gas cur : options) {
             result += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
             position += 2;
         }
@@ -130,7 +143,7 @@ public class Display {
         if (lastState != DECLINED) {
             device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
         }
-        if(Controller.timerEnded()){
+        if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
         lastState = DECLINED;
