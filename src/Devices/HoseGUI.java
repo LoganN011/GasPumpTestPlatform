@@ -5,6 +5,7 @@ import Sockets.controlPort;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
@@ -14,6 +15,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.QuadCurve;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -44,7 +46,7 @@ public class HoseGUI extends Application {
         double sceneW = scene.getHeight();
         double sceneH = scene.getWidth();
 
-        controlPort harness = control;
+        controlPort port = control;
         ProgressBar gasTank = new ProgressBar();
         gasTank.setProgress((Math.random()));
         gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
@@ -64,10 +66,10 @@ public class HoseGUI extends Application {
             gasTank.setProgress(0);
             full = false;
             if (connected) {
-                harness.send(new Message("connected"));
+                port.send(new Message("connected"));
             }
             else  {
-                harness.send(new Message("disconnected"));
+                port.send(new Message("disconnected"));
             }
         });
 
@@ -81,7 +83,7 @@ public class HoseGUI extends Application {
             } else {
                 if (!full) {
                     full = true;
-                    harness.send(new Message("full_tank"));
+                    port.send(new Message("full_tank"));
                 }
             }
         }));
@@ -110,9 +112,9 @@ public class HoseGUI extends Application {
                 System.out.println("on car");
                 connected = true;
                 if (full) {
-                    harness.send(new Message("full_tank"));
+                    port.send(new Message("full_tank"));
                 } else {
-                    harness.send(new Message("connected"));
+                    port.send(new Message("connected"));
                 }
 
                 pumpHandle.setCenterX(sceneW - (sceneW/2));
@@ -124,7 +126,7 @@ public class HoseGUI extends Application {
                 if (connected) {
                     animation.stop();
                     connected = false;
-                    harness.send(new Message("disconnected"));
+                    port.send(new Message("disconnected"));
                     pumpHandle.setCenterX(sceneW/7);
                     pumpHandle.setCenterY(sceneH/2);
                     hoseLine.setEndX(pumpHandle.getCenterX());
@@ -160,7 +162,12 @@ public class HoseGUI extends Application {
         root.setBackground(new Background(background));
 
 
-
+        // Screen dimensions
+        Rectangle2D bounds = Screen.getPrimary().getBounds();
+        double screenWidth = bounds.getWidth();
+        double screenHeight = bounds.getHeight();
+        primaryStage.setX(screenWidth/15);
+        primaryStage.setY(screenHeight/3);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Hose");
