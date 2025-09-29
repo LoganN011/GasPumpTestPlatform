@@ -2,6 +2,7 @@ package Devices;
 
 import Message.Message;
 import Sockets.controlPort;
+import Sockets.monitorPort;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -23,6 +24,8 @@ public class HoseGUI extends Application {
 
     private boolean connected;
     private boolean full;
+    private boolean pumpOn;
+    private monitorPort control = null;
 
     public static void main(String[] args) {
         launch(args);
@@ -30,23 +33,25 @@ public class HoseGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        controlPort control = null;
         try {
-            control = new controlPort("hose");
+            control = new monitorPort("hose");
+            updatePump();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Pane root = new Pane();
-        Scene scene = new Scene(root, 500,500);
-
         double SIZE = 400;
+
+        Pane root = new Pane();
+        Scene scene = new Scene(root, SIZE*1.25,SIZE*1.25);
+
+
         double rootHeight = root.getHeight();
         double rootWidth = root.getWidth();
         double sceneW = scene.getHeight();
         double sceneH = scene.getWidth();
 
-        controlPort port = control;
+        monitorPort port = control;
         ProgressBar gasTank = new ProgressBar();
         gasTank.setProgress((Math.random()));
         gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
@@ -77,7 +82,7 @@ public class HoseGUI extends Application {
         clear.setLayoutY(SIZE/3);
 
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
-            if (gasTank.getProgress() < 1.0) {
+            if (gasTank.getProgress() < 1.0 && pumpOn) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
                 System.out.println(gasTank.getProgress());
             } else {
@@ -117,11 +122,11 @@ public class HoseGUI extends Application {
                     port.send(new Message("connected"));
                 }
 
-                pumpHandle.setCenterX(sceneW - (sceneW/2));
-                pumpHandle.setCenterY(sceneH/4);
+                pumpHandle.setCenterX(sceneW - (sceneW/4));
+                pumpHandle.setCenterY(sceneH/2);
                 animation.playFromStart();
-                hoseLine.setEndX(sceneW - (sceneW/2));
-                hoseLine.setEndY(sceneH/4);
+                hoseLine.setEndX(sceneW - (sceneW/4));
+                hoseLine.setEndY(sceneH/2);
             } else {
                 if (connected) {
                     animation.stop();
@@ -136,19 +141,11 @@ public class HoseGUI extends Application {
             }
         });
 
-//        Rectangle pump = new Rectangle(rootWidth/8, rootHeight/2);
-//        pump.setStyle("-fx-fill: #FF0000");
-
-
-//        Rectangle car = new Rectangle(SIZE/8, SIZE/2);
-//        car.setStyle("-fx-fill: grey");
-//        car.setX(SIZE - (SIZE/8));
-
         Image backgroundImage = VisualElements.getImage("hose.png");
 
         BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
-                100,
-                100,
+                SIZE/8,
+                SIZE/8,
                 true,
                 true,
                 false,
@@ -158,7 +155,6 @@ public class HoseGUI extends Application {
 
         root.setPrefSize(SIZE, SIZE/2);
         root.getChildren().addAll(hoseLine, pumpHandle, gasTank, clear);
-//        root.getChildren().addAll(pump, car, pumpHandle, gasTank, clear);
         root.setBackground(new Background(background));
 
 
@@ -172,5 +168,22 @@ public class HoseGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Hose");
         primaryStage.show();
+    }
+
+    public void updatePump(){
+        new Thread(()->{
+            while(true){
+                Message m = control.read();
+                if(m != null){
+                    System.out.println(m);
+                    if(m.equals("on")){
+                        pumpOn = true;
+                    }
+                    else if(m.equals("off")){
+                        pumpOn = false;
+                    }
+                }
+            }
+        }).start();
     }
 }
