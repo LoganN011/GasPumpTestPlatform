@@ -50,7 +50,7 @@ public class Display extends Thread {
     private void pumpUnavailable() {
         ScreenState.welcomeScreen(device);
 //        if (lastState != OFF && lastState != STANDBY) {
-          //  ScreenState.pumpUnavailableScreen(device);
+            ScreenState.pumpUnavailableScreen(device);
 //        }
         lastState = STANDBY;
     }
@@ -73,23 +73,23 @@ public class Display extends Thread {
     }
 
     private void fuelSelect() {
-        //todo show the correct screen
-//        if (lastState != SELECTION) {
-            int position = 2;
-            String list = "";
-            ArrayList<Gas> options = Controller.getNewPriceList();
-            for(Gas cur: options) {
-                list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
+        int position = 2;
+        String list = "";
+        ArrayList<Gas> options = Controller.getNewPriceList();
+        if (options != null) {
+            for (Gas cur : options) {
+                // Example line: "b:2:m,b:3:m,t:23:s1:f1:c1:Regular $3.59,"
+                String label = String.format("%s $%.2f", cur.getName(), cur.getPrice());
+                list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s,", position, position + 1, position, position + 1, label);
                 position += 2;
             }
+        }
+        ScreenState.fuelSelectionScreen(device, new Message(list));
 
-            ScreenState.fuelSelectionScreen(device, new Message(list));
-//        }
-        if(Controller.timerEnded()){
+        if (Controller.timerEnded()) {
             Controller.setState(STANDBY);
         }
         lastState = SELECTION;
-
     }
 
     private void cardDeclined() {
@@ -103,30 +103,67 @@ public class Display extends Thread {
     }
 
     private void attaching() {
-
+        ScreenState.attachingScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
+        lastState = ATTACHING;
     }
 
     private void fueling() {
+        int gallons = Controller.getGasAmount();
 
+        // Read selected gas & price
+        Devices.Gas g = Controller.getCurrentGas();
+        double pricePerGallon = (g != null ? g.getPrice() : 0.0);
+
+        double total = gallons * pricePerGallon;
+
+        Devices.DisplayObjects.ScreenState.pumpingScreen(device, gallons, total);
+
+        lastState = InternalState.FUELING;
     }
 
-    private void detached() {
 
+    private void detached() {
+        ScreenState.detachedScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
+        lastState = DETACHED;
     }
 
     private void pause() {
-
+        ScreenState.pausedScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
+        lastState = PAUSED;
     }
+
 
     private void detaching() {
+        ScreenState.detachingScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
+        lastState = DETACHING;
     }
 
-    private void complete() {
 
+    private void complete() {
+        ScreenState.finishScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(STANDBY);
+        }
+        lastState = COMPLETE;
     }
 
     private void offDetaching() {
-
+        ScreenState.offDetachingScreen(device);
+        if (Controller.timerEnded()) {
+            Controller.setState(OFF);
+        }
+        lastState = OFF_DETACHING;
     }
-
 }
