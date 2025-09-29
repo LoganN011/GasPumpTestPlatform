@@ -1,16 +1,23 @@
 package Controller;
 
+import Message.Message;
 import Sockets.commPort;
 
 public class CardReader {
 
-    private commPort device;
+    private final commPort device;
 
     public CardReader() {
         device = new commPort("card");
     }
 
     public String readCard() {
-        return device.get().toString();
+        Message m = device.get();
+
+        if (m != null) {
+            return m.toString();
+        }
+
+        return null;
     }
 }

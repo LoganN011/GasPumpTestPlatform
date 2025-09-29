@@ -46,8 +46,8 @@ public class CardReaderGUI extends Application {
         Rectangle2D bounds = Screen.getPrimary().getBounds();
         double screenWidth = bounds.getWidth();
         double screenHeight = bounds.getHeight();
-//        primaryStage.setX(screenWidth/15);
-//        primaryStage.setY(screenHeight/8);
+        primaryStage.setX(screenWidth/15);
+        primaryStage.setY(screenHeight/8);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Card Reader");
@@ -96,7 +96,7 @@ public class CardReaderGUI extends Application {
         background.setOnMouseClicked(e -> {
             // Set LEDs to green
             setLEDState(LEDState.ACCEPTED);
-            background.setDisable(true);
+            background.setDisable(false);
 
             String cardNumber = generateCardNumber();
             System.out.println("Generated: " + cardNumber);

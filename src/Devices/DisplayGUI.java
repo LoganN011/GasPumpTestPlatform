@@ -1,10 +1,10 @@
 package Devices;
 
 import Devices.DisplayObjects.ButtonCmd;
-import Devices.DisplayObjects.DisplayHandler;
 import Devices.DisplayObjects.TextCmd;
+import Message.Message;
 import Message.MessageReader;
-import Utility.MyTimer;
+import Sockets.commPort;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -21,6 +21,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -33,6 +34,9 @@ import java.util.*;
  */
 public class DisplayGUI extends Application {
     private static final Set<String> PAIRS = Set.of("00", "01", "23", "45", "67", "89");
+    // IO
+    private volatile boolean running = true;
+    private volatile commPort port;
 
     private static class ParsedLine {
         final List<ButtonCmd> buttons = new ArrayList<>();
@@ -45,10 +49,8 @@ public class DisplayGUI extends Application {
     private final Map<String, Pane> centers = new HashMap<>(); // "00","01","23","45","67","89"
     private final Set<Integer> multiActive = new HashSet<>();  // are 'm'
     private final Label footer = new Label();                  // a status line (will remove later)
-    private DisplayHandler displayHandler;
     private final StackPane overlayLayer = new StackPane();
     private Label selectedGasLabel;
-    private MyTimer timer;
 
 
     private static final double WIDTH = 960, HEIGHT = 540;
@@ -61,33 +63,14 @@ public class DisplayGUI extends Application {
      *              the application scene can be set.
      */
     public void start(Stage stage) {
-        displayHandler = new DisplayHandler(this);
-        displayHandler.startIO();
-
-        // timer
-//        timer = new MyTimer();
-//        timer.timeProperty().addListener((obs, oldV, newV) -> {
-//            System.out.println("Time: " + newV.longValue());
-//            displayHandler.setTime(newV.longValue());
-//
-//            // 30-second timeout
-//            if (newV.longValue() > 30) {
-//                try {
-//                    displayHandler.doTimeout();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//        });
-//        timer.start();
+        startIO();
 
         Scene scene = new Scene(this.createPumpDisplay(), WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setTitle("Screen");
 
-        stage.setOnCloseRequest(e -> displayHandler.stopIO());
+        stage.setOnCloseRequest(e -> stopIO());
         stage.show();
     }
 
@@ -178,7 +161,7 @@ public class DisplayGUI extends Application {
             if (p.isDisable()) return;
 
             try {
-                displayHandler.onButtonClick(idx);
+                port.send(new Message(String.valueOf(idx)));
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -314,6 +297,8 @@ public class DisplayGUI extends Application {
     public void handleInbound(String line) {
         ParsedLine parsed = parseLineUsingMR(line);
         Platform.runLater(() -> {
+            //resetAll();
+
             for (ButtonCmd b : parsed.buttons) applyButton(b);
             for (TextCmd t : parsed.texts)
                 if (PAIRS.contains(t.pair)) applyText(t);
@@ -477,8 +462,32 @@ public class DisplayGUI extends Application {
         label.setGraphicTextGap(0);
     }
 
-    public void resetTimer() {
-        timer.reset();
+    public void startIO() {
+        Thread io = new Thread(() -> {
+            try {
+                port = new commPort("screen");
+                System.out.println("Display connected");
+
+                while (running) {
+                    Message m = port.get();
+                    if (m == null) continue;
+                    String line = m.toString();
+                    if (!line.isEmpty()) {
+                        this.handleInbound(line);
+                    }
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        }, "screen-io");
+        io.setDaemon(true);
+        io.start();
+    }
+
+    public void stopIO() {
+        running = false;
     }
 
 

@@ -1,9 +1,6 @@
 package Controller;
 
-import Devices.Gas;
-import Message.Message;
-
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static Controller.InternalState.*;
 
@@ -20,6 +17,7 @@ public class Transaction {
 //    private static ArrayList<Gas> inUsePriceList;
 
     public static void start() {
+        AtomicBoolean temp = new AtomicBoolean(true);
         cardReader = new CardReader();
         gasStationServer = new GasStationServer();
         bankServer = new BankServer();
@@ -27,41 +25,60 @@ public class Transaction {
 //        cardNumber = null;
 //        inUsePriceList = null;
         new Thread(() -> {
+            while (temp.get()) {
+                System.out.println("\nTRANSACTION: " + Controller.getState());
 
-        while (true) {
-            switch (Controller.getState()) {
-                case OFF -> {
-                    gasStationServer.waitForPower();
-                    System.out.println("ive been powered on");
-                    Controller.setState(STANDBY);
-                }
-                case STANDBY -> {
-                    Controller.setNewPriceList(gasStationServer.waitForPrices());
-                    System.out.println("prices received: " + Controller.newPriceListString());
-                    Controller.setState(IDLE);
-                }
-                case IDLE -> {
-                    Controller.setCardNumber(cardReader.readCard());
-                    Controller.setState(AUTHORIZING);
-                }
-                case AUTHORIZING -> {
-                    //todo continue from here...
-                    boolean approved = bankServer.authorize(Controller.getCardNumber());
-                    Controller.setTimer(10);
-                    if(approved){
-                        Controller.setInUsePriceList();
-                        Controller.setState(SELECTION);
-                        Controller.setTimer(10);
-                        System.out.println("approved");
-                    } else {
-                        Controller.setState(DECLINED);
-                        Controller.setTimer(10);
-                        System.out.println("approved");
+                switch (Controller.getState()) {
+                    case OFF -> {
+                        gasStationServer.waitForPower();
+                        System.out.println("TRANSACTION: Gas Station server ON");
+                        Controller.setState(STANDBY);
                     }
-                }
 
+                    case STANDBY -> {
+                        Controller.setNewPriceList(gasStationServer.waitForPrices());
+                        System.out.println("TRANSACTION: Prices Received: " + Controller.newPriceListString());
+                        Controller.setState(IDLE);
+                    }
+
+                    case IDLE -> {
+                        String card = cardReader.readCard();
+
+                        Controller.setCardNumber(card);
+                        Controller.startProcess(Controller.getState());
+                    }
+
+                    case AUTHORIZING -> {
+                        boolean approved = bankServer.authorize(Controller.getCardNumber());
+                        Controller.setTimer(2); //10
+
+                        if (approved) {
+                            Controller.setInUsePriceList();
+                            Controller.setState(SELECTION);
+                            Controller.setTimer(10);
+                            System.out.println("TRANSACTION: CC Approved");
+
+                        } else {
+                            Controller.setState(DECLINED);
+                            Controller.setTimer(10);
+                            System.out.println("TRANSACTION: CC Declined");
+                        }
+                    }
+
+//                    case DECLINED -> {
+//                        Controller.setCardNumber(null);
+//                        Controller.setState(IDLE);
+//                    }
+
+                    case SELECTION -> {
+                        // stop loop
+                        temp.set(false);
+                    }
+
+                    default -> System.out.println("TRANSACTION: MISSING");
+
+                }
             }
-        }
         }).start();
     }
 
