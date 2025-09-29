@@ -5,6 +5,7 @@ import Devices.DisplayObjects.TextCmd;
 import Message.Message;
 import Message.MessageReader;
 import Sockets.commPort;
+import Sockets.monitorPort;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -36,7 +37,7 @@ public class DisplayGUI extends Application {
     private static final Set<String> PAIRS = Set.of("00", "01", "23", "45", "67", "89");
     // IO
     private volatile boolean running = true;
-    private volatile commPort port;
+    private volatile monitorPort port;
 
     private static class ParsedLine {
         final List<ButtonCmd> buttons = new ArrayList<>();
@@ -465,11 +466,16 @@ public class DisplayGUI extends Application {
     public void startIO() {
         Thread io = new Thread(() -> {
             try {
-                port = new commPort("screen");
+                port = new monitorPort("screen");
                 System.out.println("Display connected");
 
                 while (running) {
-                    Message m = port.get();
+                    Message m = port.read();
+                    try {
+                        Thread.sleep(100);
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
                     if (m == null) continue;
                     String line = m.toString();
                     if (!line.isEmpty()) {
