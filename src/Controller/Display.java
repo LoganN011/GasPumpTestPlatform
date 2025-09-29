@@ -113,9 +113,6 @@ public class Display {
         if (lastState != AUTHORIZING) {
             device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
         }
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
-        }
         lastState = AUTHORIZING;
     }
 
@@ -124,9 +121,6 @@ public class Display {
         if (lastState != SELECTION) {
             Message options = optionsDisplayable(Controller.getInUsePriceList());
             device.send(options);
-        }
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
         }
         lastState = SELECTION;
         int recentInput = -1;
@@ -179,9 +173,6 @@ public class Display {
     private static void cardDeclined() {
         if (lastState != DECLINED) {
             device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
-        }
-        if (Controller.timerEnded()) {
-            Controller.setState(STANDBY);
         }
         lastState = DECLINED;
     }

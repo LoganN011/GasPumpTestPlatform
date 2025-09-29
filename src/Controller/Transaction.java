@@ -53,18 +53,18 @@ public class Transaction {
                     }
                     case AUTHORIZING -> {
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
-                        Controller.setTimer(2); //10
+
 
                         if (approved) {
                             Controller.setInUsePriceList();
                             Controller.setState(SELECTION);
-                            Controller.setTimer(10);
+
                             System.out.println("TRANSACTION: CC Approved");
 
                         } else {
                             Controller.setCardNumber(null);
                             Controller.setState(DECLINED);
-                            Controller.setTimer(10);
+
                             System.out.println("TRANSACTION: CC Declined");
                         }
                     }

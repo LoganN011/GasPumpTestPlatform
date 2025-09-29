@@ -84,7 +84,6 @@ public class HoseGUI extends Application {
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (gasTank.getProgress() < 1.0 && pumpOn) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
-                System.out.println(gasTank.getProgress());
             } else {
                 if (!full) {
                     full = true;

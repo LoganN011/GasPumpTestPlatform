@@ -17,7 +17,6 @@ public class Controller {
     //todo consider deleting cardNumber variable and setter/getter
     private static AtomicReference<String> cardNumber = new AtomicReference<>();
 
-    private static AtomicReference<Boolean> nozzleAttached = new AtomicReference(false);
     //todo move variables here
     private static volatile long lastFuelMS = 0L;
     private static final int fuelDelayMS = 100;
@@ -31,10 +30,6 @@ public class Controller {
 
         setState(getState());
     }
-
-
-    public static boolean isNozzleAttached() { return nozzleAttached.get(); }
-    public static void setNozzleAttached(boolean attached) { nozzleAttached.set(attached); }
 
     public static void setCurrentGas(Gas currentGas) {
         Controller.currentGas.set(currentGas);
