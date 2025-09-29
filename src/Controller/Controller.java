@@ -19,6 +19,8 @@ public class Controller {
 
     private static AtomicReference<Boolean> nozzleAttached = new AtomicReference(false);
     //todo move variables here
+    private static volatile long lastFuelMS = 0L;
+    private static final int fuelDelayMS = 100;
 
     private static Display displayProcess;
 
@@ -28,7 +30,6 @@ public class Controller {
         Fueling.start();
 
         setState(getState());
-//        startProcess(getState());
     }
 
 
@@ -44,7 +45,21 @@ public class Controller {
     }
 
     public static void setGasAmount(int newGasAmount) {
-        gasAmount.set(newGasAmount);
+        int prev = gasAmount.getAndSet(newGasAmount);
+
+        if (getState() == InternalState.FUELING && newGasAmount != prev) {
+            long now = System.currentTimeMillis();
+
+            if (now - lastFuelMS >= fuelDelayMS) {
+                lastFuelMS = now;
+
+                Gas g = getCurrentGas();
+                double ppg = (g != null ? g.getPrice() : 0.0);
+                double total = newGasAmount * ppg;
+
+                displayProcess.updateFueling(newGasAmount, total);
+            }
+        }
     }
 
     public static int getGasAmount() {
@@ -123,6 +138,11 @@ public class Controller {
                     displayProcess.showAuthorizing();
                 }
 
+                case DECLINED -> {
+                    System.out.println("MAIN: CC Declined");
+                    displayProcess.showCardDeclined();
+                }
+
                 case SELECTION -> {
                     System.out.println("MAIN: Showing Selection");
                     displayProcess.showFuelSelect();
@@ -136,6 +156,16 @@ public class Controller {
                 case FUELING -> {
                     System.out.println("MAIN: Showing Fueling");
                     displayProcess.showFueling();
+                }
+
+                case DETACHING -> {
+                    System.out.println("MAIN: Showing Detaching");
+                    displayProcess.showDetaching();
+                }
+
+                case COMPLETE -> {
+                    System.out.println("MAIN: Showing Complete");
+                    displayProcess.showComplete();
                 }
             }
     }
@@ -170,12 +200,10 @@ public class Controller {
                 }
             }
 
-            // Cancel
+            // Cancel, OK (Payment Declined)
             case 9 -> {
-                if (getState() == InternalState.SELECTION) {
-                    cardNumber.set(null);
-                    setState(InternalState.IDLE);
-                }
+                cardNumber.set(null);
+                setState(InternalState.IDLE);
             }
         }
 

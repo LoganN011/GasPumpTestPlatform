@@ -65,6 +65,11 @@ public class Transaction {
                         }
                     }
 
+//                    case DECLINED -> {
+//                        Controller.setCardNumber(null);
+//                        Controller.setState(IDLE);
+//                    }
+
                     case SELECTION -> {
                         // stop loop
                         temp.set(false);
