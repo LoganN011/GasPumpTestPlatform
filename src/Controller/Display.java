@@ -76,10 +76,9 @@ public class Display {
 
 
     private static void attachHose() {
-        if(lastState != ATTACHING) {
+
             device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
-        }
-        lastState = ATTACHING;
+
     }
 
     private static void fueling() {
@@ -99,33 +98,24 @@ public class Display {
 
     //todo: remove these if statements when displayGUI is fixed
     private static void pumpUnavailable() {
-        if (lastState != OFF && lastState != STANDBY) {
             device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
-        }
-        lastState = STANDBY;
     }
 
     private static void welcome() {
-        if (lastState != IDLE) {
+
             device.send(new Message("t:01:s0:f0:c2:WELCOME!,t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
-        }
-        lastState = IDLE;
     }
 
     private static void authorizing() {
-        if (lastState != AUTHORIZING) {
+
             device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
-        }
-        lastState = AUTHORIZING;
+
     }
 
     private static void fuelSelect() {
         //todo show the correct screen
-        if (lastState != SELECTION) {
-            Message options = optionsDisplayable(Controller.getInUsePriceList());
-            device.send(options);
-        }
-        lastState = SELECTION;
+            Message msg = optionsDisplayable(Controller.getInUsePriceList());
+            device.send(msg);
         int recentInput = -1;
         int numberSelected = -1;
         boolean begin = false;
@@ -172,10 +162,8 @@ public class Display {
     }
 
     private static void cardDeclined() {
-        if (lastState != DECLINED) {
+
             device.send(new Message("t:01:s0:f0:c2:Payment Declined"));
-        }
-        lastState = DECLINED;
     }
 
 }
