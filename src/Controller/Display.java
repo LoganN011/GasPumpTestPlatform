@@ -46,7 +46,6 @@ public class Display {
         message += ",t:23:s2:f1:c1: ";
         message += ",t:45:s1:f1:c1:Thank you for refilling with us!";
         message += ",t:67:s2:f1:c1: ";
-        message += ",b:9:x,t:89:s2:f2:c0:|OK";
         device.send(new Message(message));
     }
 
@@ -111,7 +110,7 @@ public class Display {
 
     private static void authorizing() {
         if (lastState != AUTHORIZING) {
-            device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
+            device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
         }
         lastState = AUTHORIZING;
     }
@@ -131,15 +130,12 @@ public class Display {
             String buttonInput = device.get().toString();
             try{
                 recentInput = Integer.parseInt(buttonInput);
-                System.out.println("button " + recentInput + " last used");
             } catch (Exception e) {
-                System.out.println("bad button selection");
                 e.printStackTrace();
             }
             switch (recentInput) {
                 case 3,5,7 ->  numberSelected = recentInput;
                 case 8 -> {
-                    System.out.println("begin pressed");
                     if(numberSelected != -1) begin = true;
                 }
                 case 9 -> cancel = true;
@@ -172,7 +168,7 @@ public class Display {
 
     private static void cardDeclined() {
         if (lastState != DECLINED) {
-            device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
+            device.send(new Message("t:01:s0:f0:c2:Payment Declined"));
         }
         lastState = DECLINED;
     }

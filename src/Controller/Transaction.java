@@ -54,6 +54,7 @@ public class Transaction {
                     case AUTHORIZING -> {
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
 
+                        Controller.setTimer(2); //10
 
                         if (approved) {
                             Controller.setInUsePriceList();
