@@ -1,6 +1,5 @@
 package Controller;
 
-import Devices.DisplayObjects.ScreenState;
 import Devices.Gas;
 import Message.Message;
 import Sockets.commPort;
@@ -11,135 +10,101 @@ import static Controller.InternalState.*;
 
 public class Display extends Thread {
 
-    private final commPort device;
-    private int buttonID;
+    private commPort device;
+
+    //todo: remove once displayGUI code properly removes old texts and shows all new messages independently
+    private static InternalState lastState = DETACHING;
 
     public Display() {
         device = new commPort("screen");
+
         start();
     }
 
     @Override
     public void run() {
         while (true) {
-
-            Message m = device.get();
-            if (m == null) continue;
-            System.out.println("Display responded: " + m.toString());
-
-            buttonID = Integer.parseInt(m.toString());
-            Controller.handleClick(buttonID);
+            switch (Controller.getState()) {
+                case OFF, STANDBY -> pumpUnavailable();
+                case IDLE -> welcome();
+                case AUTHORIZING -> authorizing();
+                case SELECTION -> fuelSelect();
+                case DECLINED -> cardDeclined();
+                case ATTACHING -> attachHose();
+                //TODO add the remainder of the states
+            }
         }
     }
 
+    private void attachHose() {
+        String message = "";
+        if (lastState != OFF && lastState != STANDBY) {
+            message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
+            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %f", Controller.getGasAmount());
+            message += String.format(",t:45:s2:f1:c1:Price꞉ $%fill this in ");
+            message += "b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
+            device.send(new Message(message));
+        }
+        lastState = ATTACHING;
+    }
 
     //todo: remove these if statements when displayGUI is fixed
-    public void showUnavailable() {
-        ScreenState.pumpUnavailableScreen(device);
+    private void pumpUnavailable() {
+        if (lastState != OFF && lastState != STANDBY) {
+            device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
+        }
+        lastState = STANDBY;
     }
 
-    public void showWelcome() {
-        ScreenState.welcomeScreen(device);
-//        Controller.setState(AUTHORIZING);
+    private void welcome() {
+        if (lastState != IDLE) {
+            device.send(new Message("t:01:s0:f0:c2:WELCOME!,t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
+        }
+        lastState = IDLE;
     }
 
-    public void showAuthorizing(){
-        ScreenState.paymentAuthorizing(device);
-
-//        if (Controller.timerEnded()){
-//            Controller.setState(STANDBY);
-//        }
+    private void authorizing(){
+        if (lastState != AUTHORIZING) {
+            device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
+        }
+        if(Controller.timerEnded()){
+            Controller.setState(STANDBY);
+        }
+        lastState = AUTHORIZING;
     }
 
-    public void showFuelSelect() {
+    private void fuelSelect() {
+        //todo show the correct screen
+        if (lastState != SELECTION) {
+            Message options = optionsDisplayable(Controller.getNewPriceList());
+            device.send(options);
+        }
+        if(Controller.timerEnded()){
+            Controller.setState(STANDBY);
+        }
+        lastState = SELECTION;
+
+    }
+
+    private Message optionsDisplayable(ArrayList<Gas> options) {
+        String result = "t:01:s0:f0:c2:SELECT YOUR GAS TYPE,";
         int position = 2;
-        String list = "";
-        ArrayList<Gas> options = Controller.getNewPriceList();
-        for (Gas cur: options) {
-            String label = String.format("%s $%.2f", cur.getName(), cur.getPrice());
-            list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s,", position, position + 1, position, position + 1, label);
+        for(Gas cur: options) {
+            result += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
             position += 2;
         }
+        result += "b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL";
+        return new Message(result);
+    }
 
-        ScreenState.fuelSelectionScreen(device, new Message(list));
-
-        if (Controller.timerEnded()){
+    private void cardDeclined() {
+        if (lastState != DECLINED) {
+            device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
+        }
+        if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
-    }
-
-    public void showCardDeclined() {
-        ScreenState.paymentDeclinedScreen(device);
-
-        if (Controller.timerEnded()){
-            Controller.setState(STANDBY);
-        }
-    }
-
-    public void showAttaching() {
-        ScreenState.attachingScreen(device);
-
-//        if (Controller.timerEnded()) {
-//            Controller.setState(STANDBY);
-//        }
-    }
-
-    public void showFueling() {
-        int gallons = Controller.getGasAmount();
-
-        // Read selected gas & price
-        Devices.Gas g = Controller.getCurrentGas();
-        double pricePerGallon = (g != null ? g.getPrice() : 0.0);
-
-        double total = gallons * pricePerGallon;
-
-        ScreenState.pumpingScreen(device, gallons, total);
-    }
-
-    public void updateFueling(int gallons, double total) {
-        ScreenState.pumpingScreen(device, gallons, total);
-    }
-
-
-    public void showDetached(int gallons, double total) {
-        ScreenState.detachedScreen(device, gallons, total);
-
-//        if (Controller.timerEnded()) {
-//            Controller.setState(STANDBY);
-//        }
-    }
-
-    public void showPause(int gallons, double total) {
-        ScreenState.pausedScreen(device, gallons, total);
-
-//        if (Controller.timerEnded()) {
-//            Controller.setState(STANDBY);
-//        }
-    }
-
-
-    public void showDetaching(int gallons, double total) {
-        ScreenState.detachingScreen(device, gallons, total);
-
-//        if (Controller.timerEnded()) {
-//            Controller.setState(STANDBY);
-//        }
-    }
-
-
-    public void showComplete() {
-        ScreenState.finishScreen(device);
-
-//        if (Controller.timerEnded()) {
-//            Controller.setState(STANDBY);
-//        }
-    }
-
-    public void showOffDetaching() {
-        ScreenState.offDetachingScreen(device);
-        if (Controller.timerEnded()) {
-            Controller.setState(OFF);
-        }
+        lastState = DECLINED;
     }
 
 }

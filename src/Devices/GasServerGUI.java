@@ -56,6 +56,7 @@ public class GasServerGUI extends Application {
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
             try {
+                System.out.println("message sending");
                 server.send(generateCurrentPrices());
             } catch (Exception e) {
                 e.printStackTrace();

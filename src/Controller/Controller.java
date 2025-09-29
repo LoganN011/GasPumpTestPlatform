@@ -57,7 +57,8 @@ public class Controller {
                 double ppg = (g != null ? g.getPrice() : 0.0);
                 double total = newGasAmount * ppg;
 
-                displayProcess.updateFueling(newGasAmount, total);
+                //todo make this correct
+//                displayProcess.updateFueling(newGasAmount, total);
             }
         }
     }
@@ -72,7 +73,6 @@ public class Controller {
 
     public static synchronized void setState(InternalState newState) {
         internalState.set(newState);
-        startProcess(getState());
     }
 
     public static void setTimer(int durationSeconds) {
@@ -117,129 +117,130 @@ public class Controller {
         return cardNumber.get();
     }
 
-    public static void startProcess(InternalState s) {
-            switch (s) {
-                case OFF, STANDBY -> {
-                    System.out.println("MAIN: Showing Unavail");
-                    displayProcess.showUnavailable();
-                }
+    //todo, delete. not what we agreed on doing and should not be here
+//    public static void startProcess(InternalState s) {
+//            switch (s) {
+//                case OFF, STANDBY -> {
+//                    System.out.println("MAIN: Showing Unavail");
+//                    displayProcess.showUnavailable();
+//                }
+//
+//                case IDLE -> {
+//                    System.out.println("MAIN: Showing Welcome");
+//                    displayProcess.showWelcome();
+//
+//                    if (getCardNumber() != null) {
+//                        setState(InternalState.AUTHORIZING);
+//                    }
+//                }
+//
+//                case AUTHORIZING -> {
+//                    System.out.println("MAIN: Showing Authorizing");
+//                    displayProcess.showAuthorizing();
+//                }
+//
+//                case DECLINED -> {
+//                    System.out.println("MAIN: CC Declined");
+//                    displayProcess.showCardDeclined();
+//                }
+//
+//                case SELECTION -> {
+//                    System.out.println("MAIN: Showing Selection");
+//                    displayProcess.showFuelSelect();
+//                }
+//
+//                case ATTACHING -> {
+//                    System.out.println("MAIN: Showing Attaching");
+//                    displayProcess.showAttaching();
+//                }
+//
+//                case FUELING -> {
+//                    System.out.println("MAIN: Showing Fueling");
+//                    displayProcess.showFueling();
+//                }
+//
+//                case DETACHED -> {
+//                    System.out.println("MAIN: Showing DetachED");
+//                    displayProcess.showDetached(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
+//                }
+//
+//                case DETACHING -> {
+//                    System.out.println("MAIN: Showing DetachING");
+//                    displayProcess.showDetaching(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
+//                }
+//
+//                case PAUSED -> {
+//                    System.out.println("MAIN: Showing Paused");
+//                    displayProcess.showPause(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
+//                }
+//
+//                case COMPLETE -> {
+//                    System.out.println("MAIN: Showing Complete");
+//                    displayProcess.showComplete();
+//                }
+//            }
+//    }
+//
+//    public static void handleClick(int buttonID) {
+//        switch (buttonID) {
+//            case 3, 5, 7 -> {
+//                int index = 0;
+//
+//                ArrayList<Gas> prices = getInUsePriceList();
+//                if (prices == null || prices.isEmpty()) return;
+//                if (buttonID == 5) {
+//                    index = 1;
+//                } else if (buttonID == 7) {
+//                    index = 2;
+//                }
+//                setCurrentGas(prices.get(index));
+//                System.out.println("MAIN: " + getCurrentGas().getName());
+//            }
+//
+//            // Begin fueling, pause, resume
+//            case 8 -> {
+//                if (getState() == InternalState.SELECTION && getCurrentGas() != null) {
+//                    if (!isNozzleAttached()) {
+//                        System.out.println("MAIN: Attach Nozzle");
+//                        setState(InternalState.ATTACHING);
+//                        return;
+//                    }
+//
+//                    System.out.println("MAIN: Begin Fueling");
+//                    setState(InternalState.FUELING);
+//                    return;
+//                }
+//
+//                if (getState() == InternalState.FUELING) {
+//                    System.out.println("\nMAIN: Paused");
+//                    setState(InternalState.PAUSED);
+//                    return;
+//                }
+//
+//                if (getState() == InternalState.PAUSED) {
+//                    System.out.println("\nMAIN: Resuming");
+//                    setState(InternalState.FUELING);
+//                    return;
+//                }
+//            }
+//
+//            // Cancel, OK (Payment Declined), finish
+//            case 9 -> {
+//                if (getState() == InternalState.PAUSED || getState() == InternalState.DETACHED) {
+//                    setState(InternalState.DETACHING);
+//                    return;
+//                }
+//
+//                cardNumber.set(null);
+//                setCurrentGas(null);
+//                setInUsePriceList();
+//                setState(InternalState.IDLE);
+//
+//                setGasAmount(0); // needs to be changed
+//            }
+//        }
 
-                case IDLE -> {
-                    System.out.println("MAIN: Showing Welcome");
-                    displayProcess.showWelcome();
-
-                    if (getCardNumber() != null) {
-                        setState(InternalState.AUTHORIZING);
-                    }
-                }
-
-                case AUTHORIZING -> {
-                    System.out.println("MAIN: Showing Authorizing");
-                    displayProcess.showAuthorizing();
-                }
-
-                case DECLINED -> {
-                    System.out.println("MAIN: CC Declined");
-                    displayProcess.showCardDeclined();
-                }
-
-                case SELECTION -> {
-                    System.out.println("MAIN: Showing Selection");
-                    displayProcess.showFuelSelect();
-                }
-
-                case ATTACHING -> {
-                    System.out.println("MAIN: Showing Attaching");
-                    displayProcess.showAttaching();
-                }
-
-                case FUELING -> {
-                    System.out.println("MAIN: Showing Fueling");
-                    displayProcess.showFueling();
-                }
-
-                case DETACHED -> {
-                    System.out.println("MAIN: Showing DetachED");
-                    displayProcess.showDetached(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
-                }
-
-                case DETACHING -> {
-                    System.out.println("MAIN: Showing DetachING");
-                    displayProcess.showDetaching(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
-                }
-
-                case PAUSED -> {
-                    System.out.println("MAIN: Showing Paused");
-                    displayProcess.showPause(getGasAmount(), Controller.getCurrentGas().getPrice() * getGasAmount());
-                }
-
-                case COMPLETE -> {
-                    System.out.println("MAIN: Showing Complete");
-                    displayProcess.showComplete();
-                }
-            }
     }
 
-    public static void handleClick(int buttonID) {
-        switch (buttonID) {
-            case 3, 5, 7 -> {
-                int index = 0;
-
-                ArrayList<Gas> prices = getInUsePriceList();
-                if (prices == null || prices.isEmpty()) return;
-                if (buttonID == 5) {
-                    index = 1;
-                } else if (buttonID == 7) {
-                    index = 2;
-                }
-                setCurrentGas(prices.get(index));
-                System.out.println("MAIN: " + getCurrentGas().getName());
-            }
-
-            // Begin fueling, pause, resume
-            case 8 -> {
-                if (getState() == InternalState.SELECTION && getCurrentGas() != null) {
-                    if (!isNozzleAttached()) {
-                        System.out.println("MAIN: Attach Nozzle");
-                        setState(InternalState.ATTACHING);
-                        return;
-                    }
-
-                    System.out.println("MAIN: Begin Fueling");
-                    setState(InternalState.FUELING);
-                    return;
-                }
-
-                if (getState() == InternalState.FUELING) {
-                    System.out.println("\nMAIN: Paused");
-                    setState(InternalState.PAUSED);
-                    return;
-                }
-
-                if (getState() == InternalState.PAUSED) {
-                    System.out.println("\nMAIN: Resuming");
-                    setState(InternalState.FUELING);
-                    return;
-                }
-            }
-
-            // Cancel, OK (Payment Declined), finish
-            case 9 -> {
-                if (getState() == InternalState.PAUSED || getState() == InternalState.DETACHED) {
-                    setState(InternalState.DETACHING);
-                    return;
-                }
-
-                cardNumber.set(null);
-                setCurrentGas(null);
-                setInUsePriceList();
-                setState(InternalState.IDLE);
-
-                setGasAmount(0); // needs to be changed
-            }
-        }
-
-    }
 
 
-}

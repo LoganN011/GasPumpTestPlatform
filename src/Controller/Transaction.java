@@ -1,7 +1,5 @@
 package Controller;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static Controller.InternalState.*;
 
 public class Transaction {
@@ -10,41 +8,47 @@ public class Transaction {
     private static GasStationServer gasStationServer;
     private static BankServer bankServer;
 
-    //todo should these be atomic reference?
-    // could also use some like  Collections.synchronizedList()
-//    private static ArrayList<Gas> newPriceList;
-//    private static String cardNumber;
-//    private static ArrayList<Gas> inUsePriceList;
 
     public static void start() {
         cardReader = new CardReader();
         gasStationServer = new GasStationServer();
         bankServer = new BankServer();
-//        newPriceList = null;
-//        cardNumber = null;
-//        inUsePriceList = null;
+
         new Thread(() -> {
             while (true) {
-                //System.out.println("\nTRANSACTION: " + Controller.getState());
-
                 switch (Controller.getState()) {
                     case OFF -> {
-                        gasStationServer.waitForPower();
+                        while(!gasStationServer.checkPower()){
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                System.out.println("here");
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        //replaced with the above while loop
+//                        gasStationServer.checkPower();
                         System.out.println("TRANSACTION: Gas Station server ON");
                         Controller.setState(STANDBY);
                     }
-
                     case STANDBY -> {
-                        Controller.setNewPriceList(gasStationServer.waitForPrices());
+                        //commented out because the GasStationServer sets the prices
+//                        Controller.setNewPriceList(gasStationServer.waitForPrices());
+                        System.out.println("up");
+                        while (Controller.getNewPriceList() == null) {
+                            try{
+                                Thread.sleep(100);
+                            }catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                         System.out.println("TRANSACTION: Prices Received: " + Controller.newPriceListString());
                         Controller.setState(IDLE);
                     }
 
                     case IDLE -> {
                         String card = cardReader.readCard();
-
                         Controller.setCardNumber(card);
-                        Controller.startProcess(Controller.getState());
                     }
 
                     case AUTHORIZING -> {
