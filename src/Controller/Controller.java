@@ -25,7 +25,7 @@ public class Controller {
     private static Display displayProcess;
 
     public static void main(String[] args) {
-        displayProcess = new Display();
+        Display.start();
         Transaction.start();
         Fueling.start();
 

@@ -8,21 +8,15 @@ import java.util.ArrayList;
 
 import static Controller.InternalState.*;
 
-public class Display extends Thread {
+public class Display {
 
     private commPort device;
 
     //todo: remove once displayGUI code properly removes old texts and shows all new messages independently
     private static InternalState lastState = DETACHING;
 
-    public Display() {
+    public void start() {
         device = new commPort("screen");
-
-        start();
-    }
-
-    @Override
-    public void run() {
         while (true) {
             switch (Controller.getState()) {
                 case OFF, STANDBY -> pumpUnavailable();
