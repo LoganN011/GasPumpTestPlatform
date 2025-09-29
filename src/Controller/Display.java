@@ -1,5 +1,7 @@
 package Controller;
 
+import Devices.DisplayGUI;
+import Devices.DisplayObjects.ScreenState;
 import Devices.Gas;
 import Message.Message;
 import Sockets.commPort;
@@ -17,7 +19,6 @@ public class Display extends Thread {
 
     public Display() {
         device = new commPort("screen");
-
         start();
     }
 
@@ -29,30 +30,42 @@ public class Display extends Thread {
                 case IDLE -> welcome();
                 case AUTHORIZING -> authorizing();
                 case SELECTION -> fuelSelect();
-                //TODO add the remainder of the states
+                case DECLINED -> cardDeclined();
+                case ATTACHING -> attaching();
+                case FUELING -> fueling();
+                case DETACHED -> detached();
+                case PAUSED -> pause();
+                case DETACHING -> detaching();
+                case COMPLETE -> complete();
+                case OFF_DETACHING -> offDetaching();
             }
+
+            Message m = device.get();
+            if (m == null) continue;
+            System.out.println("Display responded: " + m.toString());
         }
     }
 
     //todo: remove these if statements when displayGUI is fixed
     private void pumpUnavailable() {
-        if (lastState != OFF && lastState != STANDBY) {
-            device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
-        }
+        ScreenState.welcomeScreen(device);
+//        if (lastState != OFF && lastState != STANDBY) {
+          //  ScreenState.pumpUnavailableScreen(device);
+//        }
         lastState = STANDBY;
     }
 
     private void welcome() {
-        if (lastState != IDLE) {
-            device.send(new Message("t:01:s0:f0:c2:WELCOME!,t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
-        }
+//        if (lastState != IDLE) {
+            ScreenState.welcomeScreen(device);
+//        }
         lastState = IDLE;
     }
 
     private void authorizing(){
-        if (lastState != AUTHORIZING) {
-            device.send(new Message("t:01:s0:f0:c2:Authorizing payment...,t:45:s1:f1:c1:Please Wait"));
-        }
+//        if (lastState != AUTHORIZING) {
+            ScreenState.paymentAuthorizing(device);
+//        }
         if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
@@ -61,10 +74,17 @@ public class Display extends Thread {
 
     private void fuelSelect() {
         //todo show the correct screen
-        if (lastState != SELECTION) {
-            Message options = optionsDisplayable(Controller.getNewPriceList());
-            device.send(options);
-        }
+//        if (lastState != SELECTION) {
+            int position = 2;
+            String list = "";
+            ArrayList<Gas> options = Controller.getNewPriceList();
+            for(Gas cur: options) {
+                list += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
+                position += 2;
+            }
+
+            ScreenState.fuelSelectionScreen(device, new Message(list));
+//        }
         if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
@@ -72,25 +92,41 @@ public class Display extends Thread {
 
     }
 
-    private Message optionsDisplayable(ArrayList<Gas> options) {
-        String result = "t:01:s0:f0:c2:SELECT YOUR GAS TYPE,";
-        int position = 2;
-        for(Gas cur: options) {
-            result += String.format("b:%d:m,b:%d:m,t:%d%d:s1:f1:c1:%s %s,", position, position + 1, position, position + 1, cur.getName(), cur.getPrice());
-            position += 2;
-        }
-        result += "b:8:x,b:9:x,t:89:s2:f2:c0:BEGIN FUELING|CANCEL";
-        return new Message(result);
-    }
-
     private void cardDeclined() {
-        if (lastState != DECLINED) {
-            device.send(new Message("t:01:s0:f0:c2:Show the declined screen:45:s1:f1:c1:DECLINED!"));
-        }
+//        if (lastState != DECLINED) {
+            ScreenState.paymentDeclinedScreen(device);
+//        }
         if(Controller.timerEnded()){
             Controller.setState(STANDBY);
         }
         lastState = DECLINED;
+    }
+
+    private void attaching() {
+
+    }
+
+    private void fueling() {
+
+    }
+
+    private void detached() {
+
+    }
+
+    private void pause() {
+
+    }
+
+    private void detaching() {
+    }
+
+    private void complete() {
+
+    }
+
+    private void offDetaching() {
+
     }
 
 }

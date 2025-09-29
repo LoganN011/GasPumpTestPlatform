@@ -25,7 +25,6 @@ public class Controller {
         Transaction.start();
         Display displayProcess = new Display();
         Fueling.start();
-
     }
 
     public static void setCurrentGas(Gas currentGas) {

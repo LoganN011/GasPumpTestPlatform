@@ -1,4 +1,4 @@
-package Devices.DisplayObjects;
+package Controller;
 
 import Devices.DisplayGUI;
 import Message.Message;
@@ -39,34 +39,8 @@ public class DisplayHandler {
      * @param buttonID int
      */
     public void onButtonClick(int buttonID) throws IOException {
-        display.resetTimer();
+//        display.resetTimer();
         handleInput(buttonID);
-    }
-
-    public void startIO() {
-        Thread io = new Thread(() -> {
-            try {
-                port = new commPort("screen");
-                System.out.println("Display connected");
-
-                while (running) {
-                    Message m = port.get();
-                    if (m == null) continue;
-                    String line = m.toString().trim();
-                    if (!line.isEmpty()) display.handleInbound(line);
-                }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        }, "screen-io");
-        io.setDaemon(true);
-        io.start();
-    }
-
-    public void stopIO() {
-        running = false;
     }
 
 
@@ -190,18 +164,18 @@ public class DisplayHandler {
         timer = num;
     }
 
-    public void doTimeout() throws IOException {
-        if (timer > 5 && (currentScreenState != Screen.WELCOME && currentScreenState != Screen.PUMPING)) {
-
-            display.resetTimer();
-            clearAllSelections();
-            changeToScreen(0);
-
-        } else {
-            clearAllSelections();
-            display.resetTimer();
-        }
-    }
+//    public void doTimeout() throws IOException {
+//        if (timer > 5 && (currentScreenState != Screen.WELCOME && currentScreenState != Screen.PUMPING)) {
+//
+//            display.resetTimer();
+//            clearAllSelections();
+//            changeToScreen(0);
+//
+//        } else {
+//            clearAllSelections();
+//            display.resetTimer();
+//        }
+//    }
 
 
 }
