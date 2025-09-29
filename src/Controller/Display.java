@@ -20,6 +20,7 @@ public class Display {
             device = new commPort("screen");
             while (true) {
                 switch (Controller.getState()) {
+                    //todo change the names of the display methods to match SRS
                     case OFF, STANDBY -> pumpUnavailable();
                     case IDLE -> welcome();
                     case AUTHORIZING -> authorizing();
@@ -30,9 +31,8 @@ public class Display {
                     case DETACHED -> detached();
                     case PAUSED -> paused();
                     case DETACHING -> detaching();
-                case COMPLETE -> complete();
-//                case OFF_DETACHING -> detaching();
-                    //TODO add the remainder of the states
+                    case COMPLETE -> complete();
+                    case OFF_DETACHING -> detaching();
                 }
             }
         }).start();
@@ -44,8 +44,9 @@ public class Display {
         message += "t:01:s0:f0:c2:PUMPING FINISHED";
         message += ",t:23:s2:f1:c1: ";
         message += ",t:45:s1:f1:c1:Thank you for refilling with us!";
-        device.send(new Message(",t:67:s2:f1:c1: "));
-        device.send(new Message(",b:9:x,t:89:s2:f2:c0:|OK"));
+        message += ",t:67:s2:f1:c1: ";
+        message += ",b:9:x,t:89:s2:f2:c0:|OK";
+        device.send(new Message(message));
     }
 
     private static void detaching() {
