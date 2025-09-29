@@ -96,7 +96,7 @@ public class CardReaderGUI extends Application {
         background.setOnMouseClicked(e -> {
             // Set LEDs to green
             setLEDState(LEDState.ACCEPTED);
-            background.setDisable(true);
+            background.setDisable(false);
 
             String cardNumber = generateCardNumber();
             System.out.println("Generated: " + cardNumber);
