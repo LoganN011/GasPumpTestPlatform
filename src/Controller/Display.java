@@ -82,6 +82,8 @@ public class Display {
 
     private static void fueling() {
         String message = "";
+        //The current gas amount is not updated and also the price is not set
+        //The display is also broken
         if (lastState != OFF && lastState != STANDBY) {
             message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
             message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());

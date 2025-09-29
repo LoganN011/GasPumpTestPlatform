@@ -297,7 +297,7 @@ public class DisplayGUI extends Application {
     public void handleInbound(String line) {
         ParsedLine parsed = parseLineUsingMR(line);
         Platform.runLater(() -> {
-            //resetAll();
+            resetAll();
 
             for (ButtonCmd b : parsed.buttons) applyButton(b);
             for (TextCmd t : parsed.texts)

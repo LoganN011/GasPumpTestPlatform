@@ -22,7 +22,7 @@ public class Controller {
     private static volatile long lastFuelMS = 0L;
     private static final int fuelDelayMS = 100;
 
-    private static Display displayProcess;
+
 
     public static void main(String[] args) {
         Display.start();
@@ -45,22 +45,7 @@ public class Controller {
     }
 
     public static void setGasAmount(int newGasAmount) {
-        int prev = gasAmount.getAndSet(newGasAmount);
-
-        if (getState() == InternalState.FUELING && newGasAmount != prev) {
-            long now = System.currentTimeMillis();
-
-            if (now - lastFuelMS >= fuelDelayMS) {
-                lastFuelMS = now;
-
-                Gas g = getCurrentGas();
-                double ppg = (g != null ? g.getPrice() : 0.0);
-                double total = newGasAmount * ppg;
-
-                //todo make this correct
-//                displayProcess.updateFueling(newGasAmount, total);
-            }
-        }
+        gasAmount.set(newGasAmount);
     }
 
     public static double getCurPrice() {
