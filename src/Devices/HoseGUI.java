@@ -2,6 +2,7 @@ package Devices;
 
 import Message.Message;
 import Sockets.controlPort;
+import Sockets.monitorPort;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -23,6 +24,8 @@ public class HoseGUI extends Application {
 
     private boolean connected;
     private boolean full;
+    private boolean pumpOn;
+    private monitorPort control = null;
 
     public static void main(String[] args) {
         launch(args);
@@ -30,9 +33,9 @@ public class HoseGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        controlPort control = null;
         try {
-            control = new controlPort("hose");
+            control = new monitorPort("hose");
+            updatePump();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,7 +51,7 @@ public class HoseGUI extends Application {
         double sceneW = scene.getHeight();
         double sceneH = scene.getWidth();
 
-        controlPort port = control;
+        monitorPort port = control;
         ProgressBar gasTank = new ProgressBar();
         gasTank.setProgress((Math.random()));
         gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
@@ -79,7 +82,7 @@ public class HoseGUI extends Application {
         clear.setLayoutY(SIZE/3);
 
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
-            if (gasTank.getProgress() < 1.0) {
+            if (gasTank.getProgress() < 1.0 && pumpOn) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
                 System.out.println(gasTank.getProgress());
             } else {
@@ -165,5 +168,22 @@ public class HoseGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Hose");
         primaryStage.show();
+    }
+
+    public void updatePump(){
+        new Thread(()->{
+            while(true){
+                Message m = control.read();
+                if(m != null){
+                    System.out.println(m);
+                    if(m.equals("on")){
+                        pumpOn = true;
+                    }
+                    else if(m.equals("off")){
+                        pumpOn = false;
+                    }
+                }
+            }
+        }).start();
     }
 }

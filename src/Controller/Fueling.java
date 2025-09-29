@@ -13,73 +13,52 @@ public class Fueling {
 
         new Thread(() -> {
             while (true) {
-                if (Controller.getState() == InternalState.PAUSED) {
-                    if (!pauseTimer) {
-                        pump.pumpOff();
-                        Controller.setTimer(10);
-                        pauseTimer = true;
-                    }
-
-                    continue;
-                }
-
-                pauseTimer = false;
-                hose.check();
-
                 switch (Controller.getState()) {
-                    case OFF, COMPLETE -> {
-                        pump.pumpOff();
-                        flowMeter.resetFlow();
-                    }
-
                     case ATTACHING -> {
                         if (hose.isAttached()) {
-                            System.out.println("\nFUELING: Attached");
                             Controller.setState(InternalState.FUELING);
                         }
                     }
-
-                    case DETACHING -> {
-                        if (!hose.isAttached()) {
-                            System.out.println("\nFUELING: Detaching");
-                            Controller.setState(InternalState.COMPLETE);
-//                            Controller.setTimer(10);
-                        }
-                    }
-
-                    case DETACHED ->{
-                        Controller.setTimer(10);
+                    case DETACHED -> {
                         if (hose.isAttached()) {
-                            System.out.println("\nFUELING: Detached");
                             Controller.setState(InternalState.FUELING);
                         }
                     }
-
                     case FUELING -> {
-                        if (Controller.getCurrentGas() == null) {
-                            break;
-                        }
-
                         if (hose.isFull()) {
                             Controller.setState(InternalState.DETACHING);
                             pump.pumpOff();
-                            Controller.setTimer(10);
-
+                            hose.pumpOff();
+                            
                         } else if (!hose.isAttached()) {
                             pump.pumpOff();
+                            hose.pumpOff();
                             Controller.setState(InternalState.DETACHED);
-                            Controller.setTimer(10);
-
+                            
                         } else {
                             pump.pumpOn(Controller.getCurrentGas().getName());
+                            hose.pumpOn();
                             Controller.setGasAmount(flowMeter.readFlow());
                         }
                     }
-
+                    case PAUSED -> {
+                        pump.pumpOff();
+                        hose.pumpOff();
+                    }
+                    case DETACHING -> {
+                        if (!hose.isAttached()) {
+                            Controller.setState(InternalState.COMPLETE);
+                            
+                        }
+                    }
+                    case OFF, COMPLETE -> {
+                        pump.pumpOff();
+                        hose.pumpOff();
+                        flowMeter.resetFlow();
+                    }
                 }
             }
 
         }).start();
     }
-
 }
