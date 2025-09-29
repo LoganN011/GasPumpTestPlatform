@@ -31,17 +31,37 @@ public class Display extends Thread {
                 case SELECTION -> fuelSelect();
                 case DECLINED -> cardDeclined();
                 case ATTACHING -> attachHose();
+                case FUELING -> fueling();
+                case DETACHED -> detached();
+//                case PAUSED -> paused();
+//                case DETACHING -> detaching();
+//                case COMPLETE -> complete();
+//                case OFF_DETACHING -> detaching();
                 //TODO add the remainder of the states
             }
         }
     }
 
+    private void detached() {
+        String message = "";
+        message += "t:01:s0:f0:c2:NOZZLE REMOVED";
+        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
+        message += String.format("t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
+        device.send(new Message("t:67:s1:f1:c1:Re-insert to resume or FINISH."));
+        device.send(new Message("b:9:x,t:89:s2:f2:c0:|FINISH"));
+    }
+
+
     private void attachHose() {
+        device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
+    }
+
+    private void fueling() {
         String message = "";
         if (lastState != OFF && lastState != STANDBY) {
             message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
-            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %f", Controller.getGasAmount());
-            message += String.format(",t:45:s2:f1:c1:Price꞉ $%fill this in ");
+            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
+            message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
             message += "b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
             device.send(new Message(message));
         }

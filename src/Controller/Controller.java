@@ -63,6 +63,10 @@ public class Controller {
         }
     }
 
+    public static double getCurPrice() {
+        return getCurrentGas().getPrice() * getGasAmount();
+    }
+
     public static int getGasAmount() {
         return gasAmount.get();
     }
