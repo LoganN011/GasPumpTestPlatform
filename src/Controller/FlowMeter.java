@@ -9,6 +9,7 @@ public class FlowMeter {
 
     public FlowMeter() {
         flow = new monitorPort("flow_meter");
+        flow.send(new Message("flow"));
     }
 
     public int readFlow(){

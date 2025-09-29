@@ -76,7 +76,10 @@ public class Display {
 
 
     private static void attachHose() {
-        device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
+        if(lastState != ATTACHING) {
+            device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
+        }
+        lastState = ATTACHING;
     }
 
     private static void fueling() {
@@ -88,6 +91,7 @@ public class Display {
             message += String.format(",t:23:s2:f1:c1:Gallons꞉ %d", Controller.getGasAmount());
             message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
             message += ",b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
+
             device.send(new Message(message));
         }
         lastState = ATTACHING;

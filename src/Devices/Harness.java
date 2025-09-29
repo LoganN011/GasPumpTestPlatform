@@ -15,7 +15,7 @@ public class Harness {
 
     public static void main(String[] args) {
 //        specialTest();
-        String device = "timer"; // Write device in arg line
+        String device = "pump"; // Write device in arg line
 
         switch (device) {
             case "display" -> {
@@ -159,7 +159,21 @@ public class Harness {
 
     public static void testHose() {
         try {
-            statusPort hose = new statusPort("hose");
+            monitorPort hose = new monitorPort("hose");
+
+            new Thread(() -> {
+                while (true){
+                    try {
+                        Thread.sleep(1000);
+                        hose.send(new Message("on"));
+                        Thread.sleep(1000);
+                        hose.send(new Message("off"));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }).start();
             while (true) {
                 System.out.println(hose.read());
             }
