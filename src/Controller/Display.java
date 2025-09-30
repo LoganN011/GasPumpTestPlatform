@@ -72,9 +72,7 @@ public class Display {
 
 
     private static void attachHose() {
-
         device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
-
     }
 
     private static void fueling() {

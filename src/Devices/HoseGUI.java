@@ -62,7 +62,7 @@ public class HoseGUI extends Application {
         gasTank.setPrefWidth(rootWidth/8);
 
 
-        Button clear = new Button("Empty");
+        Button clear = new Button("E");
         clear.setPrefWidth(SIZE / 10);
         clear.setPrefHeight(SIZE / 24);
 

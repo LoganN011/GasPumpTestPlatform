@@ -69,6 +69,7 @@ public class GasServerGUI extends Application {
         sendInputs.setBorder(VisualElements.THIN_BORDER);
         Button addFuel = new Button("Add New Fuel");
         addFuel.setOnMouseClicked(x -> {
+            //TODO remove this quinn
             fuelInputs.getChildren().addAll(generateFuelInputs(1));
         });
         addFuel.setPrefWidth(fuelButtons.getPrefWidth() / 2);
