@@ -34,7 +34,7 @@ public class Fueling {
                             pump.pumpOff();
                             hose.pumpOff();
                             Controller.setState(InternalState.DETACHED);
-                            
+                            Controller.setTimer(10);
                         } else {
                             pump.pumpOn(Controller.getCurrentGas().getName());
                             hose.pumpOn();
@@ -44,11 +44,17 @@ public class Fueling {
                     case PAUSED -> {
                         pump.pumpOff();
                         hose.pumpOff();
+                        if(!hose.isAttached()) {
+                            Controller.setState(InternalState.COMPLETE);
+                            Controller.setTimer(10);
+                        }
                     }
                     case DETACHING -> {
+                        hose.pumpOff();
+                        pump.pumpOff();
                         if (!hose.isAttached()) {
                             Controller.setState(InternalState.COMPLETE);
-                            
+                            Controller.setTimer(10);
                         }
                     }
                     case OFF, COMPLETE -> {

@@ -75,7 +75,11 @@ public class Controller {
 
     public static boolean timerEnded() {
         if(System.currentTimeMillis() >= endingTime){
+            gasAmount.set(0.0);
+            currentGas = new AtomicReference<>();
             endingTime = Long.MAX_VALUE;
+            inUsePriceList = new AtomicReference<>();
+            cardNumber = new AtomicReference<>();
             return true;
         }
         return false;

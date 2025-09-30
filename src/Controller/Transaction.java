@@ -57,21 +57,22 @@ public class Transaction {
                     case IDLE -> {
                         String card = cardReader.readCard();
                         Controller.setCardNumber(card);
+                        Controller.setTimer(10);
                         Controller.setState(AUTHORIZING);
                     }
                     case AUTHORIZING -> {
                         boolean approved = bankServer.authorize(Controller.getCardNumber());
 
-                        if (gasStationServer.checkPower() && approved) {
+                        if (gasStationServer.checkPower() && approved && Controller.getState() != IDLE) {
                             Controller.setInUsePriceList();
                             Controller.setState(SELECTION);
-
+                            Controller.setTimer(10);
                             System.out.println("TRANSACTION: CC Approved");
 
-                        } else if(gasStationServer.checkPower()) {
+                        } else if(gasStationServer.checkPower() && Controller.getState() != IDLE) {
                             Controller.setCardNumber(null);
                             Controller.setState(DECLINED);
-
+                            Controller.setTimer(10);
                             System.out.println("TRANSACTION: CC Declined");
                         }
                     }

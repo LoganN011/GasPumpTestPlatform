@@ -1,12 +1,10 @@
 package Devices;
 
 import Controller.Controller;
-import Devices.DisplayObjects.ScreenState;
 import Message.Message;
 import Sockets.commPort;
 import Sockets.controlPort;
 import Sockets.monitorPort;
-import Sockets.statusPort;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
