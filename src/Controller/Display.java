@@ -4,7 +4,6 @@ import Devices.Gas;
 import Message.Message;
 import Sockets.commPort;
 
-import javax.naming.ldap.Control;
 import java.util.ArrayList;
 
 import static Controller.InternalState.*;
@@ -12,9 +11,6 @@ import static Controller.InternalState.*;
 public class Display {
 
     private static commPort device;
-
-    //todo: remove once displayGUI code properly removes old texts and shows all new messages independently
-    private static InternalState lastState = DETACHING;
 
     public static void start() {
         new Thread(() -> {
@@ -77,69 +73,62 @@ public class Display {
 
     private static void attachHose() {
 
-            device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
+        device.send(new Message("t:01:s0:f0:c2:PLEASE ATTACH THE HOSE"));
 
     }
 
     private static void fueling() {
         String message = "";
-        //The current gas amount is not updated and also the price is not set
-        //The display is also broken
-        if (lastState != OFF && lastState != STANDBY) {
-            message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
-            message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
-            message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
-            message += ",b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
-
-            device.send(new Message(message));
-        }
-        lastState = ATTACHING;
+        message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
+        message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
+        message += String.format(",t:45:s2:f1:c1:Price꞉ $%.2f", Controller.getCurPrice());
+        message += ",b:8:x,b:9:x,t:89:s2:f2:c0:PAUSE|EXIT";
+        device.send(new Message(message));
     }
 
     //todo: remove these if statements when displayGUI is fixed
     private static void pumpUnavailable() {
-            device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
+        device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
     }
 
     private static void welcome() {
 
-            device.send(new Message("t:01:s0:f0:c2:WELCOME!,t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
+        device.send(new Message("t:01:s0:f0:c2:WELCOME!,t:45:s1:f1:c1:Please tap your credit card or phone's digital card to begin."));
     }
 
     private static void authorizing() {
 
-            device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
+        device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
 
     }
 
     private static void fuelSelect() {
-        //todo show the correct screen
-            Message msg = optionsDisplayable(Controller.getInUsePriceList());
-            device.send(msg);
+        Message msg = optionsDisplayable(Controller.getInUsePriceList());
+        device.send(msg);
         int recentInput = -1;
         int numberSelected = -1;
         boolean begin = false;
         boolean cancel = false;
-        while(true) {
+        while (true) {
             String buttonInput = device.get().toString();
-            try{
+            try {
                 recentInput = Integer.parseInt(buttonInput);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             switch (recentInput) {
-                case 3,5,7 ->  numberSelected = recentInput;
+                case 3, 5, 7 -> numberSelected = recentInput;
                 case 8 -> {
-                    if(numberSelected != -1) begin = true;
+                    if (numberSelected != -1) begin = true;
                 }
                 case 9 -> cancel = true;
             }
             System.out.println(numberSelected);
-            if(Controller.getState() == OFF) break;
+            if (Controller.getState() == OFF) break;
             if (cancel) {
                 //todo consider this
             }
-            if(begin) {
+            if (begin) {
                 String options = "357";
                 Controller.setCurrentGas(Controller.getInUsePriceList().get(options.indexOf("" + numberSelected)));
                 Controller.setState(ATTACHING);
@@ -162,8 +151,7 @@ public class Display {
     }
 
     private static void cardDeclined() {
-
-            device.send(new Message("t:01:s0:f0:c2:Payment Declined"));
+        device.send(new Message("t:01:s0:f0:c2:Payment Declined"));
     }
 
 }
