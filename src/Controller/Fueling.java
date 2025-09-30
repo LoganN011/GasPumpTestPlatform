@@ -38,7 +38,6 @@ public class Fueling {
                         } else {
                             pump.pumpOn(Controller.getCurrentGas().getName());
                             hose.pumpOn();
-//                            System.out.println(flowMeter.readFlow()); 0 here still
                             Controller.setGasAmount(flowMeter.readFlow());
                         }
                     }
