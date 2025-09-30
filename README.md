@@ -5,8 +5,8 @@ Java/JavaFX simulation of a fuel pump system with separate device GUIs (Display,
 #### Buttons
 b:id:t
 where:
-- <id> is the integer button id
-- <t> is separated into two:
+- id is the integer button id
+- t is separated into two:
   - x = exclusive
   - m = multi-select
 
