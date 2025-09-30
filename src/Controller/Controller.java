@@ -11,7 +11,7 @@ public class Controller {
     private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF);
     private static AtomicReference<Double> gasAmount = new AtomicReference<>();
     private static AtomicReference<Gas> currentGas = new AtomicReference<>();
-    private static long endingTime;
+    private static long endingTime=Long.MAX_VALUE;
     private static AtomicReference<ArrayList<Gas>> newPriceList = new AtomicReference<>();
     private static AtomicReference<ArrayList<Gas>> inUsePriceList = new AtomicReference<>();
     //todo consider deleting cardNumber variable and setter/getter
@@ -79,7 +79,11 @@ public class Controller {
 
     public static boolean timerEnded() {
         //TODO if returning true then set the ending time to the max value
-        return System.currentTimeMillis() >= endingTime;
+        if(System.currentTimeMillis() >= endingTime){
+            endingTime = Long.MAX_VALUE;
+            return true;
+        }
+        return false;
     }
 
     /**
