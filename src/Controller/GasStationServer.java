@@ -45,7 +45,7 @@ public class GasStationServer {
         }
     }
 
-    public void report(){
-        device.send(new Message(String.format("sale:%d,%f",Controller.getGasAmount(),Controller.getCurPrice())));
+    public void report(double gasAmount, double price){
+        device.send(new Message(String.format("sale:%f,%f",gasAmount,price)));
     }
 }

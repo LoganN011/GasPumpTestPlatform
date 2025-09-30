@@ -25,7 +25,7 @@ public class BankServer {
 
     }
 
-    public void charge() {
-        device.send(new Message("sale:" + Controller.getCurPrice()));
+    public void charge(double price) {
+        device.send(new Message("sale:" + price));
     }
 }

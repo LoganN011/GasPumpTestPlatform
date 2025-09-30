@@ -78,6 +78,7 @@ public class Display {
     }
 
     private static void fueling() {
+        //TODO handle pause click 
         String message = "";
         message += "t:01:s0:f0:c2:PUMPING IN PROGRESS";
         message += String.format(",t:23:s2:f1:c1:Gallons꞉ %.2f", Controller.getGasAmount());
@@ -86,7 +87,6 @@ public class Display {
         device.send(new Message(message));
     }
 
-    //todo: remove these if statements when displayGUI is fixed
     private static void pumpUnavailable() {
         device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
     }

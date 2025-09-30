@@ -19,8 +19,8 @@ public class Transaction {
                 if(!gasStationServer.checkPower()) {
                     if(Controller.getCurPrice() != 0) {
                         System.out.println("off received during transaction, reporting transaction now");
-                        gasStationServer.report();
-                        bankServer.charge(); // These should take param so it is not talking directly to controller for the object
+                        gasStationServer.report(Controller.getGasAmount(), Controller.getCurPrice());
+                        bankServer.charge(Controller.getCurPrice());
                     }
                     Controller.reset();
                 }
