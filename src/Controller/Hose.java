@@ -15,7 +15,7 @@ public class Hose {
     public boolean isAttached(){
         if(device.read() == null){
             return attached;
-        } else if (device.read().equals("connected")||device.read().equals("tank_full")) {
+        } else if (device.read().equals("connected")||device.read().equals("full_tank")) {
             attached = true;
             return true;
         }
