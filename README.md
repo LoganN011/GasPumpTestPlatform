@@ -3,7 +3,7 @@ Java/JavaFX simulation of a fuel pump system with separate device GUIs (Display,
 
 ### Message Markup Language
 #### Buttons
-b:<id>:<t>
+b:id:t
 where:
 - <id> is the integer button id
 - <t> is separated into two:
