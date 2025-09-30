@@ -56,7 +56,6 @@ public class GasServerGUI extends Application {
         sendInputs.setOnMouseClicked(x -> {
             fuels = readFuelInputs(fuelInputs);
             try {
-                System.out.println("message sending");
                 server.send(generateCurrentPrices());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -67,17 +66,17 @@ public class GasServerGUI extends Application {
         sendInputs.setOnMouseEntered(x -> sendInputs.setBackground(VisualElements.ACTIVE_ELEMENT));
         sendInputs.setOnMouseExited(x -> sendInputs.setBackground(VisualElements.ELEMENT_BACKGROUND));
         sendInputs.setBorder(VisualElements.THIN_BORDER);
-        Button addFuel = new Button("Add New Fuel");
-        addFuel.setOnMouseClicked(x -> {
-            //TODO remove this quinn
-            fuelInputs.getChildren().addAll(generateFuelInputs(1));
-        });
-        addFuel.setPrefWidth(fuelButtons.getPrefWidth() / 2);
-        addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
-        addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
-        addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
-        addFuel.setBorder(VisualElements.THIN_BORDER);
-        fuelButtons.getChildren().addAll(sendInputs, addFuel);
+//        Button addFuel = new Button("Add New Fuel");
+//        addFuel.setOnMouseClicked(x -> {
+//            //TODO remove this quinn
+//            fuelInputs.getChildren().addAll(generateFuelInputs(1));
+//        });
+//        addFuel.setPrefWidth(fuelButtons.getPrefWidth() / 2);
+//        addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND);
+//        addFuel.setOnMouseEntered(x -> addFuel.setBackground(VisualElements.ACTIVE_ELEMENT));
+//        addFuel.setOnMouseExited(x -> addFuel.setBackground(VisualElements.ELEMENT_BACKGROUND));
+//        addFuel.setBorder(VisualElements.THIN_BORDER);
+        fuelButtons.getChildren().addAll(sendInputs);
         root.setBottom(fuelButtons);
         VBox fuelOptions = new VBox();
         fuelOptions.getChildren().addAll(fuelInputs, fuelButtons);
@@ -126,13 +125,15 @@ public class GasServerGUI extends Application {
             TextField fuelNameInput = (TextField) fuelSection.getChildren().getFirst();
             TextField fuelPriceInput = (TextField) fuelSection.getChildren().get(1);
             String name = fuelNameInput.getText();
-            String price = fuelPriceInput.getText();
+            String priceString = fuelPriceInput.getText();
             try {
-                if (name.isEmpty() || price.isEmpty()) continue;
-                fuels.add(new Gas(name, Double.parseDouble(price)));
+                if (name.isEmpty() || priceString.isEmpty()) continue;
+                double price = Double.parseDouble(priceString);
+                if(price > 0) {
+                    fuels.add(new Gas(name, price));
+                }
             } catch (Exception e) {
                 System.out.println("Invalid input in text entry, skipping");
-                continue;
             }
 
         }
