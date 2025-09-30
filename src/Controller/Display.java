@@ -86,7 +86,7 @@ public class Display {
     }
 
     private static void pumpUnavailable() {
-        device.send(new Message("t:01:s0:f0:c2:Pump Currently Unavailable"));
+        device.send(new Message("t:01:s0:f0:c2:PUMP CURRENTLY UNAVAILABLE"));
     }
 
     private static void welcome() {
@@ -96,7 +96,7 @@ public class Display {
 
     private static void authorizing() {
 
-        device.send(new Message("t:01:s0:f0:c2:Waiting For Authorization,t:45:s1:f1:c1:Please wait a moment"));
+        device.send(new Message("t:01:s0:f0:c2:WAITING FOR AUTHORIZATION,t:45:s1:f1:c1:Please wait a moment"));
 
     }
 
@@ -149,7 +149,7 @@ public class Display {
     }
 
     private static void cardDeclined() {
-        device.send(new Message("t:01:s0:f0:c2:Payment Declined"));
+        device.send(new Message("t:01:s0:f0:c2:PAYMENT DECLINED"));
     }
 
 }
