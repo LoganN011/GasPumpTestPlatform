@@ -23,6 +23,9 @@ public class Fueling {
                         if (hose.isAttached()) {
                             Controller.setState(InternalState.FUELING);
                         }
+                        if(Controller.timerEnded()){
+                            Controller.setState(InternalState.IDLE);
+                        }
                     }
                     case FUELING -> {
                         if (hose.isFull()) {
