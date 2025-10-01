@@ -1,7 +1,6 @@
 package Devices;
 
 import Message.Message;
-import Sockets.controlPort;
 import Sockets.monitorPort;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -14,8 +13,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.QuadCurve;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -43,7 +40,7 @@ public class HoseGUI extends Application {
         double SIZE = 400;
 
         Pane root = new Pane();
-        Scene scene = new Scene(root, SIZE*1.25,SIZE*1.25);
+        Scene scene = new Scene(root, SIZE * 1.25, SIZE * 1.25);
 
 
         double rootHeight = root.getHeight();
@@ -56,10 +53,10 @@ public class HoseGUI extends Application {
         gasTank.setProgress(0.01);
         gasTank.setStyle("-fx-accent: yellow;-fx-control-inner-background: black;");
         gasTank.setRotate(-90);
-        gasTank.setLayoutX((rootWidth - (rootWidth/8))+(rootWidth/32));
-        gasTank.setLayoutY(rootHeight/4);
+        gasTank.setLayoutX((rootWidth - (rootWidth / 8)) + (rootWidth / 32));
+        gasTank.setLayoutY(rootHeight / 4);
         //resize gas tank
-        gasTank.setPrefWidth(rootWidth/8);
+        gasTank.setPrefWidth(rootWidth / 8);
 
 
         Button clear = new Button("E");
@@ -72,19 +69,18 @@ public class HoseGUI extends Application {
             full = false;
             if (connected) {
                 port.send(new Message("connected"));
-            }
-            else  {
+            } else {
                 port.send(new Message("disconnected"));
             }
         });
 
-        clear.setLayoutX((SIZE - (SIZE/8))+(SIZE/32));
-        clear.setLayoutY(SIZE/3);
+        clear.setLayoutX((SIZE - (SIZE / 8)) + (SIZE / 32));
+        clear.setLayoutY(SIZE / 3);
 
         Timeline animation = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (gasTank.getProgress() < 1.0 && pumpOn) {
                 gasTank.setProgress(gasTank.getProgress() + 0.01);
-            } else if(gasTank.getProgress() > 1.0) {
+            } else if (gasTank.getProgress() > 1.0) {
                 if (!full) {
                     full = true;
                     port.send(new Message("full_tank"));
@@ -93,13 +89,13 @@ public class HoseGUI extends Application {
         }));
         animation.setCycleCount(Timeline.INDEFINITE);
 
-        Circle pumpHandle = new Circle(SIZE/32);
-        pumpHandle.setCenterX(sceneW/7);
-        pumpHandle.setCenterY(sceneH/2);
+        Circle pumpHandle = new Circle(SIZE / 32);
+        pumpHandle.setCenterX(sceneW / 7);
+        pumpHandle.setCenterY(sceneH / 2);
 
         Line hoseLine = new Line();
-        hoseLine.setStartX(sceneW/7);
-        hoseLine.setStartY(sceneH/7);
+        hoseLine.setStartX(sceneW / 7);
+        hoseLine.setStartY(sceneH / 7);
         hoseLine.setEndX(pumpHandle.getCenterX());
         hoseLine.setEndY(pumpHandle.getCenterY());
         hoseLine.setStrokeWidth(2);
@@ -112,7 +108,7 @@ public class HoseGUI extends Application {
             hoseLine.setEndY(e.getY());
         });
         pumpHandle.setOnMouseReleased(e -> {
-            if (e.getX() >= (sceneW - (sceneW/2))) {
+            if (e.getX() >= (sceneW - (sceneW / 2))) {
                 System.out.println("on car");
                 connected = true;
                 if (full) {
@@ -121,18 +117,18 @@ public class HoseGUI extends Application {
                     port.send(new Message("connected"));
                 }
 
-                pumpHandle.setCenterX(sceneW - (sceneW/4));
-                pumpHandle.setCenterY(sceneH/2);
+                pumpHandle.setCenterX(sceneW - (sceneW / 4));
+                pumpHandle.setCenterY(sceneH / 2);
                 animation.playFromStart();
-                hoseLine.setEndX(sceneW - (sceneW/4));
-                hoseLine.setEndY(sceneH/2);
+                hoseLine.setEndX(sceneW - (sceneW / 4));
+                hoseLine.setEndY(sceneH / 2);
             } else {
                 if (connected) {
                     animation.stop();
                     connected = false;
                     port.send(new Message("disconnected"));
-                    pumpHandle.setCenterX(sceneW/7);
-                    pumpHandle.setCenterY(sceneH/2);
+                    pumpHandle.setCenterX(sceneW / 7);
+                    pumpHandle.setCenterY(sceneH / 2);
                     hoseLine.setEndX(pumpHandle.getCenterX());
                     hoseLine.setEndY(pumpHandle.getCenterY());
                 }
@@ -143,8 +139,8 @@ public class HoseGUI extends Application {
         Image backgroundImage = VisualElements.getImage("hose.png");
 
         BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
-                SIZE/8,
-                SIZE/8,
+                SIZE / 8,
+                SIZE / 8,
                 true,
                 true,
                 false,
@@ -152,7 +148,7 @@ public class HoseGUI extends Application {
         ));
 
 
-        root.setPrefSize(SIZE, SIZE/2);
+        root.setPrefSize(SIZE, SIZE / 2);
         root.getChildren().addAll(hoseLine, pumpHandle, gasTank, clear);
         root.setBackground(new Background(background));
 
@@ -161,23 +157,22 @@ public class HoseGUI extends Application {
         Rectangle2D bounds = Screen.getPrimary().getBounds();
         double screenWidth = bounds.getWidth();
         double screenHeight = bounds.getHeight();
-        primaryStage.setX(screenWidth/15);
-        primaryStage.setY(screenHeight/3);
+        primaryStage.setX(screenWidth / 15);
+        primaryStage.setY(screenHeight / 3);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Hose");
         primaryStage.show();
     }
 
-    public void updatePump(){
-        new Thread(()->{
-            while(true){
+    public void updatePump() {
+        new Thread(() -> {
+            while (true) {
                 Message m = control.read();
-                if(m != null){
-                    if(m.equals("on")){
+                if (m != null) {
+                    if (m.equals("on")) {
                         pumpOn = true;
-                    }
-                    else if(m.equals("off")){
+                    } else if (m.equals("off")) {
                         pumpOn = false;
                     }
                 }

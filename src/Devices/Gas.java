@@ -49,7 +49,7 @@ public class Gas {
             if (curGas.isEmpty()) continue;
             String[] fields = curGas.split(":");
             double price = Double.parseDouble(fields[2]);
-            if(price == 0) continue;
+            if (price == 0) continue;
             result.add(new Gas(fields[1], price));
         }
         return result;

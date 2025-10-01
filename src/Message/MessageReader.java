@@ -29,7 +29,7 @@ public class MessageReader {
     private void decodeMessage(String input) {
         String[] messageArr = input.split(",");
 
-        for (String message: messageArr) {
+        for (String message : messageArr) {
             String messageType; // "b" or "t"
             String buttonID;
             int fontSizeSelect;
@@ -50,7 +50,7 @@ public class MessageReader {
 
                 buttonCollection.add(new ButtonCmd(Integer.parseInt(buttonID), selectType));
 
-            // text
+                // text
             } else {
                 fontSizeSelect = Integer.parseInt(temp[2].substring(1));
                 fontNameSelect = Integer.parseInt(temp[3].substring(1));
@@ -72,7 +72,6 @@ public class MessageReader {
             }
         }
     }
-
 
 
     /**

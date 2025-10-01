@@ -11,12 +11,12 @@ public class Pump {
         device = new controlPort("pump");
     }
 
-    public void pumpOn(String type){
-        device.send(new Message("on:"+type));
+    public void pumpOn(String type) {
+        device.send(new Message("on:" + type));
 
     }
 
-    public void pumpOff(){
+    public void pumpOff() {
         device.send(new Message("off"));
     }
 }

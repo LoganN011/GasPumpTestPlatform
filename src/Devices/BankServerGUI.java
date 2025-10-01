@@ -65,8 +65,8 @@ public class BankServerGUI extends Application {
         Rectangle2D bounds = Screen.getPrimary().getBounds();
         double screenWidth = bounds.getWidth();
         double screenHeight = bounds.getHeight();
-        primaryStage.setX(screenWidth/1.5);
-        primaryStage.setY(screenHeight/15);
+        primaryStage.setX(screenWidth / 1.5);
+        primaryStage.setY(screenHeight / 15);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Bank Server");

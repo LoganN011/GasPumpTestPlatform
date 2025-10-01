@@ -37,7 +37,7 @@ public class Harness {
             case "special" -> {
                 specialTest();
             }
-            case "timer"-> timerExample();
+            case "timer" -> timerExample();
         }
 //
 
@@ -46,7 +46,7 @@ public class Harness {
     private static void timerExample() {
         Controller.setTimer(10);
         while (true) {
-            if(Controller.timerEnded()){
+            if (Controller.timerEnded()) {
                 System.out.println("TImer over");
                 Controller.setTimer(2);
             }
@@ -160,7 +160,7 @@ public class Harness {
             monitorPort hose = new monitorPort("hose");
 
             new Thread(() -> {
-                while (true){
+                while (true) {
                     try {
                         Thread.sleep(1000);
                         hose.send(new Message("on"));

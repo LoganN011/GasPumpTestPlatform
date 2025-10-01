@@ -24,9 +24,9 @@ public class GasStationServer {
 
     private void handleMessage(Message incoming) {
         String[] contents = incoming.toString().split(":");
-        if(contents[0].equals("status")) {
+        if (contents[0].equals("status")) {
             powerStatus = contents[1].equals("on");
-        } else if(incoming.toString().contains("price")) {
+        } else if (incoming.toString().contains("price")) {
             Controller.setNewPriceList(Gas.parseGasses(incoming));
         }
     }
@@ -37,15 +37,15 @@ public class GasStationServer {
 
     //todo remove after changing
     public ArrayList<Gas> old() {
-        while(true) {
+        while (true) {
             Message messageContents = device.get();
             //todo what if we receive an off instead of a price list
-            if(messageContents.toString().contains("price"))
+            if (messageContents.toString().contains("price"))
                 return Gas.parseGasses(messageContents);
         }
     }
 
-    public void report(double gasAmount, double price){
-        device.send(new Message(String.format("sale:%f,%f",gasAmount,price)));
+    public void report(double gasAmount, double price) {
+        device.send(new Message(String.format("sale:%f,%f", gasAmount, price)));
     }
 }

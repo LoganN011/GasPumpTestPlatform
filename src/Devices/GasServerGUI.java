@@ -129,7 +129,7 @@ public class GasServerGUI extends Application {
             try {
                 if (name.isEmpty() || priceString.isEmpty()) continue;
                 double price = Double.parseDouble(priceString);
-                if(price > 0) {
+                if (price > 0) {
                     fuels.add(new Gas(name, price));
                 }
             } catch (Exception e) {

@@ -23,7 +23,7 @@ public class Message implements Serializable {
         return message;
     }
 
-    public boolean equals(String other){
+    public boolean equals(String other) {
         return message.equals(other);
     }
 

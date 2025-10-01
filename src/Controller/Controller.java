@@ -3,7 +3,6 @@ package Controller;
 import Devices.Gas;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller {
@@ -11,12 +10,11 @@ public class Controller {
     private static AtomicReference<InternalState> internalState = new AtomicReference<>(InternalState.OFF);
     private static AtomicReference<Double> gasAmount = new AtomicReference<>();
     private static AtomicReference<Gas> currentGas = new AtomicReference<>();
-    private static long endingTime=Long.MAX_VALUE;
+    private static long endingTime = Long.MAX_VALUE;
     private static AtomicReference<ArrayList<Gas>> newPriceList = new AtomicReference<>();
     private static AtomicReference<ArrayList<Gas>> inUsePriceList = new AtomicReference<>();
     //todo consider deleting cardNumber variable and setter/getter
     private static AtomicReference<String> cardNumber = new AtomicReference<>();
-
 
 
     public static void main(String[] args) {
@@ -48,7 +46,7 @@ public class Controller {
         return gasAmount.get();
     }
 
-    public static InternalState getState(){
+    public static InternalState getState() {
         return internalState.get();
     }
 
@@ -65,7 +63,6 @@ public class Controller {
         internalState.set(InternalState.OFF);
         gasAmount.set(0.0);
         currentGas = new AtomicReference<>();
-        //todo consider changing
         endingTime = Long.MAX_VALUE;
         newPriceList = new AtomicReference<>();
         inUsePriceList = new AtomicReference<>();
@@ -74,9 +71,8 @@ public class Controller {
     }
 
 
-
     public static boolean timerEnded() {
-        if(System.currentTimeMillis() >= endingTime){
+        if (System.currentTimeMillis() >= endingTime) {
             gasAmount.set(0.0);
             currentGas = new AtomicReference<>();
             endingTime = Long.MAX_VALUE;
@@ -100,7 +96,7 @@ public class Controller {
         return inUsePriceList.get();
     }
 
-    public static void setNewPriceList(ArrayList<Gas> newGivenPrices){
+    public static void setNewPriceList(ArrayList<Gas> newGivenPrices) {
         newPriceList.set(newGivenPrices);
     }
 
@@ -108,7 +104,7 @@ public class Controller {
         return newPriceList.get();
     }
 
-    public static String newPriceListString(){
+    public static String newPriceListString() {
         return newPriceList.toString();
     }
 
@@ -120,7 +116,7 @@ public class Controller {
         return cardNumber.get();
     }
 
-    }
+}
 
 
 

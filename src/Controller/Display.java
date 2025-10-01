@@ -15,6 +15,7 @@ public class Display {
     private static Thread paused;
     private static Thread detached;
     private static Thread fuelSelect;
+
     public static void start() {
         new Thread(() -> {
             device = new commPort("screen");
@@ -55,8 +56,8 @@ public class Display {
     }
 
     private static void paused() {
-        if(paused == null || !paused.isAlive()) {
-            paused= new Thread(() -> {
+        if (paused == null || !paused.isAlive()) {
+            paused = new Thread(() -> {
                 while (Controller.getState() == PAUSED) {
                     int buttonInput = Integer.parseInt(device.get().toString());
                     System.out.println(buttonInput);
@@ -82,7 +83,7 @@ public class Display {
     }
 
     private static void detached() {
-        if( detached == null || !detached.isAlive()) {
+        if (detached == null || !detached.isAlive()) {
             detached = new Thread(() -> {
                 while (Controller.getState() == DETACHED) {
                     int buttonInput = Integer.parseInt(device.get().toString());
@@ -118,7 +119,7 @@ public class Display {
     }
 
     private static void fueling() {
-        if(fueling == null || !fueling.isAlive()) {
+        if (fueling == null || !fueling.isAlive()) {
             fueling = new Thread(() -> {
                 while (Controller.getState() == FUELING) {
                     int buttonInput = Integer.parseInt(device.get().toString());
@@ -158,7 +159,7 @@ public class Display {
     private static void fuelSelect() {
         Message msg = optionsDisplayable(Controller.getInUsePriceList());
         device.send(msg);
-        if(fuelSelect == null ||  !fuelSelect.isAlive()) {
+        if (fuelSelect == null || !fuelSelect.isAlive()) {
             fuelSelect = new Thread(() -> {
                 int recentInput = -1;
                 int numberSelected = -1;

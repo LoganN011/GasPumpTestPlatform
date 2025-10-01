@@ -16,8 +16,8 @@ public class Transaction {
 
         new Thread(() -> {
             while (true) {
-                if(!gasStationServer.checkPower()) {
-                    if(Controller.getCurPrice() != 0) {
+                if (!gasStationServer.checkPower()) {
+                    if (Controller.getCurPrice() != 0) {
                         System.out.println("off received during transaction, reporting transaction now");
                         gasStationServer.report(Controller.getGasAmount(), Controller.getCurPrice());
                         bankServer.charge(Controller.getCurPrice());
@@ -26,7 +26,7 @@ public class Transaction {
                 }
                 switch (Controller.getState()) {
                     case OFF -> {
-                        while(!gasStationServer.checkPower()){
+                        while (!gasStationServer.checkPower()) {
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
@@ -44,9 +44,9 @@ public class Transaction {
 //                        Controller.setNewPriceList(gasStationServer.waitForPrices());
                         System.out.println("up");
                         while (Controller.getNewPriceList() == null) {
-                            try{
+                            try {
                                 Thread.sleep(100);
-                            }catch (Exception e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
@@ -69,7 +69,7 @@ public class Transaction {
                             Controller.setTimer(10);
                             System.out.println("TRANSACTION: CC Approved");
 
-                        } else if(gasStationServer.checkPower() && Controller.getState() != IDLE) {
+                        } else if (gasStationServer.checkPower() && Controller.getState() != IDLE) {
                             Controller.setCardNumber(null);
                             Controller.setState(DECLINED);
                             Controller.setTimer(10);

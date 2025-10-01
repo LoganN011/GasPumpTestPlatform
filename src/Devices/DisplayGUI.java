@@ -4,7 +4,6 @@ import Devices.DisplayObjects.ButtonCmd;
 import Devices.DisplayObjects.TextCmd;
 import Message.Message;
 import Message.MessageReader;
-import Sockets.commPort;
 import Sockets.monitorPort;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -22,7 +21,6 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -473,7 +471,7 @@ public class DisplayGUI extends Application {
                     Message m = port.read();
                     try {
                         Thread.sleep(100);
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     if (m == null) continue;

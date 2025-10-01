@@ -12,7 +12,7 @@ public class FlowMeter {
         flow.send(new Message("flow"));
     }
 
-    public double readFlow(){
+    public double readFlow() {
         flow.send(new Message("flow"));
         Message m = flow.read();
         if (m != null) {
@@ -21,7 +21,7 @@ public class FlowMeter {
         return 0;
     }
 
-    public void resetFlow(){
+    public void resetFlow() {
         flow.send(new Message("reset"));
     }
 }

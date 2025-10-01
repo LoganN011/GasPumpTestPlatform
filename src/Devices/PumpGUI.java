@@ -20,8 +20,6 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.InputStream;
-
 
 public class PumpGUI extends Application {
 
@@ -34,7 +32,7 @@ public class PumpGUI extends Application {
     Label flowCounter;
     ImageView pumpImage;
     Rectangle line;
-    private final double SIZE= 200;
+    private final double SIZE = 200;
 
     public static void main(String[] args) {
         launch(args);
@@ -48,13 +46,13 @@ public class PumpGUI extends Application {
 
         BorderPane root = new BorderPane();
 
-        pumpImage = VisualElements.getImage("off.png", (int) (SIZE/2));
+        pumpImage = VisualElements.getImage("off.png", (int) (SIZE / 2));
         pumpImage.setPreserveRatio(true);
         pumpImage.fitWidthProperty().bind(root.widthProperty().multiply(0.5));
         pumpImage.fitHeightProperty().bind(root.heightProperty().multiply(0.5));
 
         StackPane flowMeter = new StackPane();
-        gauge = new Circle(SIZE/8);
+        gauge = new Circle(SIZE / 8);
         gauge.setFill(Color.WHITE);
         gauge.setStroke(Color.BLACK);
         gauge.radiusProperty().bind(root.widthProperty().multiply(0.05));
@@ -69,7 +67,7 @@ public class PumpGUI extends Application {
         flowBackground.widthProperty().bind(root.widthProperty().multiply(0.25));
         flowBackground.heightProperty().bind(root.heightProperty().multiply(0.25));
 
-        flowMeter.getChildren().addAll(flowBackground,gauge, line);
+        flowMeter.getChildren().addAll(flowBackground, gauge, line);
         VBox flowAssembly = new VBox();
 
         flowCounter = new Label("0");
@@ -81,16 +79,16 @@ public class PumpGUI extends Application {
         flowCounter.setStyle(
                 "-fx-text-fill: red;" +
                         "-fx-background-color: black;" +
-                        "-fx-padding: "+SIZE/40+";" +
+                        "-fx-padding: " + SIZE / 40 + ";" +
                         "-fx-border-color: darkred;" +
-                        "-fx-border-width: "+ SIZE/200+ ";" +
-                        "-fx-border-radius: "+SIZE/100+ ";"
+                        "-fx-border-width: " + SIZE / 200 + ";" +
+                        "-fx-border-radius: " + SIZE / 100 + ";"
         );
         Rectangle textBackground = new Rectangle();
         textBackground.widthProperty().bind(root.widthProperty().multiply(0.25));
         textBackground.heightProperty().bind(root.heightProperty().multiply(0.1));
 
-        flowAssembly.getChildren().addAll(new StackPane(textBackground,flowCounter), flowMeter);
+        flowAssembly.getChildren().addAll(new StackPane(textBackground, flowCounter), flowMeter);
         flowAssembly.prefWidthProperty().bind(root.widthProperty());
         flowAssembly.prefHeightProperty().bind(root.heightProperty().multiply(0.6));
 
@@ -109,8 +107,8 @@ public class PumpGUI extends Application {
         Image backgroundImage = VisualElements.getImage("pump_background.png");
 
         BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(
-                SIZE/2,
-                SIZE/2,
+                SIZE / 2,
+                SIZE / 2,
                 true,
                 true,
                 false,
@@ -127,7 +125,7 @@ public class PumpGUI extends Application {
         flowAssembly.prefWidthProperty().bind(root.widthProperty());
         flowAssembly.prefHeightProperty().bind(root.heightProperty().multiply(0.8));
 
-        Scene scene = new Scene(root, SIZE*2, SIZE*2);
+        Scene scene = new Scene(root, SIZE * 2, SIZE * 2);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Pump Assembly");
