@@ -73,6 +73,8 @@ public class Controller {
 
     }
 
+
+
     public static boolean timerEnded() {
         if(System.currentTimeMillis() >= endingTime){
             gasAmount.set(0.0);
