@@ -1,4 +1,20 @@
-Read me 
+# Gas Pump Simulator
+Java/JavaFX simulation of a fuel pump system with separate device GUIs (Display, Card Reader, Hose, Pump, Bank Server, Gas Server) and a multithreaded controller.
+
+### Message Markup Language
+#### Buttons
+b:id:t
+where:
+- id is the integer button id
+- t is separated into two:
+  - x = exclusive
+  - m = multi-select
+
+#### Text
+- Example: t:n[n]:sx:fy:cz:m
+  - where n[n] is the text number
+    - x is the size to use, y is the font to use
+    - z is the color to use, and m is the message
 
 ### Running Test Harness
 1. Go to "Harness.java" and find device name. Type the device name as argument and run file.
@@ -22,7 +38,7 @@ _Something_: Font 2, Size 2, Color 2<br>
 #### Font Colors
 1. Green, #84E296
 2. Blue, #083D77 
-3. Indian red, #EB5160
+3. Indian red #EB5160
 
 ### Message Formatting:
 
